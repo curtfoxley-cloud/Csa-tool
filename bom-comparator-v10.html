@@ -1838,7 +1838,7 @@ function runSynchronous(done) {
 function renderAll() {
   renderMetrics();
   renderCharts();
-  renderKpiBlocks();
+  try { renderKpiBlocks(); } catch(e) { console.error('KPI block render error:', e); }
   renderSummaryTable();
   const req = getModeRequired();
   if (req.includes('ebom') && state.boms.ebom) renderFullBom('ebom');
@@ -1847,7 +1847,7 @@ function renderAll() {
   if (state.boms.cp)  renderFullBom('cp');
   if (state.boms.wo5) renderFullBom('wo5');
   if (state.boms.ncr) renderNcrTable();
-  if (state.boms.ci)  renderCITraceTable();
+  if (state.boms.ci)  { try { renderCITraceTable(); } catch(e) { console.error('CI table render error:', e); } }
 }
 
 function renderMetrics() {
@@ -3400,6 +3400,8 @@ function exportCIReport() {
   if (!state.boms.ci) { toast('No CI file loaded.'); return; }
   if (typeof XLSX === 'undefined') { showError('SheetJS not available.'); return; }
 
+  try {
+
   const traces = generateCITrace();
   const ts     = new Date().toLocaleString();
 
@@ -3887,7 +3889,7 @@ function exportCIReport() {
     ];
     const ciCpWs = XLSX.utils.aoa_to_sheet(ciCpTitleBlock);
     if (ciCpWs['A1']) ciCpWs['A1'].s = { font: { bold: true, sz: 13 } };
-    XLSX.utils.book_append_sheet(wb, ciCpWs, 'CI - EBOM Drawings and Change Ped');
+    XLSX.utils.book_append_sheet(wb, ciCpWs, 'CI EBOM Drawings+Change Ped');
   }
 
   // ── Sheet 8: CI's Next Higher Parts Change Pedigree ───────────────────────
@@ -3955,7 +3957,7 @@ function exportCIReport() {
     ];
     const nhCpWs = XLSX.utils.aoa_to_sheet(nhCpTitleBlock);
     if (nhCpWs['A1']) nhCpWs['A1'].s = { font: { bold: true, sz: 13 } };
-    XLSX.utils.book_append_sheet(wb, nhCpWs, "CI's Next Higher Parts Change Ped");
+    XLSX.utils.book_append_sheet(wb, nhCpWs, "CI Next-Higher Change Pedigree");
   }
 
   // ── Sheet 9: CIs Embodied as Used On Parts ────────────────────────────────
@@ -4237,6 +4239,11 @@ function exportCIReport() {
 
   XLSX.writeFile(wb, 'ci_csa_pedigree_report.xlsx');
   toast('CI CSA Pedigree Report exported (' + traces.length + ' items, ' + Object.keys(ciGroups).length + ' unique CIs, ' + ncrDispRows.length + ' NCR disposition rows)');
+
+  } catch(err) {
+    console.error('CI Report export error:', err);
+    showError('CI Report export failed: ' + err.message);
+  }
 }
 
 // ── KPI BLOCKS: Open NCR Dispositions + CIs Not in Build Records ──────────
