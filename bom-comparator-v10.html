@@ -290,6 +290,45 @@
   #toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--success); border-radius: 8px; padding: 12px 20px; color: var(--success); font-family: var(--mono); font-size: 12px; display: none; z-index: 9999; }
   #sheetjs-warning { background: var(--wo-open-dim); border: 1px solid var(--wo-open); border-radius: 8px; padding: 14px 18px; color: var(--wo-open); font-family: var(--mono); font-size: 11px; margin-bottom: 20px; line-height: 1.6; display: none; }
 
+  /* ── KPI BLOCKS ── */
+  .kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+  .kpi-block {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 22px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
+  }
+  .kpi-block::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 10px 10px 0 0; }
+  .kpi-block:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 12px #00000040; }
+  .kpi-block .kpi-num { font-family: var(--mono); font-size: 32px; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+  .kpi-block .kpi-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); font-family: var(--mono); margin-bottom: 4px; }
+  .kpi-block .kpi-sub { font-size: 9px; color: var(--text-dim); font-family: var(--mono); }
+  .kpi-block.kpi-ncr-open::before { background: var(--ncr); }
+  .kpi-block.kpi-ncr-open .kpi-num { color: var(--ncr); }
+  .kpi-block.kpi-ci-nobuild::before { background: var(--warn); }
+  .kpi-block.kpi-ci-nobuild .kpi-num { color: var(--warn); }
+
+  /* ── REPORT OVERLAY ── */
+  .report-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9000;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .report-panel {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+    width: 90vw; max-width: 1400px; max-height: 85vh; overflow: auto;
+    padding: 24px; box-shadow: 0 20px 60px #000000aa;
+  }
+  .report-panel .report-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+  }
+  .report-panel .report-title {
+    font-family: var(--mono); font-size: 13px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  .report-panel .report-close {
+    background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+    border-radius: 4px; padding: 4px 12px; cursor: pointer; font-family: var(--mono); font-size: 10px;
+  }
+  .report-panel .report-close:hover { border-color: var(--danger); color: var(--danger); }
+
   /* ── SPINNER ── */
   #run-spinner { display: none; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -556,6 +595,25 @@
           <div class="donut-legend" id="wo-closure-legend"></div>
         </div>
       </div>
+    </div>
+
+    <!-- CI KPI BLOCKS: Open NCR Dispositions + CIs Not in Build Records -->
+    <div class="kpi-row" id="kpi-ci-row" style="display:none">
+      <div class="kpi-block kpi-ncr-open" id="kpi-ncr-open" onclick="showKpiReport('ncr_open')">
+        <div class="kpi-num" id="kpi-ncr-open-num">—</div>
+        <div class="kpi-label">CIs with Open NCR Dispositions</div>
+        <div class="kpi-sub" id="kpi-ncr-open-sub">CIs linked to NCR dispositions not closed</div>
+      </div>
+      <div class="kpi-block kpi-ci-nobuild" id="kpi-ci-nobuild" onclick="showKpiReport('ci_nobuild')">
+        <div class="kpi-num" id="kpi-ci-nobuild-num">—</div>
+        <div class="kpi-label">CIs Not Present in Build Records</div>
+        <div class="kpi-sub" id="kpi-ci-nobuild-sub">CIs not found in ABOM as PN, Used On, or parent</div>
+      </div>
+    </div>
+
+    <!-- REPORT OVERLAY (for KPI drill-down) -->
+    <div class="report-overlay" id="report-overlay" style="display:none" onclick="if(event.target===this)closeKpiReport()">
+      <div class="report-panel" id="report-panel"></div>
     </div>
 
     <!-- TABS -->
@@ -1780,6 +1838,7 @@ function runSynchronous(done) {
 function renderAll() {
   renderMetrics();
   renderCharts();
+  renderKpiBlocks();
   renderSummaryTable();
   const req = getModeRequired();
   if (req.includes('ebom') && state.boms.ebom) renderFullBom('ebom');
@@ -3122,6 +3181,64 @@ function generateCITrace() {
     const irSerials   = [...new Set(wo5Entries.map(e=>e.serial).filter(Boolean))].join('; ') || '—';
     const irDates     = [...new Set(wo5Entries.map(e=>e.date).filter(Boolean))].join('; ') || '—';
 
+    // ── ABOM WO → WO5 Installed/Removed trace (6 dedicated columns) ──
+    // Trace the CI's part number + ABOM work order into the WO5 install/remove file
+    // to extract separated installed vs. removed part data.
+    const instEntries = wo5Entries.filter(e => e.action === 'installed');
+    const remEntries  = wo5Entries.filter(e => e.action === 'removed');
+    // Also gather raw WO5 rows for richer data (full PN from WO5 file, not just CI PN)
+    const wo5InstPns     = [];
+    const wo5InstDates   = [];
+    const wo5InstSerials = [];
+    const wo5RemPns      = [];
+    const wo5RemDates    = [];
+    const wo5RemSerials  = [];
+    if (state.boms.wo5 && result && result.woValues) {
+      result.woValues.forEach(wov => {
+        state.boms.wo5.data.forEach(wRow => {
+          const woNum  = String(wRow[COL.wo5.woNo] ?? '').trim();
+          if (woNum !== wov) return;
+          const instPnRaw = normPN(wRow[COL.wo5.installedPart]);
+          const remPnRaw  = normPN(wRow[COL.wo5.removedPart]);
+          if (instPnRaw === pn || remPnRaw === pn) {
+            if (instPnRaw) {
+              wo5InstPns.push(instPnRaw);
+              const d = String(wRow[COL.wo5.installedOn] ?? '').trim();
+              const s = String(wRow[COL.wo5.installedSerial] ?? '').trim();
+              if (d) wo5InstDates.push(d);
+              if (s) wo5InstSerials.push(s);
+            }
+            if (remPnRaw) {
+              wo5RemPns.push(remPnRaw);
+              const d = String(wRow[COL.wo5.removedOn] ?? '').trim();
+              const s = String(wRow[COL.wo5.removedSerial] ?? '').trim();
+              if (d) wo5RemDates.push(d);
+              if (s) wo5RemSerials.push(s);
+            }
+          }
+        });
+      });
+    }
+    // Fallback: use wo5Entries if ABOM WO trace yielded nothing
+    if (!wo5InstPns.length && !wo5RemPns.length) {
+      instEntries.forEach(e => {
+        wo5InstPns.push(pn);
+        if (e.serial) wo5InstSerials.push(e.serial);
+        if (e.date)   wo5InstDates.push(e.date);
+      });
+      remEntries.forEach(e => {
+        wo5RemPns.push(pn);
+        if (e.serial) wo5RemSerials.push(e.serial);
+        if (e.date)   wo5RemDates.push(e.date);
+      });
+    }
+    const pnInstalled     = [...new Set(wo5InstPns)].join('; ')     || '—';
+    const dateInstalled   = [...new Set(wo5InstDates)].join('; ')   || '—';
+    const serialInstalled = [...new Set(wo5InstSerials)].join('; ') || '—';
+    const pnRemoved       = [...new Set(wo5RemPns)].join('; ')      || '—';
+    const dateRemoved     = [...new Set(wo5RemDates)].join('; ')    || '—';
+    const serialRemoved   = [...new Set(wo5RemSerials)].join('; ')  || '—';
+
     // NCR quality data — match by PN, also by ABOM WO → originating WO
     const ncrEntries  = [...(ncrPnMap[pn] || [])];
     if (result && result.woValues && state.boms.ncr) {
@@ -3178,6 +3295,8 @@ function generateCITrace() {
       mbomQty, mbomStatus, mbomWo,
       abomQty, abomNhVal, abomStatus, abomWo, abomWoStatus,
       irActions, irWoNums, irWoStats, irSerials, irDates,
+      pnInstalled, dateInstalled, serialInstalled,
+      pnRemoved, dateRemoved, serialRemoved,
       ncrNums, ncrStatuses, ncrCauses, ncrCauseDescs,
       ncrDefects, ncrDefectDescs,
       ncrDispNos, ncrDispStats, ncrDispTypes, ncrDispCodes,
@@ -3202,6 +3321,8 @@ function renderCITraceTable() {
     'Drawing No', 'Drawing Rev', 'Sheet', 'Sheet Rev',
     'MBOM WO', 'ABOM WO', 'ABOM WO Status',
     'I/R Action', 'I/R WO#', 'I/R WO Status', 'Serial Number', 'I/R Date',
+    'PN Installed', 'Installed Date', 'S/N Installed',
+    'PN Removed', 'Removal Date', 'S/N Removed',
     'Related NCRs', 'NCR Status', 'NCR Cause Code', 'NCR Cause Code Desc',
     'NCR Defect Code', 'NCR Defect Code Desc',
     'NCR Disp#', 'NCR Disp Status', 'NCR Disp Type', 'NCR Disp Code',
@@ -3249,6 +3370,12 @@ function renderCITraceTable() {
       <td style="color:${t.irWoStats.toUpperCase().includes('CLOSED')?'var(--success)':t.irWoStats!=='—'?'var(--wo-open)':'var(--text-dim)'}">${esc(t.irWoStats)}</td>
       <td style="color:var(--wo5)">${esc(t.irSerials)}</td>
       <td style="color:var(--text-muted)">${esc(t.irDates)}</td>
+      <td class="td-installed">${esc(t.pnInstalled)}</td>
+      <td style="color:var(--text-muted)">${esc(t.dateInstalled)}</td>
+      <td style="color:var(--wo5)">${esc(t.serialInstalled)}</td>
+      <td class="td-removed">${esc(t.pnRemoved)}</td>
+      <td style="color:var(--text-muted)">${esc(t.dateRemoved)}</td>
+      <td style="color:var(--wo5)">${esc(t.serialRemoved)}</td>
       <td style="color:var(--ncr);font-weight:${t.ncrNums!=='—'?'600':'400'}">${esc(t.ncrNums)}</td>
       <td>${esc(t.ncrStatuses)}</td>
       <td>${esc(t.ncrCauses)}</td>
@@ -3314,6 +3441,10 @@ function exportCIReport() {
     // Installed/Removed Report (WO5 file)
     'I/R Action', 'I/R WO#', 'I/R WO Status', 'Serial Number', 'I/R Date',
 
+    // ABOM WO → WO5 Installed/Removed trace
+    'Part Number Installed', 'Installed Date', 'Serial Number Installed',
+    'Part Number Removed', 'Removal Date', 'Serial Number Removed',
+
     // NCR / Quality metadata
     'Related NCRs', 'NCR Status', 'NCR Cause Code', 'NCR Cause Code Desc',
     'NCR Defect Code', 'NCR Defect Code Desc',
@@ -3331,6 +3462,8 @@ function exportCIReport() {
     t.mbomQty, t.mbomStatus, t.mbomWo,
     t.abomQty, t.abomNhVal, t.abomStatus, t.abomWo, t.abomWoStatus,
     t.irActions, t.irWoNums, t.irWoStats, t.irSerials, t.irDates,
+    t.pnInstalled, t.dateInstalled, t.serialInstalled,
+    t.pnRemoved, t.dateRemoved, t.serialRemoved,
     t.ncrNums, t.ncrStatuses, t.ncrCauses, t.ncrCauseDescs,
     t.ncrDefects, t.ncrDefectDescs,
     t.ncrDispNos, t.ncrDispStats, t.ncrDispTypes, t.ncrDispCodes,
@@ -3379,6 +3512,13 @@ function exportCIReport() {
     'I/R WO Status Summary',
     'Serial Numbers',
     'I/R Date(s)',
+    // ABOM WO → WO5 Installed/Removed trace
+    'PN Installed Summary',
+    'Installed Date Summary',
+    'S/N Installed Summary',
+    'PN Removed Summary',
+    'Removal Date Summary',
+    'S/N Removed Summary',
     // Quality
     'NCR Numbers',
     'NCR Statuses',
@@ -3443,6 +3583,13 @@ function exportCIReport() {
     const irSerials      = mergeUniq(items.map(i=>i.irSerials));
     const irDates        = mergeUniq(items.map(i=>i.irDates));
 
+    const allPnInst      = mergeUniq(items.map(i=>i.pnInstalled));
+    const allDateInst    = mergeUniq(items.map(i=>i.dateInstalled));
+    const allSnInst      = mergeUniq(items.map(i=>i.serialInstalled));
+    const allPnRem       = mergeUniq(items.map(i=>i.pnRemoved));
+    const allDateRem     = mergeUniq(items.map(i=>i.dateRemoved));
+    const allSnRem       = mergeUniq(items.map(i=>i.serialRemoved));
+
     const ncrNums        = mergeUniq(items.map(i=>i.ncrNums));
     const ncrStats       = mergeUniq(items.map(i=>i.ncrStatuses));
     const ncrCauses      = mergeUniq(items.map(i=>i.ncrCauses));
@@ -3468,6 +3615,7 @@ function exportCIReport() {
       mbomQtys, mbomStats, mbomWos,
       abomQtys, abomNhs, abomStats, abomWos, abomWoStats,
       irActions, irWoNums, irWoStats, irSerials, irDates,
+      allPnInst, allDateInst, allSnInst, allPnRem, allDateRem, allSnRem,
       ncrNums, ncrStats, ncrCauses, ncrCauseDescs,
       ncrDefects, ncrDefectDescs,
       ncrDispNos, ncrDispStats, ncrDispTypes, ncrDispCodes,
@@ -3818,12 +3966,36 @@ function exportCIReport() {
       'CI ID', 'CI Part Number',
       'Used On Number (ABOM)', 'Part Number (ABOM)',
       'Part Qty (ABOM)', 'Work Order Number (ABOM)', 'Work Order Status (ABOM)',
+      'Part Number Installed', 'Installed Date', 'Serial Number Installed',
+      'Part Number Removed', 'Removal Date', 'Serial Number Removed',
     ];
 
     // CI pn → first ciId (for lookup)
     const ciPnToId = {};
     traces.forEach(t => { if (t.pn && !ciPnToId[t.pn]) ciPnToId[t.pn] = t.ciId; });
     const ciPnSet = new Set(Object.keys(ciPnToId));
+
+    // Build WO5 lookup: woNo||pn → {instPn, instDate, instSerial, remPn, remDate, remSerial}
+    const wo5WoPnMap = {};
+    if (state.boms.wo5) {
+      state.boms.wo5.data.forEach(wRow => {
+        const woNum  = String(wRow[COL.wo5.woNo] ?? '').trim();
+        if (!woNum) return;
+        const instPn = normPN(wRow[COL.wo5.installedPart]);
+        const remPn  = normPN(wRow[COL.wo5.removedPart]);
+        [instPn, remPn].forEach(matchPn => {
+          if (!matchPn) return;
+          const key = woNum + '||' + matchPn;
+          if (!wo5WoPnMap[key]) wo5WoPnMap[key] = [];
+          wo5WoPnMap[key].push({
+            instPn: instPn || '—', instDate: String(wRow[COL.wo5.installedOn]??'').trim() || '—',
+            instSerial: String(wRow[COL.wo5.installedSerial]??'').trim() || '—',
+            remPn: remPn || '—', remDate: String(wRow[COL.wo5.removedOn]??'').trim() || '—',
+            remSerial: String(wRow[COL.wo5.removedSerial]??'').trim() || '—',
+          });
+        });
+      });
+    }
 
     const embUsedOnRows = [];
     if (state.boms.abom) {
@@ -3834,10 +4006,15 @@ function exportCIReport() {
         const woNo   = String(row[COL.abom.woNo]     ?? '').trim();
         const woStat = String(row[COL.abom.woStatus] ?? '').trim();
         if (!usedOn || !ciPnSet.has(usedOn)) return;
+        // Lookup WO5 by woNo and usedOn (the CI part number)
+        const wo5Hits = wo5WoPnMap[woNo + '||' + usedOn] || wo5WoPnMap[woNo + '||' + pn] || [];
+        const ir = wo5Hits[0] || { instPn:'—', instDate:'—', instSerial:'—', remPn:'—', remDate:'—', remSerial:'—' };
         embUsedOnRows.push([
           ciPnToId[usedOn] || '—', usedOn,
           usedOn, pn || '—',
           qty || '—', woNo || '—', woStat || '—',
+          ir.instPn, ir.instDate, ir.instSerial,
+          ir.remPn, ir.remDate, ir.remSerial,
         ]);
       });
     }
@@ -3865,6 +4042,8 @@ function exportCIReport() {
       'Part Number (ABOM)', 'Part Indenture (EBOM)',
       'Part Qty (ABOM)', 'Used On Number (ABOM)',
       'Work Order Number (ABOM)', 'Work Order Status (ABOM)',
+      'Part Number Installed', 'Installed Date', 'Serial Number Installed',
+      'Part Number Removed', 'Removal Date', 'Serial Number Removed',
     ];
 
     // Build EBOM pn → indenture and pn → nh maps (first occurrence)
@@ -3918,6 +4097,28 @@ function exportCIReport() {
       });
     }
 
+    // WO5 lookup for installed/removed trace
+    const wo5WoPnMap10 = {};
+    if (state.boms.wo5) {
+      state.boms.wo5.data.forEach(wRow => {
+        const woNum  = String(wRow[COL.wo5.woNo] ?? '').trim();
+        if (!woNum) return;
+        const instPn = normPN(wRow[COL.wo5.installedPart]);
+        const remPn  = normPN(wRow[COL.wo5.removedPart]);
+        [instPn, remPn].forEach(matchPn => {
+          if (!matchPn) return;
+          const key = woNum + '||' + matchPn;
+          if (!wo5WoPnMap10[key]) wo5WoPnMap10[key] = [];
+          wo5WoPnMap10[key].push({
+            instPn: instPn || '—', instDate: String(wRow[COL.wo5.installedOn]??'').trim() || '—',
+            instSerial: String(wRow[COL.wo5.installedSerial]??'').trim() || '—',
+            remPn: remPn || '—', remDate: String(wRow[COL.wo5.removedOn]??'').trim() || '—',
+            remSerial: String(wRow[COL.wo5.removedSerial]??'').trim() || '—',
+          });
+        });
+      });
+    }
+
     const embHigherRows = [];
     traces.forEach((t, idx) => {
       const ancestorSet  = ciAncestorSets[idx];
@@ -3926,11 +4127,15 @@ function exportCIReport() {
         const abomRows = abomPnToRows[ancestorPn] || [];
         abomRows.forEach(ar => {
           const partInd = ebomPnToInd[ar.pn] || '—';
+          const wo5Hits = wo5WoPnMap10[ar.woNo + '||' + t.pn] || wo5WoPnMap10[ar.woNo + '||' + ar.pn] || [];
+          const ir = wo5Hits[0] || { instPn:'—', instDate:'—', instSerial:'—', remPn:'—', remDate:'—', remSerial:'—' };
           embHigherRows.push([
             t.ciId||'—', t.pn||'—', ciIndenture,
             ar.pn||'—', partInd,
             ar.qty||'—', ar.usedOn||'—',
             ar.woNo||'—', ar.woStat||'—',
+            ir.instPn, ir.instDate, ir.instSerial,
+            ir.remPn, ir.remDate, ir.remSerial,
           ]);
         });
       });
@@ -3958,6 +4163,8 @@ function exportCIReport() {
       'CI ID', 'CI Part Number',
       'Part Number (ABOM)', 'Used On Number (ABOM)',
       'Part Qty (ABOM)', 'Work Order Number (ABOM)', 'Work Order Status (ABOM)',
+      'Part Number Installed', 'Installed Date', 'Serial Number Installed',
+      'Part Number Removed', 'Removal Date', 'Serial Number Removed',
     ];
 
     // Build CI exact-key map: "ciPn||ciNh" → [traces]
@@ -3967,6 +4174,28 @@ function exportCIReport() {
       if (!ciExactKeyMap[key]) ciExactKeyMap[key] = [];
       ciExactKeyMap[key].push(t);
     });
+
+    // WO5 lookup for installed/removed trace
+    const wo5WoPnMap11 = {};
+    if (state.boms.wo5) {
+      state.boms.wo5.data.forEach(wRow => {
+        const woNum  = String(wRow[COL.wo5.woNo] ?? '').trim();
+        if (!woNum) return;
+        const instPn = normPN(wRow[COL.wo5.installedPart]);
+        const remPn  = normPN(wRow[COL.wo5.removedPart]);
+        [instPn, remPn].forEach(matchPn => {
+          if (!matchPn) return;
+          const key = woNum + '||' + matchPn;
+          if (!wo5WoPnMap11[key]) wo5WoPnMap11[key] = [];
+          wo5WoPnMap11[key].push({
+            instPn: instPn || '—', instDate: String(wRow[COL.wo5.installedOn]??'').trim() || '—',
+            instSerial: String(wRow[COL.wo5.installedSerial]??'').trim() || '—',
+            remPn: remPn || '—', remDate: String(wRow[COL.wo5.removedOn]??'').trim() || '—',
+            remSerial: String(wRow[COL.wo5.removedSerial]??'').trim() || '—',
+          });
+        });
+      });
+    }
 
     const embWoRows = [];
     if (state.boms.abom) {
@@ -3979,10 +4208,14 @@ function exportCIReport() {
         const key    = abomPn + '||' + usedOn;
         const matchedCIs = ciExactKeyMap[key] || [];
         matchedCIs.forEach(ci => {
+          const wo5Hits = wo5WoPnMap11[woNo + '||' + ci.pn] || wo5WoPnMap11[woNo + '||' + abomPn] || [];
+          const ir = wo5Hits[0] || { instPn:'—', instDate:'—', instSerial:'—', remPn:'—', remDate:'—', remSerial:'—' };
           embWoRows.push([
             ci.ciId||'—', ci.pn||'—',
             abomPn||'—', usedOn||'—',
             qty||'—', woNo||'—', woStat||'—',
+            ir.instPn, ir.instDate, ir.instSerial,
+            ir.remPn, ir.remDate, ir.remSerial,
           ]);
         });
       });
@@ -4004,6 +4237,251 @@ function exportCIReport() {
 
   XLSX.writeFile(wb, 'ci_csa_pedigree_report.xlsx');
   toast('CI CSA Pedigree Report exported (' + traces.length + ' items, ' + Object.keys(ciGroups).length + ' unique CIs, ' + ncrDispRows.length + ' NCR disposition rows)');
+}
+
+// ── KPI BLOCKS: Open NCR Dispositions + CIs Not in Build Records ──────────
+// Cached KPI data (recomputed on each renderAll)
+let _kpiData = { ncrOpenCIs: [], noBuildCIs: [] };
+
+function renderKpiBlocks() {
+  const kpiRow = document.getElementById('kpi-ci-row');
+  const hasCi  = !!state.boms.ci;
+  const hasAbom = getModeRequired().includes('abom') && !!state.boms.abom;
+  const hasNcr  = !!state.boms.ncr;
+
+  if (!hasCi || !hasAbom) {
+    kpiRow.style.display = 'none';
+    return;
+  }
+  kpiRow.style.display = '';
+
+  const C = COL.ci;
+
+  // ── Build ABOM lookup sets ──
+  const abomPnSet    = new Set();   // all part numbers in ABOM
+  const abomUsedOnSet= new Set();   // all "used on" values in ABOM
+  const abomWoToPns  = {};          // woNo → Set of part numbers
+  const abomWoToUsedOns = {};       // woNo → Set of used-on values
+  if (state.boms.abom) {
+    state.boms.abom.data.forEach(row => {
+      const pn     = normPN(row[COL.abom.pn]);
+      const usedOn = normPN(row[COL.abom.usedOn]);
+      const woNo   = String(row[COL.abom.woNo] ?? '').trim();
+      if (pn) abomPnSet.add(pn);
+      if (usedOn) abomUsedOnSet.add(usedOn);
+      if (woNo) {
+        if (!abomWoToPns[woNo]) abomWoToPns[woNo] = new Set();
+        if (pn) abomWoToPns[woNo].add(pn);
+        if (!abomWoToUsedOns[woNo]) abomWoToUsedOns[woNo] = new Set();
+        if (usedOn) abomWoToUsedOns[woNo].add(usedOn);
+      }
+    });
+  }
+
+  // ── KPI 1: CIs with Open NCR Disposition Status ──
+  // Includes CIs that are NCR Discrepant Parts and CIs whose PN matches
+  // an ABOM used-on value linked to an NCR disposition's originating WO.
+  const ncrOpenCIMap = {};  // ciId → { ciId, pn, nh, ncrEntries[] }
+  if (hasNcr) {
+    // Build NCR entries with originating WO
+    const ncrRows = state.boms.ncr.data;
+    const ncrCols = COL.ncr;
+
+    // Map: discrepantPn → [ncr entry objects]
+    const ncrByDiscPn = {};
+    // Map: origWo → [ncr entry objects]
+    const ncrByOrigWo = {};
+    ncrRows.forEach(row => {
+      const discPn  = normPN(row[ncrCols.discrepantPart]);
+      const origWo  = String(row[ncrCols.originatingWo] ?? '').trim();
+      const dispSt  = String(row[ncrCols.dispStatus] ?? '').trim().toUpperCase();
+
+      const entry = {
+        ncrNum:      String(row[ncrCols.ncrNum]      ?? '').trim(),
+        ncrStatus:   String(row[ncrCols.ncrStatus]   ?? '').trim(),
+        origWo,
+        discrepantPart: discPn,
+        discNum:     String(row[ncrCols.discNum]     ?? '').trim(),
+        discStatus:  String(row[ncrCols.discStatus]  ?? '').trim(),
+        dispNo:      String(row[ncrCols.dispNo]      ?? '').trim(),
+        dispStatus:  String(row[ncrCols.dispStatus]  ?? '').trim(),
+        dispType:    String(row[ncrCols.dispType]    ?? '').trim(),
+        dispCode:    String(row[ncrCols.dispCode]    ?? '').trim(),
+        causeCode:   String(row[ncrCols.causeCode]   ?? '').trim(),
+        causeCodeDesc:String(row[ncrCols.causeCodeDesc]??'').trim(),
+        defectCode:  String(row[ncrCols.defectCode]  ?? '').trim(),
+        defectCodeDesc:String(row[ncrCols.defectCodeDesc]??'').trim(),
+      };
+
+      // Only include entries where disposition status is NOT closed
+      if (dispSt === 'CLOSED') return;
+
+      if (discPn) {
+        if (!ncrByDiscPn[discPn]) ncrByDiscPn[discPn] = [];
+        ncrByDiscPn[discPn].push(entry);
+      }
+      if (origWo) {
+        if (!ncrByOrigWo[origWo]) ncrByOrigWo[origWo] = [];
+        ncrByOrigWo[origWo].push(entry);
+      }
+    });
+
+    // For each CI, check:
+    // 1) CI PN matches a discrepant part with open disposition
+    // 2) CI PN matches an ABOM used-on value for an NCR's originating WO with open disposition
+    state.boms.ci.data.forEach(row => {
+      const ciId = String(row[C.ciId] ?? '').trim();
+      const pn   = normPN(row[C.pn]);
+      const nh   = normPN(row[C.nh]);
+      if (!ciId && !pn) return;
+
+      const matchedEntries = [];
+
+      // Path 1: CI PN is a discrepant part
+      if (ncrByDiscPn[pn]) {
+        ncrByDiscPn[pn].forEach(e => matchedEntries.push(e));
+      }
+
+      // Path 2: CI PN matches ABOM used-on linked to NCR originating WO
+      Object.keys(ncrByOrigWo).forEach(origWo => {
+        const usedOns = abomWoToUsedOns[origWo];
+        if (usedOns && usedOns.has(pn)) {
+          ncrByOrigWo[origWo].forEach(e => {
+            if (!matchedEntries.some(m => m.ncrNum === e.ncrNum && m.dispNo === e.dispNo)) {
+              matchedEntries.push(e);
+            }
+          });
+        }
+      });
+
+      if (matchedEntries.length > 0) {
+        const key = ciId || pn;
+        if (!ncrOpenCIMap[key]) ncrOpenCIMap[key] = { ciId, pn, nh, ncrEntries: [] };
+        matchedEntries.forEach(e => {
+          if (!ncrOpenCIMap[key].ncrEntries.some(x => x.ncrNum === e.ncrNum && x.dispNo === e.dispNo)) {
+            ncrOpenCIMap[key].ncrEntries.push(e);
+          }
+        });
+      }
+    });
+  }
+  const ncrOpenCIs = Object.values(ncrOpenCIMap);
+
+  // ── KPI 2: CIs Not Present in Build Records ──
+  // CI not found in ABOM as: part number, used-on number, or parent (NH) as part number
+  const noBuildCIs = [];
+  state.boms.ci.data.forEach(row => {
+    const ciId = String(row[C.ciId] ?? '').trim();
+    const pn   = normPN(row[C.pn]);
+    const nh   = normPN(row[C.nh]);
+    if (!ciId && !pn) return;
+
+    const pnInAbom     = abomPnSet.has(pn);
+    const pnAsUsedOn   = abomUsedOnSet.has(pn);
+    const nhInAbom     = nh ? abomPnSet.has(nh) : false;
+
+    if (!pnInAbom && !pnAsUsedOn && !nhInAbom) {
+      noBuildCIs.push({ ciId, pn, nh });
+    }
+  });
+
+  // Cache for drill-down reports
+  _kpiData = { ncrOpenCIs, noBuildCIs };
+
+  // Update display
+  document.getElementById('kpi-ncr-open-num').textContent = ncrOpenCIs.length;
+  document.getElementById('kpi-ncr-open-sub').textContent = ncrOpenCIs.length + ' CI(s) linked to non-closed NCR dispositions';
+  if (!hasNcr) {
+    document.getElementById('kpi-ncr-open-num').textContent = '—';
+    document.getElementById('kpi-ncr-open-sub').textContent = 'Load NCR file to enable';
+    document.getElementById('kpi-ncr-open').style.opacity = '0.5';
+    document.getElementById('kpi-ncr-open').style.cursor = 'default';
+  } else {
+    document.getElementById('kpi-ncr-open').style.opacity = '';
+    document.getElementById('kpi-ncr-open').style.cursor = 'pointer';
+  }
+
+  document.getElementById('kpi-ci-nobuild-num').textContent = noBuildCIs.length;
+  document.getElementById('kpi-ci-nobuild-sub').textContent = noBuildCIs.length + ' CI(s) not found in ABOM as PN, Used On, or parent PN';
+}
+
+function showKpiReport(type) {
+  if (type === 'ncr_open') {
+    if (!state.boms.ncr) return;
+    const data = _kpiData.ncrOpenCIs;
+    const cols = [
+      'CI ID', 'CI Part Number', 'Next Higher PN',
+      'NCR Number', 'NCR Status', 'Originating WO',
+      'Discrepant Part', 'Disc#', 'Disc Status',
+      'Disp#', 'Disp Status', 'Disp Type', 'Disp Code',
+      'Cause Code', 'Cause Code Desc', 'Defect Code', 'Defect Code Desc',
+    ];
+    let html = `<div class="report-header">
+      <span class="report-title">CIs with Open NCR Dispositions (${data.length})</span>
+      <button class="report-close" onclick="closeKpiReport()">✕ Close</button>
+    </div>`;
+    html += '<div class="table-wrap"><table><thead><tr>';
+    cols.forEach(c => html += `<th style="color:var(--ncr)">${c}</th>`);
+    html += '</tr></thead><tbody>';
+    if (!data.length) {
+      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-dim)">No CIs with open NCR dispositions found.</td></tr>`;
+    }
+    data.forEach(ci => {
+      ci.ncrEntries.forEach((e, idx) => {
+        html += `<tr>
+          ${idx===0?`<td style="color:var(--ci);font-weight:600" rowspan="${ci.ncrEntries.length}">${esc(ci.ciId||'—')}</td>
+          <td class="pn-col" rowspan="${ci.ncrEntries.length}">${esc(ci.pn||'—')}</td>
+          <td rowspan="${ci.ncrEntries.length}">${esc(ci.nh||'—')}</td>`:''}
+          <td style="color:var(--ncr);font-weight:600">${esc(e.ncrNum||'—')}</td>
+          <td>${esc(e.ncrStatus||'—')}</td>
+          <td>${esc(e.origWo||'—')}</td>
+          <td>${esc(e.discrepantPart||'—')}</td>
+          <td>${esc(e.discNum||'—')}</td>
+          <td>${esc(e.discStatus||'—')}</td>
+          <td>${esc(e.dispNo||'—')}</td>
+          <td style="color:var(--wo-open);font-weight:600">${esc(e.dispStatus||'—')}</td>
+          <td>${esc(e.dispType||'—')}</td>
+          <td>${esc(e.dispCode||'—')}</td>
+          <td>${esc(e.causeCode||'—')}</td>
+          <td style="color:var(--text-muted)">${esc(e.causeCodeDesc||'—')}</td>
+          <td>${esc(e.defectCode||'—')}</td>
+          <td style="color:var(--text-muted)">${esc(e.defectCodeDesc||'—')}</td>
+        </tr>`;
+      });
+    });
+    html += '</tbody></table></div>';
+    document.getElementById('report-panel').innerHTML = html;
+  }
+
+  if (type === 'ci_nobuild') {
+    const data = _kpiData.noBuildCIs;
+    const cols = ['CI ID', 'Part Number', 'Next Higher Part Number'];
+    let html = `<div class="report-header">
+      <span class="report-title">CIs Not Present in Build Records (${data.length})</span>
+      <button class="report-close" onclick="closeKpiReport()">✕ Close</button>
+    </div>`;
+    html += '<div class="table-wrap"><table><thead><tr>';
+    cols.forEach(c => html += `<th style="color:var(--warn)">${c}</th>`);
+    html += '</tr></thead><tbody>';
+    if (!data.length) {
+      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-dim)">All CIs are present in ABOM build records.</td></tr>`;
+    }
+    data.forEach(ci => {
+      html += `<tr>
+        <td style="color:var(--ci);font-weight:600">${esc(ci.ciId||'—')}</td>
+        <td class="pn-col">${esc(ci.pn||'—')}</td>
+        <td>${esc(ci.nh||'—')}</td>
+      </tr>`;
+    });
+    html += '</tbody></table></div>';
+    document.getElementById('report-panel').innerHTML = html;
+  }
+
+  document.getElementById('report-overlay').style.display = 'flex';
+}
+
+function closeKpiReport() {
+  document.getElementById('report-overlay').style.display = 'none';
 }
 
 
@@ -4040,6 +4518,11 @@ function resetAll() {
   freezeBtn.disabled        = true;
   freezeBtn.textContent     = '🔒 Finalize & Freeze Report';
   document.getElementById('cert-banner').style.display = 'none';
+
+  // Hide KPI blocks and overlay
+  document.getElementById('kpi-ci-row').style.display = 'none';
+  document.getElementById('report-overlay').style.display = 'none';
+  _kpiData = { ncrOpenCIs: [], noBuildCIs: [] };
 
   state.results = [];
   activeFilter  = 'all';
