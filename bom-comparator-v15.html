@@ -736,8 +736,8 @@ let collapsedNodes = new Set(); // pn keys that are collapsed in tree
 // ── COLUMN MAPPINGS (precise per input file spec) ─────────────────────────
 const COL = {
   ebom: { indenture: 0, pn: 1, desc: 2, nh: 3, qty: 7, qtyText: 8 },
-  mbom: { usedOn: 8, pn: 9, desc: 10, qty: 13, woNo: 35, woStatus: 36 },
-  abom: { usedOn: 8, pn: 9, desc: 10, qty: 13, woNo: 35, woStatus: 36 },
+  mbom: { usedOn: 8, pn: 9, desc: 10, qty: 13, procCode: 12, woNo: 35, woStatus: 36 },
+  abom: { usedOn: 8, pn: 9, desc: 10, qty: 13, procCode: 12, woNo: 35, woStatus: 36 },
   cp:   { indentCode: 1, pn: 3, partName: 4, nh: 5, partQty: 6, partQtyText: 7,
           docNo: 10, docRev: 11, dwgSheet: 12, dwgSheetRev: 13,
           dcn: 15, dcnReleaseDate: 16, ecn: 17, ecnStatus: 18, ecr: 19, ecrStatus: 20 },
@@ -906,25 +906,29 @@ function buildNhPnSet(data, nhCol) {
   return nhSet;
 }
 
-// ABOM map: key → { qty, woStatus, woNumbers, woValues, nhValues }
-function buildAbomMap(data, pnCol, nhCol, qtyCol, woNoCol, woStatCol) {
+// ABOM map: key → { qty, woStatus, woNumbers, woValues, nhValues, procCodes }
+function buildAbomMap(data, pnCol, nhCol, qtyCol, woNoCol, woStatCol, procCodeCol) {
   const qtyMap = {};
   const woStatMap  = {};   // key → [status strings]
   const woNumMap   = {};   // key → [WO number strings]
   const nhMap  = {};
+  const procCodeMap = {};  // key → Set of unique procurement codes
   data.forEach(row => {
     const pn     = normPN(row[pnCol]);
     const nh     = normPN(row[nhCol]);
     const qty    = parseFloat(row[qtyCol]) || 0;
     const woNum  = String(row[woNoCol] ?? '').trim();
     const woStat = String(row[woStatCol] ?? '').trim();
+    const proc   = (procCodeCol !== undefined && procCodeCol !== null) ? String(row[procCodeCol] ?? '').trim() : '';
     if (!pn) return;
     const key = pn + '||' + nh;
     qtyMap[key] = (qtyMap[key] || 0) + qty;
-    if (!woStatMap[key]) woStatMap[key] = [];
-    if (!woNumMap[key])  woNumMap[key]  = [];
+    if (!woStatMap[key])   woStatMap[key]   = [];
+    if (!woNumMap[key])    woNumMap[key]     = [];
+    if (!procCodeMap[key]) procCodeMap[key]  = new Set();
     if (woStat) woStatMap[key].push(woStat.toUpperCase());
     if (woNum)  woNumMap[key].push(woNum);
+    if (proc)   procCodeMap[key].add(proc);
     if (!nhMap[key]) nhMap[key] = [];
     if (nh && nhMap[key].indexOf(nh) === -1) nhMap[key].push(nh);
   });
@@ -938,6 +942,7 @@ function buildAbomMap(data, pnCol, nhCol, qtyCol, woNoCol, woStatCol) {
       woValues: [...new Set(woNumMap[key] || [])],   // unique WO numbers
       woStatuses: statuses,                            // raw status strings
       nhValues: nhMap[key] || [],
+      procCodes: [...(procCodeMap[key] || [])],        // unique procurement codes
     };
   }
   return result;
@@ -1211,7 +1216,7 @@ self.onmessage = function(e) {
 
     var ebomMap = d.ebomData ? buildQtyMap(d.ebomData, C.ebom.pn, C.ebom.nh, C.ebom.qtyText) : {};
     var mbomMap = d.mbomData ? buildQtyMap(d.mbomData, C.mbom.pn, C.mbom.usedOn, C.mbom.qty) : null;
-    var abomMap = d.abomData ? buildAbomMap(d.abomData, C.abom.pn, C.abom.usedOn, C.abom.qty, C.abom.woNo, C.abom.woStatus) : null;
+    var abomMap = d.abomData ? buildAbomMap(d.abomData, C.abom.pn, C.abom.usedOn, C.abom.qty, C.abom.woNo, C.abom.woStatus, C.abom.procCode) : null;
 
     // Problem 4: identify EBOM keys with SUB/AR quantities
     var ebomFlex = d.ebomData ? buildEbomFlexKeys(d.ebomData, C.ebom.pn, C.ebom.nh, C.ebom.qtyText) : {};
@@ -1235,12 +1240,13 @@ self.onmessage = function(e) {
       for (var ak in abomMap) {
         var aPn = ak.split('||')[0];
         if (!abomPnOnlyMap[aPn]) {
-          abomPnOnlyMap[aPn] = { qty: 0, woStatus: 'no_status', woValues: [], woStatuses: [], nhValues: [] };
+          abomPnOnlyMap[aPn] = { qty: 0, woStatus: 'no_status', woValues: [], woStatuses: [], nhValues: [], procCodes: [] };
         }
         abomPnOnlyMap[aPn].qty += abomMap[ak].qty;
         abomMap[ak].woValues.forEach(function(w){ abomPnOnlyMap[aPn].woValues.push(w); });
         (abomMap[ak].woStatuses || []).forEach(function(s){ abomPnOnlyMap[aPn].woStatuses.push(s); });
         abomMap[ak].nhValues.forEach(function(n){ if (abomPnOnlyMap[aPn].nhValues.indexOf(n)===-1) abomPnOnlyMap[aPn].nhValues.push(n); });
+        (abomMap[ak].procCodes || []).forEach(function(p){ if (abomPnOnlyMap[aPn].procCodes.indexOf(p)===-1) abomPnOnlyMap[aPn].procCodes.push(p); });
       }
       for (var apk in abomPnOnlyMap) {
         var avs = abomPnOnlyMap[apk].woStatuses;
@@ -1349,7 +1355,7 @@ self.onmessage = function(e) {
       }
 
       // ── ABOM ──
-      var as_ = 'n/a', aq = null, woStatus = 'n/a', woValues = [], abomNh = '';
+      var as_ = 'n/a', aq = null, woStatus = 'n/a', woValues = [], abomNh = '', abomProcCode = '';
       var abomUsedOnTrace = '';
       if (required.indexOf('abom') >= 0 && abomMap) {
         var aEntry = abomMap[key];
@@ -1369,6 +1375,7 @@ self.onmessage = function(e) {
         } else {
           aq = aEntry.qty; woStatus = aEntry.woStatus; woValues = aEntry.woValues;
           abomNh = aEntry.nhValues && aEntry.nhValues.length > 0 ? aEntry.nhValues[0] : '';
+          abomProcCode = (aEntry.procCodes && aEntry.procCodes.length) ? aEntry.procCodes.join(', ') : '';
           if (isFlexKey)                  as_ = woStatus === 'closed' ? 'ok' : 'wo_open';
           else if (aq < eq)              as_ = 'qty_mismatch';   // Prompt 1: only flag if ABOM < EBOM
           else if (woStatus !== 'closed') as_ = 'wo_open';
@@ -1482,6 +1489,7 @@ self.onmessage = function(e) {
         key: key, pn: pn, nh: nh, eq: eq,
         mq: mq, ms: ms,
         aq: aq, as: as_, woStatus: woStatus, woValues: woValues, abomNh: abomNh,
+        abomProcCode: abomProcCode,
         indenture: indenture, coveredByParent: coveredByParent,
         isCollectorLevel: isCollectorLevel, isFlexKey: isFlexKey,
         flexType: flexType, flexUsed: flexUsed,
@@ -1608,7 +1616,7 @@ function runSynchronous(done) {
 
     const ebomMap = state.boms.ebom ? buildQtyMap(state.boms.ebom.data, COL.ebom.pn, COL.ebom.nh, COL.ebom.qtyText) : {};
     const mbomMap = state.boms.mbom ? buildQtyMap(state.boms.mbom.data, COL.mbom.pn, COL.mbom.usedOn, COL.mbom.qty) : null;
-    const abomMap = state.boms.abom ? buildAbomMap(state.boms.abom.data, COL.abom.pn, COL.abom.usedOn, COL.abom.qty, COL.abom.woNo, COL.abom.woStatus) : null;
+    const abomMap = state.boms.abom ? buildAbomMap(state.boms.abom.data, COL.abom.pn, COL.abom.usedOn, COL.abom.qty, COL.abom.woNo, COL.abom.woStatus, COL.abom.procCode) : null;
 
     // Problem 4: identify EBOM keys with SUB/AR quantities
     const ebomFlex = state.boms.ebom ? buildEbomFlexKeys(state.boms.ebom.data, COL.ebom.pn, COL.ebom.nh, COL.ebom.qtyText) : {};
@@ -1632,12 +1640,13 @@ function runSynchronous(done) {
       for (const ak of Object.keys(abomMap)) {
         const aPn = ak.split('||')[0];
         if (!abomPnOnlyMap[aPn]) {
-          abomPnOnlyMap[aPn] = { qty: 0, woStatus: 'no_status', woValues: [], woStatuses: [], nhValues: [] };
+          abomPnOnlyMap[aPn] = { qty: 0, woStatus: 'no_status', woValues: [], woStatuses: [], nhValues: [], procCodes: [] };
         }
         abomPnOnlyMap[aPn].qty += abomMap[ak].qty;
         abomMap[ak].woValues.forEach(w => abomPnOnlyMap[aPn].woValues.push(w));
         (abomMap[ak].woStatuses || []).forEach(s => abomPnOnlyMap[aPn].woStatuses.push(s));
         abomMap[ak].nhValues.forEach(n => { if (!abomPnOnlyMap[aPn].nhValues.includes(n)) abomPnOnlyMap[aPn].nhValues.push(n); });
+        (abomMap[ak].procCodes || []).forEach(p => { if (!abomPnOnlyMap[aPn].procCodes.includes(p)) abomPnOnlyMap[aPn].procCodes.push(p); });
       }
       for (const apk of Object.keys(abomPnOnlyMap)) {
         const avs = abomPnOnlyMap[apk].woStatuses;
@@ -1739,7 +1748,7 @@ function runSynchronous(done) {
       }
 
       // ── ABOM ──
-      let as_ = 'n/a', aq = null, woStatus = 'n/a', woValues = [], abomNh = '';
+      let as_ = 'n/a', aq = null, woStatus = 'n/a', woValues = [], abomNh = '', abomProcCode = '';
       let abomUsedOnTrace = '';
       if (required.includes('abom') && abomMap) {
         let aEntry = abomMap[key];
@@ -1757,6 +1766,7 @@ function runSynchronous(done) {
         } else {
           aq = aEntry.qty; woStatus = aEntry.woStatus; woValues = aEntry.woValues;
           abomNh = aEntry.nhValues && aEntry.nhValues.length > 0 ? aEntry.nhValues[0] : '';
+          abomProcCode = (aEntry.procCodes && aEntry.procCodes.length) ? aEntry.procCodes.join(', ') : '';
           if (isFlexKey)                  as_ = woStatus === 'closed' ? 'ok' : 'wo_open';
           else if (aq < eq)              as_ = 'qty_mismatch';   // Prompt 1: only flag if ABOM < EBOM
           else if (woStatus !== 'closed') as_ = 'wo_open';
@@ -1860,6 +1870,7 @@ function runSynchronous(done) {
         key, pn, nh, eq,
         mq, ms,
         aq, as: as_, woStatus, woValues, abomNh,
+        abomProcCode,
         indenture, coveredByParent,
         isCollectorLevel, isFlexKey,
         flexType, flexUsed,
@@ -2305,7 +2316,7 @@ function renderSummaryTable() {
   // ── Column headers ──
   const cols = ['Ind.', 'Part Number', 'Next Higher', 'EBOM Qty', 'ΔQty'];
   if (req.includes('mbom')) cols.push('MBOM Qty', 'MBOM Status');
-  if (req.includes('abom')) cols.push('ABOM Qty', 'ABOM NH', 'WO Number', 'WO Status', 'ABOM Status');
+  if (req.includes('abom')) cols.push('ABOM Qty', 'ABOM NH', 'WO Number', 'WO Status', 'ABOM Status', 'Proc Code');
   if (state.boms.cp)  cols.push('DCN', 'DCN Status', 'ECN', 'ECN Status', 'ECR', 'ECR Status', 'CP History');
   if (state.boms.wo5) cols.push('WO Action', 'WO Serial / Meta');
   if (state.boms.ncr) cols.push('NCR# · Status', 'Discrepant Part Qty', 'Cause Code Desc', 'Defect Code Desc', 'Disp Type', 'Disp Code');
@@ -2494,7 +2505,7 @@ function renderSummaryTable() {
         const woStatusDisp = r.woStatus === 'closed' ? 'CLOSED' : r.woStatus === 'open' ? 'OPEN' : r.woStatus === 'no_status' ? '—' : r.woStatus === 'collector' ? '◆' : r.woStatus === 'nh_match' ? '✓ NH' : r.woStatus === 'flex_ok' ? '✓ SUB/AR' : (r.aq !== null ? r.woStatus.toUpperCase() : '');
         const woStatCls = r.woStatus === 'closed' ? '' : r.woStatus === 'open' ? 'hl-woopen' : '';
         const isCoveredAbom = r.as === 'covered' || r.as === 'collector' || r.as === 'flex_ok' || r.as === 'nh_match';
-        html += `<td class="${aCls}">${r.aq ?? (isCoveredAbom ? '↑ covered' : '—')}</td><td class="${nhCls}">${esc(abomNhVal || (isCoveredAbom ? '↑' : '—'))}</td><td class="${woCls}" style="white-space:normal;min-width:80px">${woNumsHtml}</td><td class="${woStatCls}">${esc(woStatusDisp)}</td><td>${badgeAbom(r.as)}</td>`;
+        html += `<td class="${aCls}">${r.aq ?? (isCoveredAbom ? '↑ covered' : '—')}</td><td class="${nhCls}">${esc(abomNhVal || (isCoveredAbom ? '↑' : '—'))}</td><td class="${woCls}" style="white-space:normal;min-width:80px">${woNumsHtml}</td><td class="${woStatCls}">${esc(woStatusDisp)}</td><td>${badgeAbom(r.as)}</td><td style="color:var(--text-muted)">${esc(r.abomProcCode||'—')}</td>`;
       }
       if (state.boms.cp) {
         const dcnStatusStr = r.trace && r.trace.dcn.size > 0 ? [...r.trace.dcn.values()].join(', ') : '—';
@@ -3101,7 +3112,7 @@ function exportCSV() {
   const hdr = ['Indenture','Part Number','Next Higher'];
   if (req.includes('ebom')) hdr.push('EBOM Qty');
   if (req.includes('mbom')) hdr.push('MBOM Qty','MBOM Status');
-  if (req.includes('abom')) hdr.push('ABOM Qty','ABOM NH','WO Number','WO Status','ABOM Status');
+  if (req.includes('abom')) hdr.push('ABOM Qty','ABOM NH','WO Number','WO Status','ABOM Status','ABOM Proc Code');
   if (state.boms.cp)  hdr.push('DCN','DCN Status','ECN','ECN Status','ECR','ECR Status','CP History');
   if (state.boms.wo5) hdr.push('WO Action','WO Meta');
   if (state.boms.ncr) hdr.push('NCR Number','NCR Status','NCR Discrepant Part Qty','NCR Cause Code Desc','NCR Defect Code Desc','NCR Disp Type','NCR Disp Code','Disp Number','Disp Status');
@@ -3116,7 +3127,7 @@ function exportCSV() {
       const row = [r.indenture, r.pn, r.nh];
       if (req.includes('ebom')) row.push(r.eq);
       if (req.includes('mbom')) row.push(r.mq??'', r.ms);
-      if (req.includes('abom')) row.push(r.aq??'', r.abomNh||'', wo, woStat, r.as);
+      if (req.includes('abom')) row.push(r.aq??'', r.abomNh||'', wo, woStat, r.as, r.abomProcCode||'');
       if (state.boms.cp) {
         row.push(
           r.trace ? [...r.trace.dcn.keys()].join(';') : '',
@@ -3192,7 +3203,7 @@ function exportXLSX() {
         const row = [r.indenture, r.pn, r.nh];
         if (req.includes('ebom')) row.push(r.eq);
         if (req.includes('mbom')) row.push(r.mq??'', r.ms);
-        if (req.includes('abom')) row.push(r.aq??'', r.abomNh||'', wo, woStat, r.as);
+        if (req.includes('abom')) row.push(r.aq??'', r.abomNh||'', wo, woStat, r.as, r.abomProcCode||'');
         if (state.boms.cp) {
           row.push(
             r.trace ? [...r.trace.dcn.keys()].join(', ') : '',
@@ -3231,7 +3242,7 @@ function exportXLSX() {
   const hdr = ['Indenture','Part Number','Next Higher'];
   if (req.includes('ebom')) hdr.push('EBOM Qty');
   if (req.includes('mbom')) hdr.push('MBOM Qty','MBOM Status');
-  if (req.includes('abom')) hdr.push('ABOM Qty','ABOM NH','WO Number','WO Status','ABOM Status');
+  if (req.includes('abom')) hdr.push('ABOM Qty','ABOM NH','WO Number','WO Status','ABOM Status','ABOM Proc Code');
   if (state.boms.cp)  hdr.push('DCN','DCN Status','ECN','ECN Status','ECR','ECR Status','CP History');
   if (state.boms.wo5) hdr.push('WO Action','WO Meta');
   if (state.boms.ncr) hdr.push('NCR Number','NCR Status','NCR Discrepant Part Qty','NCR Cause Code Desc','NCR Defect Code Desc','NCR Disp Type','NCR Disp Code','Disp Number','Disp Status');
@@ -3330,7 +3341,7 @@ function exportHTML() {
     if (req.includes('mbom')) tds += `<td style="color:${colorFor(row.ms)}">${row.mq??'MISSING'}</td><td style="color:${colorFor(row.ms)}">${row.ms.toUpperCase()}</td>`;
     if (req.includes('abom')) {
       const woStat = row.woStatus === 'closed' ? 'CLOSED' : row.woStatus === 'open' ? 'OPEN' : row.woStatus;
-      tds += `<td style="color:${colorFor(row.as)}">${row.aq??'MISSING'}</td><td>${esc(row.abomNh||'—')}</td><td style="white-space:normal">${woHtml}</td><td style="color:${colorFor(row.as)}">${esc(woStat)}</td><td style="color:${colorFor(row.as)}">${row.as.replace('_',' ').toUpperCase()}</td>`;
+      tds += `<td style="color:${colorFor(row.as)}">${row.aq??'MISSING'}</td><td>${esc(row.abomNh||'—')}</td><td style="white-space:normal">${woHtml}</td><td style="color:${colorFor(row.as)}">${esc(woStat)}</td><td style="color:${colorFor(row.as)}">${row.as.replace('_',' ').toUpperCase()}</td><td style="color:#8b949e">${esc(row.abomProcCode||'—')}</td>`;
     }
     if (state.boms.cp) {
       const dcn = row.trace ? [...row.trace.dcn.keys()].join(', ')||'—' : '—';
@@ -3378,7 +3389,7 @@ function exportHTML() {
   const thdr = ['Ind.','Part Number','Next Higher'];
   if (req.includes('ebom')) thdr.push('EBOM Qty');
   if (req.includes('mbom')) thdr.push('MBOM Qty','MBOM Status');
-  if (req.includes('abom')) thdr.push('ABOM Qty','ABOM NH','WO Number','WO Status','ABOM Status');
+  if (req.includes('abom')) thdr.push('ABOM Qty','ABOM NH','WO Number','WO Status','ABOM Status','Proc Code');
   if (state.boms.cp)  thdr.push('DCN','DCN Status','ECN','ECN Status','ECR','ECR Status','CP History');
   if (state.boms.wo5) thdr.push('WO Action','WO Meta');
   if (state.boms.ncr) thdr.push('NCR# · Status','Discrepant Part Qty','Cause Code Desc','Defect Code Desc','Disp Type','Disp Code');
@@ -3541,14 +3552,26 @@ function generateCITrace() {
   }
 
   // ── ABOM Work Order → Used On values map (for NCR originating WO lookups) ──
+  // Also build: pn||nh → unique procurement codes (for traceability output)
   const abomWoToUsedOns = {};
+  const abomProcCodeMap = {};   // key "pn||nh" → unique proc codes joined string
   if (state.boms.abom) {
     state.boms.abom.data.forEach(row => {
       const woNo   = String(row[COL.abom.woNo]   ?? '').trim();
       const usedOn = normPN(row[COL.abom.usedOn]);
+      const pn     = normPN(row[COL.abom.pn]);
+      const proc   = String(row[COL.abom.procCode] ?? '').trim();
       if (!woNo) return;
       if (!abomWoToUsedOns[woNo]) abomWoToUsedOns[woNo] = new Set();
       if (usedOn) abomWoToUsedOns[woNo].add(usedOn);
+      if (pn) {
+        const key = pn + '||' + usedOn;
+        if (!abomProcCodeMap[key]) abomProcCodeMap[key] = new Set();
+        if (proc) abomProcCodeMap[key].add(proc);
+        // Also index by pn-only for fallback
+        if (!abomProcCodeMap[pn]) abomProcCodeMap[pn] = new Set();
+        if (proc) abomProcCodeMap[pn].add(proc);
+      }
     });
   }
 
@@ -3749,6 +3772,17 @@ function generateCITrace() {
     const abomNhVal  = result ? (result.abomNh || '—')          : '—';
     const abomStatus = result ? (result.as || '—')              : '—';
 
+    // ABOM Procurement Code — look up via result's key first, then PN-only fallback
+    const abomProcCode = (() => {
+      if (result && result.abomProcCode) return result.abomProcCode;
+      const fullKey = pn + '||' + nh;
+      const fullSet = abomProcCodeMap[fullKey];
+      if (fullSet && fullSet.size) return [...fullSet].join(', ');
+      const pnSet = abomProcCodeMap[pn];
+      if (pnSet && pnSet.size) return [...pnSet].join(', ');
+      return '—';
+    })();
+
     traces.push({
       ciId, pn, nh, foundInEbom,
       partNomenclature: ebomNomenclature[pn] || '—',
@@ -3758,6 +3792,7 @@ function generateCITrace() {
       dwgNos, dwgRevs, sheets, sheetRevs,
       mbomQty, mbomStatus, mbomWo,
       abomQty, abomNhVal, abomStatus, abomWo, abomWoStatus,
+      abomProcCode,
       irActions, irWoNums, irWoStats, irSerials, irDates,
       pnInstalled, dateInstalled, serialInstalled,
       pnRemoved, dateRemoved, serialRemoved,
@@ -3783,7 +3818,7 @@ function renderCITraceTable() {
     'CI ID', 'Part Number', 'Part Nomenclature', 'Next Higher P/N', 'Found in EBOM', 'Part Qty Text',
     'DCN', 'DCN Date', 'ECN', 'ECN Status', 'ECR', 'ECR Status',
     'Drawing No', 'Drawing Rev', 'Sheet', 'Sheet Rev',
-    'MBOM WO', 'ABOM WO', 'ABOM WO Status',
+    'MBOM WO', 'ABOM WO', 'ABOM WO Status', 'ABOM Proc Code',
     'I/R Action', 'I/R WO#', 'I/R WO Status', 'Serial Number', 'I/R Date',
     'PN Installed', 'Installed Date', 'S/N Installed',
     'PN Removed', 'Removal Date', 'S/N Removed',
@@ -3840,6 +3875,7 @@ function renderCITraceTable() {
       <td style="white-space:normal;min-width:70px">${woEmbedded(t.mbomWo,'var(--warn)')}</td>
       <td style="white-space:normal;min-width:70px">${woEmbedded(t.abomWo,'var(--success)')}</td>
       <td style="color:${t.abomWoStatus==='Closed'?'var(--success)':t.abomWoStatus==='Open'?'var(--wo-open)':'var(--text-muted)'}">${esc(t.abomWoStatus)}</td>
+      <td style="color:var(--text-muted)">${esc(t.abomProcCode||'—')}</td>
       <td>${t.irActions!=='—'?t.irActions.split('; ').map(a=>`<span class="badge ${a==='INSTALLED'?'badge-installed':'badge-removed'}">${a==='INSTALLED'?'▲':'▼'} ${a}</span>`).join(' '):'—'}</td>
       <td style="white-space:normal;min-width:70px">${woEmbedded(t.irWoNums,'var(--text-muted)')}</td>
       <td style="color:${t.irWoStats.toUpperCase().includes('CLOSED')?'var(--success)':t.irWoStats!=='—'?'var(--wo-open)':'var(--text-dim)'}">${esc(t.irWoStats)}</td>
@@ -3914,7 +3950,7 @@ function exportCIReport() {
     'MBOM Qty', 'MBOM Status', 'MBOM WO#',
 
     // ABOM metadata
-    'ABOM Qty', 'ABOM NH', 'ABOM Status', 'ABOM WO#', 'ABOM WO Status',
+    'ABOM Qty', 'ABOM NH', 'ABOM Status', 'ABOM WO#', 'ABOM WO Status', 'ABOM Proc Code',
 
     // Installed/Removed Report (WO5 file)
     'I/R Action', 'I/R WO#', 'I/R WO Status', 'Serial Number', 'I/R Date',
@@ -3938,7 +3974,7 @@ function exportCIReport() {
     t.dcns, t.dcnDates, t.ecns, t.ecnStatuses, t.ecrs, t.ecrStatuses,
     t.dwgNos, t.dwgRevs, t.sheets, t.sheetRevs,
     t.mbomQty, t.mbomStatus, t.mbomWo,
-    t.abomQty, t.abomNhVal, t.abomStatus, t.abomWo, t.abomWoStatus,
+    t.abomQty, t.abomNhVal, t.abomStatus, t.abomWo, t.abomWoStatus, t.abomProcCode||'—',
     t.irActions, t.irWoNums, t.irWoStats, t.irSerials, t.irDates,
     t.pnInstalled, t.dateInstalled, t.serialInstalled,
     t.pnRemoved, t.dateRemoved, t.serialRemoved,
@@ -3984,6 +4020,7 @@ function exportCIReport() {
     'ABOM Status Summary',
     'ABOM WO# Summary',
     'ABOM WO Status Summary',
+    'ABOM Proc Code Summary',
     // Physical installation
     'I/R Actions Summary',
     'I/R WO# Summary',
@@ -4055,6 +4092,7 @@ function exportCIReport() {
     const abomStats      = mergeUniq(items.map(i=>i.abomStatus));
     const abomWos        = mergeUniq(items.map(i=>i.abomWo));
     const abomWoStats    = mergeUniq(items.map(i=>i.abomWoStatus));
+    const abomProcCodes  = mergeUniq(items.map(i=>i.abomProcCode||''));
 
     const irActions      = mergeUniq(items.map(i=>i.irActions));
     const irWoNums       = mergeUniq(items.map(i=>i.irWoNums));
@@ -4093,7 +4131,7 @@ function exportCIReport() {
       allDcns, allDcnDates, allEcns, allEcnStats, allEcrs, allEcrStats,
       allDwgNos, allDwgRevs, allSheets, allSheetRevs,
       mbomQtys, mbomStats, mbomWos,
-      abomQtys, abomNhs, abomStats, abomWos, abomWoStats,
+      abomQtys, abomNhs, abomStats, abomWos, abomWoStats, abomProcCodes,
       irActions, irWoNums, irWoStats, irSerials, irDates,
       allPnInst, allDateInst, allSnInst, allPnRem, allDateRem, allSnRem,
       ncrNums, ncrStats, ncrDiscQtys, ncrCauses, ncrCauseDescs,
@@ -4523,6 +4561,7 @@ function exportCIReport() {
       'CI ID', 'CI Part Number',
       'Used On Number (ABOM)', 'Part Number (ABOM)',
       'Part Qty (ABOM)', 'Work Order Number (ABOM)', 'Work Order Status (ABOM)',
+      'Proc Code (ABOM)',
       'Part Number Installed', 'Installed Date', 'Serial Number Installed',
       'Part Number Removed', 'Removal Date', 'Serial Number Removed',
     ];
@@ -4568,6 +4607,7 @@ function exportCIReport() {
         const qty    = String(row[COL.abom.qty]      ?? '').trim();
         const woNo   = String(row[COL.abom.woNo]     ?? '').trim();
         const woStat = String(row[COL.abom.woStatus] ?? '').trim();
+        const proc   = String(row[COL.abom.procCode] ?? '').trim();
         if (!usedOn || !ciPnSet.has(usedOn)) return;
         // Fall back to the CI trace's computed WO data when the ABOM row's
         // WO columns are blank (e.g., trailing columns absent in sparse rows).
@@ -4581,6 +4621,7 @@ function exportCIReport() {
           ciPnToId[usedOn] || '—', usedOn,
           usedOn, pn || '—',
           qty || '—', resolvedWoNo, resolvedWoStat,
+          proc || '—',
           ir.instPn, ir.instDate, ir.instSerial,
           ir.remPn, ir.remDate, ir.remSerial,
         ]);
@@ -4610,6 +4651,7 @@ function exportCIReport() {
       'Part Number (ABOM)', 'Part Indenture (EBOM)',
       'Part Qty (ABOM)', 'Used On Number (ABOM)',
       'Work Order Number (ABOM)', 'Work Order Status (ABOM)',
+      'Proc Code (ABOM)',
       'Part Number Installed', 'Installed Date', 'Serial Number Installed',
       'Part Number Removed', 'Removal Date', 'Serial Number Removed',
     ];
@@ -4661,6 +4703,7 @@ function exportCIReport() {
           usedOn: normPN(row[COL.abom.usedOn]),
           woNo:   String(row[COL.abom.woNo]     ?? '').trim(),
           woStat: String(row[COL.abom.woStatus] ?? '').trim(),
+          proc:   String(row[COL.abom.procCode] ?? '').trim(),
         });
       });
     }
@@ -4716,6 +4759,7 @@ function exportCIReport() {
             ar.pn||'—', partInd,
             ar.qty||'—', ar.usedOn||'—',
             resolvedWoNo, resolvedWoStat,
+            ar.proc||'—',
             ir.instPn, ir.instDate, ir.instSerial,
             ir.remPn, ir.remDate, ir.remSerial,
           ]);
@@ -4745,6 +4789,7 @@ function exportCIReport() {
       'CI ID', 'CI Part Number',
       'Part Number (ABOM)', 'Used On Number (ABOM)',
       'Part Qty (ABOM)', 'Work Order Number (ABOM)', 'Work Order Status (ABOM)',
+      'Proc Code (ABOM)',
       'Part Number Installed', 'Installed Date', 'Serial Number Installed',
       'Part Number Removed', 'Removal Date', 'Serial Number Removed',
     ];
@@ -4787,6 +4832,7 @@ function exportCIReport() {
         const qty    = String(row[COL.abom.qty]      ?? '').trim();
         const woNo   = String(row[COL.abom.woNo]     ?? '').trim();
         const woStat = String(row[COL.abom.woStatus] ?? '').trim();
+        const proc   = String(row[COL.abom.procCode] ?? '').trim();
         const key    = abomPn + '||' + usedOn;
         const matchedCIs = ciExactKeyMap[key] || [];
         matchedCIs.forEach(ci => {
@@ -4800,6 +4846,7 @@ function exportCIReport() {
             ci.ciId||'—', ci.pn||'—',
             abomPn||'—', usedOn||'—',
             qty||'—', resolvedWoNo, resolvedWoStat,
+            proc||'—',
             ir.instPn, ir.instDate, ir.instSerial,
             ir.remPn, ir.remDate, ir.remSerial,
           ]);
