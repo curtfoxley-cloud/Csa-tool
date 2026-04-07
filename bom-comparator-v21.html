@@ -3990,6 +3990,18 @@ function exportCIReport() {
   const traces = generateCITrace();
   const ts     = new Date().toLocaleString();
 
+  // ── ABOM WO → used-on lookup (needed by Sheet 5 and any other export logic) ──
+  const abomWoToUsedOns = {};
+  if (state.boms.abom) {
+    state.boms.abom.data.forEach(row => {
+      const woNo   = String(row[COL.abom.woNo]   ?? '').trim();
+      const usedOn = normPN(row[COL.abom.usedOn]);
+      if (!woNo) return;
+      if (!abomWoToUsedOns[woNo]) abomWoToUsedOns[woNo] = new Set();
+      if (usedOn) abomWoToUsedOns[woNo].add(usedOn);
+    });
+  }
+
   // ── Sheet 1 (optional): Audit Certificate ──────────────────────────────
   const wb = XLSX.utils.book_new();
   if (state.auditCert) {
