@@ -1585,8 +1585,6 @@ self.onmessage = function(e) {
         abomPnOnlyMap[apk].woStatus = allC ? 'closed' : (avs.length > 0 ? 'open' : 'no_status');
       }
     }
-      }
-    }
 
     var cpTrace = null, cpPnTrace = null;
     if (d.cpData) {
@@ -2082,12 +2080,11 @@ function runSynchronous(done) {
 
     let cpTrace = null, cpPnTrace = null;
     if (state.boms.cp) {
-      const built = buildCpTraceMap(state.boms.cp.data, COL.cp);
-      cpTrace   = built.map;
-      cpPnTrace = built.pnMap;
+      const builtCp = buildCpTraceMap(state.boms.cp.data, COL.cp);
+      cpTrace   = builtCp.map;
+      cpPnTrace = builtCp.pnMap;
     }
 
-    // WO5: full map + pre-built PN-only fallback (O(1) per lookup)
     let wo5Map   = null;
     let wo5PnMap = {};
     if (state.boms.wo5) {
@@ -2099,7 +2096,6 @@ function runSynchronous(done) {
       }
     }
 
-    // NCR: full map + pre-built PN-only fallback (O(1) per lookup)
     let ncrMap   = null;
     let ncrPnMap = {};
     if (state.boms.ncr) {
@@ -2155,10 +2151,10 @@ function runSynchronous(done) {
       if (isPtExcl) {
         const eqTextPt = ebomQtyTextMap[key] || '';
         let tracePt = { dcn: new Map(), ecn: new Map(), ecr: new Map() };
-        if (state.boms.cp) {
-          const built = buildCpTraceMap(state.boms.cp.data, COL.cp);
-          const full  = built.map[key];
-          tracePt = full || built.pnMap[pn] || tracePt;
+        if (cpTrace) {
+          const full = cpTrace[key];
+          if (full)                             tracePt = full;
+          else if (cpPnTrace && cpPnTrace[pn])  tracePt = cpPnTrace[pn];
         }
         const hasHistoryPt = tracePt.dcn.size > 0 || tracePt.ecn.size > 0 || tracePt.ecr.size > 0;
         results.push({
@@ -2254,35 +2250,31 @@ function runSynchronous(done) {
       }
 
       let trace = { dcn: new Map(), ecn: new Map(), ecr: new Map() };
-      if (state.boms.cp) {
-        const built = buildCpTraceMap(state.boms.cp.data, COL.cp);
-        const full  = built.map[key];
-        trace = full || built.pnMap[pn] || trace;
+      if (cpTrace) {
+        const full = cpTrace[key];
+        if (full)                             trace = full;
+        else if (cpPnTrace && cpPnTrace[pn])  trace = cpPnTrace[pn];
       }
       const hasHistory = trace.dcn.size > 0 || trace.ecn.size > 0 || trace.ecr.size > 0;
 
       let wo5Entries = [];
-      if (state.boms.wo5 && woValues.length > 0) {
-        const wo5M = buildWo5Map(state.boms.wo5.data, COL.wo5);
+      if (wo5Map && woValues.length > 0) {
         woValues.forEach(wov => {
           const lk = wov + '||' + pn;
-          if (wo5M[lk]) wo5M[lk].forEach(e => wo5Entries.push(e));
+          if (wo5Map[lk]) wo5Map[lk].forEach(e => wo5Entries.push(e));
         });
       }
 
       let ncrEntries = [];
-      if (state.boms.ncr) {
-        const ncrM = buildNcrMap(state.boms.ncr.data, state.boms.ncr.header, COL.ncr);
+      if (ncrMap) {
         if (woValues.length > 0) {
           woValues.forEach(wov => {
             const nKey = wov + '||' + pn;
-            if (ncrM[nKey]) ncrM[nKey].forEach(e => ncrEntries.push(e));
+            if (ncrMap[nKey]) ncrMap[nKey].forEach(e => ncrEntries.push(e));
           });
         }
-        if (!ncrEntries.length) {
-          for (const nk of Object.keys(ncrM)) {
-            if (nk.split('||')[1] === pn) ncrM[nk].forEach(e => ncrEntries.push(e));
-          }
+        if (!ncrEntries.length && ncrPnMap[pn]) {
+          ncrPnMap[pn].forEach(e => ncrEntries.push(e));
         }
       }
 
