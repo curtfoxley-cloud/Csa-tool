@@ -11325,7 +11325,7 @@ function exportCSV() {
   }
   if (req.includes('abom')) {
     if (req.includes('ebom')) hdr.push('ABOM Traceability','ABOM Reconciliation Notes');
-    hdr.push('ABOM Direct Qty','ABOM Proc Code','ABOM Direct NH','ABOM Direct WO#','ABOM Direct WO Status','ABOM Used On Qty','ABOM Used On WO#','ABOM Used On WO Status');
+    hdr.push('ABOM Direct Qty (Roll Up)', 'ABOM Direct NH', 'ABOM Direct WO#', 'ABOM Direct Qty (per WO)', 'ABOM Proc Code', 'ABOM Direct WO Status', 'ABOM Used On Qty', 'ABOM Used On WO#', 'ABOM Used On WO Status');
   }
   if (req.includes('ebom')) hdr.push('Drawing','Drawing PL Rev');
   if (state.boms.cp)  hdr.push('DCN','DCN Status','ECN','ECN Status','ECR','ECR Status','CP History');
@@ -11339,9 +11339,12 @@ function exportCSV() {
   hdr.push('Overall');
 
   const rows = [hdr.map(h => '"'+h+'"').join(',')];
-  // Expand to one row per direct ABOM WO × Pool 1 NCR entry; Pool 2 summarised per row
+  // Expand to one row per raw ABOM line × Pool 1 NCR entry; Pool 2 summarised per row
   state.results.forEach(r => {
-    const dirWoSet = r.woValues && r.woValues.length ? [...new Set(r.woValues)] : [''];
+    const _csvKey = r.pn + '||' + (r.nh || '');
+    const aLines = (_meta.abomLinesByKey && _meta.abomLinesByKey.get(_csvKey) && _meta.abomLinesByKey.get(_csvKey).length)
+      ? _meta.abomLinesByKey.get(_csvKey)
+      : [{ wo: '', qty: '', proc: '', status: '' }];
     const uoWos  = r.woValuesUsedOn && r.woValuesUsedOn.length ? [...new Set(r.woValuesUsedOn)].join(';') : '';
     const uoStat = r.woStatusUsedOn === 'closed' ? 'CLOSED' : r.woStatusUsedOn === 'open' ? 'OPEN' : r.woStatusUsedOn === 'no_status' ? '' : (r.woStatusUsedOn && r.woStatusUsedOn !== 'n/a' ? r.woStatusUsedOn : '');
     const p1Set = (state.boms.ncr && r.ncrEntriesPool1 && r.ncrEntriesPool1.length) ? r.ncrEntriesPool1 : [null];
@@ -11349,8 +11352,12 @@ function exportCSV() {
     function joinP2csv(entries, field) {
       return [...new Set((entries || []).map(e => e[field] || '').filter(Boolean))].join('; ') || '';
     }
-    dirWoSet.forEach(wo => {
-      const woStat = wo ? (r.woStatus === 'closed' ? 'CLOSED' : r.woStatus === 'open' ? 'OPEN' : r.woStatus ?? '') : '';
+    aLines.forEach(line => {
+      const wo     = line.wo || '';
+      const lineQty  = line.qty || '';
+      const lineProc = line.proc || '';
+      const _ls    = String(line.status || '').toUpperCase();
+      const woStat = _ls === 'CLOSED' ? 'CLOSED' : _ls === 'OPEN' ? 'OPEN' : _ls;
       p1Set.forEach(p1 => {
         const row = [r.indenture, r.pn, (_xDesc[_xKey(r)] || ''), r.nh, r.partTypeCode || ''];
         if (req.includes('ebom')) row.push(r.eq, r.eqText || '');
@@ -11360,7 +11367,7 @@ function exportCSV() {
         }
         if (req.includes('abom')) {
           if (req.includes('ebom')) row.push(abomTraceabilityText(r), abomNotesText(r));
-          row.push(r.aq??'', r.abomProcCode||'', r.abomNh||'', wo, woStat, r.aqUsedOn??'', uoWos, uoStat);
+          row.push(r.aq??'', r.abomNh||'', wo, lineQty, lineProc, woStat, r.aqUsedOn??'', uoWos, uoStat);
         }
         if (state.boms.cp) {
           if (req.includes('ebom')) row.push(_xDrawing[_xKey(r)] || '', _xDrawingRev[_xKey(r)] || '');
@@ -11483,13 +11490,20 @@ async function exportXLSX() {
         return [...new Set((entries || []).map(e => e[field] || '').filter(Boolean))].join('; ') || '';
       }
       results.forEach(r => {
-        const dirWoSet = r.woValues && r.woValues.length ? [...new Set(r.woValues)] : [''];
+        const _xlsKey = r.pn + '||' + (r.nh || '');
+        const aLines = (_meta.abomLinesByKey && _meta.abomLinesByKey.get(_xlsKey) && _meta.abomLinesByKey.get(_xlsKey).length)
+          ? _meta.abomLinesByKey.get(_xlsKey)
+          : [{ wo: '', qty: '', proc: '', status: '' }];
         const uoWos    = r.woValuesUsedOn && r.woValuesUsedOn.length ? [...new Set(r.woValuesUsedOn)].join(', ') : '';
         const uoWoStat = r.woStatusUsedOn === 'closed' ? 'CLOSED' : r.woStatusUsedOn === 'open' ? 'OPEN' : r.woStatusUsedOn === 'no_status' ? '' : (r.woStatusUsedOn && r.woStatusUsedOn !== 'n/a' ? r.woStatusUsedOn : '');
         const p1Set = (state.boms.ncr && r.ncrEntriesPool1 && r.ncrEntriesPool1.length) ? r.ncrEntriesPool1 : [null];
         const p2    = r.ncrEntriesPool2 || [];
-        dirWoSet.forEach(wo => {
-          const woStat = wo ? (r.woStatus === 'closed' ? 'CLOSED' : r.woStatus === 'open' ? 'OPEN' : r.woStatus ?? '') : '';
+        aLines.forEach(line => {
+          const wo       = line.wo || '';
+          const lineQty  = line.qty || '';
+          const lineProc = line.proc || '';
+          const _ls      = String(line.status || '').toUpperCase();
+          const woStat   = _ls === 'CLOSED' ? 'CLOSED' : _ls === 'OPEN' ? 'OPEN' : _ls;
           p1Set.forEach(p1 => {
             const row = [r.indenture, r.pn, (_xDesc[_xKey(r)] || ''), r.nh, r.partTypeCode || ''];
             if (req.includes('ebom')) row.push(r.eq, r.eqText || '');
@@ -11499,7 +11513,7 @@ async function exportXLSX() {
             }
             if (req.includes('abom')) {
               if (req.includes('ebom')) row.push(abomTraceabilityText(r), abomNotesText(r));
-              row.push(r.aq??'', r.abomProcCode||'', r.abomNh||'', wo, woStat, r.aqUsedOn??'', uoWos, uoWoStat);
+              row.push(r.aq??'', r.abomNh||'', wo, lineQty, lineProc, woStat, r.aqUsedOn??'', uoWos, uoWoStat);
             }
             if (state.boms.cp) {
             if (req.includes('ebom')) row.push(_xDrawing[_xKey(r)] || '', _xDrawingRev[_xKey(r)] || '');
@@ -11574,7 +11588,7 @@ async function exportXLSX() {
     }
     if (req.includes('abom')) {
       if (req.includes('ebom')) hdr.push('ABOM Traceability','ABOM Reconciliation Notes');
-      hdr.push('ABOM Direct Qty','ABOM Proc Code','ABOM Direct NH','ABOM Direct WO#','ABOM Direct WO Status','ABOM Used On Qty','ABOM Used On WO#','ABOM Used On WO Status');
+      hdr.push('ABOM Direct Qty (Roll Up)','ABOM Direct NH','ABOM Direct WO#','ABOM Direct Qty (per WO)','ABOM Proc Code','ABOM Direct WO Status','ABOM Used On Qty','ABOM Used On WO#','ABOM Used On WO Status');
     }
     if (req.includes('ebom')) hdr.push('Drawing','Drawing PL Rev');
     if (state.boms.cp)  hdr.push('DCN','DCN Status','ECN','ECN Status','ECR','ECR Status','CP History');
@@ -11712,11 +11726,27 @@ function exportHTML() {
     const bg = _STATUS_DIRECT_OK.has(row.overall) || _STATUS_COVERED.has(row.overall)
       ? '' : row.overall==='missing' ? 'background:#f8514910'
       : row.overall==='qty_mismatch' ? 'background:#d2992210' : 'background:#d2992210';
-    // Direct WO numbers — stacked divs (no delimiter)
-    const woValSet = row.woValues && row.woValues.length ? [...new Set(row.woValues)] : [];
-    const woHtml = woValSet.length > 1
-      ? woValSet.map((v, i) => `<div style="padding:1px 0;${i < woValSet.length-1 ? 'border-bottom:1px solid #30363d88;margin-bottom:2px;' : ''}">${esc(v)}</div>`).join('')
-      : (woValSet.length === 1 ? esc(woValSet[0]) : '—');
+    // Per-line ABOM direct breakdown — stacked divs aligned across WO#/Qty/Proc/Status
+    const _htmlKey = row.pn + '||' + (row.nh || '');
+    const _htmlLines = (_meta.abomLinesByKey && _meta.abomLinesByKey.get(_htmlKey))
+      ? _meta.abomLinesByKey.get(_htmlKey) : [];
+    const _hDim = '—';
+    const _hStack = (items) => {
+      if (items.length === 0) return _hDim;
+      if (items.length === 1) return items[0];
+      return items.map((h, i) =>
+        `<div style="padding:1px 0;${i < items.length-1 ? 'border-bottom:1px solid #30363d88;margin-bottom:2px;' : ''}">${h}</div>`
+      ).join('');
+    };
+    const _hWoCol   = _hStack(_htmlLines.map(l => l.wo ? esc(l.wo) : _hDim));
+    const _hQtyCol  = _hStack(_htmlLines.map(l => l.qty !== '' ? esc(l.qty) : _hDim));
+    const _hProcCol = _hStack(_htmlLines.map(l => l.proc ? `<span style="color:#8b949e">${esc(l.proc)}</span>` : _hDim));
+    const _hStatCol = _hStack(_htmlLines.map(l => {
+      const s = String(l.status || '').toUpperCase();
+      if (s === 'CLOSED') return 'CLOSED';
+      if (s === 'OPEN')   return `<span style="color:#d29922">OPEN</span>`;
+      return s ? esc(s) : _hDim;
+    }));
     // Used-on WO numbers
     const uoWoSet = row.woValuesUsedOn && row.woValuesUsedOn.length ? [...new Set(row.woValuesUsedOn)] : [];
     const uoWoHtml = uoWoSet.length > 1
@@ -11740,12 +11770,12 @@ function exportHTML() {
     if (req.includes('abom')) {
       const aDirCol = colorFor(row.as);
       const aUoCol  = colorFor(row.asUsedOn && row.asUsedOn !== 'n/a' ? row.asUsedOn : 'ok');
-      const woStat  = row.woStatus === 'closed' ? 'CLOSED' : row.woStatus === 'open' ? 'OPEN' : row.woStatus === 'no_status' ? '—' : (row.woStatus && row.woStatus !== 'n/a' ? row.woStatus : '—');
       const uoStat  = row.woStatusUsedOn === 'closed' ? 'CLOSED' : row.woStatusUsedOn === 'open' ? 'OPEN' : row.woStatusUsedOn === 'no_status' ? '—' : (row.woStatusUsedOn && row.woStatusUsedOn !== 'n/a' ? row.woStatusUsedOn : '—');
       if (req.includes('ebom')) {
         tds += `<td>${esc(abomTraceabilityText(row)||'—')}</td><td>${esc(abomNotesText(row)||'—')}</td>`;
       }
-      tds += `<td style="color:${aDirCol}">${row.aq??'—'}</td><td style="color:#8b949e">${esc(row.abomProcCode||'—')}</td><td>${esc(row.abomNh||'—')}</td><td style="white-space:normal">${woHtml}</td><td style="color:${aDirCol}">${esc(woStat)}</td>`;
+      // New order: Roll Up · NH · WO# · per-WO Qty · Proc · WO Status
+      tds += `<td style="color:${aDirCol}">${row.aq??'—'}</td><td>${esc(row.abomNh||'—')}</td><td style="white-space:normal">${_hWoCol}</td><td style="white-space:normal">${_hQtyCol}</td><td style="white-space:normal">${_hProcCol}</td><td style="white-space:normal">${_hStatCol}</td>`;
       tds += `<td style="color:${aUoCol};opacity:0.8">${row.aqUsedOn??'—'}</td><td style="white-space:normal;opacity:0.8">${uoWoHtml}</td><td style="color:${aUoCol};opacity:0.8">${esc(uoStat)}</td>`;
     }
     if (state.boms.cp) {
@@ -11821,7 +11851,7 @@ function exportHTML() {
   }
   if (req.includes('abom')) {
     if (req.includes('ebom')) thdr.push('ABOM Traceability','ABOM Reconciliation Notes');
-    thdr.push('ABOM Direct Qty','Proc Code','ABOM Direct NH','ABOM Direct WO#','ABOM Direct WO Status','ABOM Used On Qty','ABOM Used On WO#','ABOM Used On WO Status');
+    thdr.push('ABOM Direct Qty (Roll Up)','ABOM Direct NH','ABOM Direct WO#','ABOM Direct Qty (per WO)','Proc Code','ABOM Direct WO Status','ABOM Used On Qty','ABOM Used On WO#','ABOM Used On WO Status');
   }
   if (req.includes('ebom')) thdr.push('Drawing','Drawing PL Rev');
   if (state.boms.cp)  thdr.push('DCN','DCN Status','ECN','ECN Status','ECR','ECR Status','CP History');
@@ -12386,6 +12416,11 @@ function generateCITrace() {
       mbomQty, mbomStatus, mbomWo,
       abomQty, abomNhVal, abomStatus, abomWo, abomWoStatus,
       abomProcCode,
+      // Per-line ABOM direct breakdown (raw, no collapse) — same index used by
+      // the summary table and main exports. One entry per raw ABOM record for
+      // this CI's PN+NH key, carrying {wo, qty, proc, status}.
+      abomLines: (_meta.abomLinesByKey && _meta.abomLinesByKey.get(ciKey))
+        ? _meta.abomLinesByKey.get(ciKey) : [],
       smeWo, woTraceSource,    // v86  SME-linked WO + source tag (Auto-reconciled | Adjudicated)
       irActions, irWoNums, irWoStats, irSerials, irDates,
       pnInstalled, dateInstalled, serialInstalled,
@@ -12413,7 +12448,7 @@ function renderCITraceTable() {
     'CI ID', 'Part Number', 'Part Nomenclature', 'Next Higher P/N', 'Found in EBOM', 'EBOM Part Qty Text', 'CP Part Qty Text',
     'DCN', 'DCN Date', 'ECN', 'ECN Status', 'ECR', 'ECR Status',
     'Drawing No', 'Drawing Rev', 'Sheet', 'Sheet Rev',
-    'MBOM WO', 'ABOM WO', 'ABOM WO Status', 'ABOM Proc Code',
+    'MBOM WO', 'ABOM Qty (Roll Up)', 'ABOM NH', 'ABOM WO#', 'ABOM Qty (per WO)', 'ABOM Proc Code', 'ABOM WO Status',
     'I/R Action', 'I/R WO#', 'I/R WO Status', 'Serial Number', 'I/R Date',
     'PN Installed', 'Installed Date', 'S/N Installed',
     'PN Removed', 'Removal Date', 'S/N Removed',
@@ -12504,9 +12539,28 @@ function renderCITraceTable() {
       <td>${esc(t.sheets)}</td>
       <td>${esc(t.sheetRevs)}</td>
       <td style="white-space:normal;min-width:70px">${woEmbedded(t.mbomWo,'var(--warn)')}</td>
-      <td style="white-space:normal;min-width:70px">${woEmbedded(t.abomWo,'var(--success)')}</td>
-      <td style="color:${t.abomWoStatus==='Closed'?'var(--success)':t.abomWoStatus==='Open'?'var(--warn)':'var(--text-muted)'}">${esc(t.abomWoStatus)}</td>
-      <td style="color:var(--text-muted)">${esc(t.abomProcCode||'—')}</td>
+      <td style="color:var(--success)">${t.abomQty ?? '—'}</td>
+      <td>${esc(t.abomNhVal||'—')}</td>
+      <td style="white-space:normal;min-width:70px">${(() => {
+        const ls = t.abomLines; if (!ls.length) return '<span style="color:var(--text-dim)">—</span>';
+        if (ls.length===1) return `<span style="color:var(--success)">${esc(ls[0].wo||'—')}</span>`;
+        return ls.map((l,i) => `<div style="color:var(--success);padding:1px 0;${i<ls.length-1?'border-bottom:1px solid #30363d88;margin-bottom:2px;':''}">${esc(l.wo||'—')}</div>`).join('');
+      })()}</td>
+      <td style="white-space:normal">${(() => {
+        const ls = t.abomLines; if (!ls.length) return '<span style="color:var(--text-dim)">—</span>';
+        if (ls.length===1) return esc(ls[0].qty||'—');
+        return ls.map((l,i) => `<div style="padding:1px 0;${i<ls.length-1?'border-bottom:1px solid #30363d88;margin-bottom:2px;':''}">${esc(l.qty||'—')}</div>`).join('');
+      })()}</td>
+      <td style="white-space:normal">${(() => {
+        const ls = t.abomLines; if (!ls.length) return '<span style="color:var(--text-dim)">—</span>';
+        if (ls.length===1) return `<span style="color:var(--text-muted)">${esc(ls[0].proc||'—')}</span>`;
+        return ls.map((l,i) => `<div style="color:var(--text-muted);padding:1px 0;${i<ls.length-1?'border-bottom:1px solid #30363d88;margin-bottom:2px;':''}">${esc(l.proc||'—')}</div>`).join('');
+      })()}</td>
+      <td style="white-space:normal">${(() => {
+        const ls = t.abomLines; if (!ls.length) return '<span style="color:var(--text-dim)">—</span>';
+        if (ls.length===1) { const s=String(ls[0].status||'').toUpperCase(); return `<span style="color:${s==='CLOSED'?'var(--success)':s==='OPEN'?'var(--warn)':'var(--text-muted)'}">${esc(s||'—')}</span>`; }
+        return ls.map((l,i) => { const s=String(l.status||'').toUpperCase(); return `<div style="color:${s==='CLOSED'?'var(--success)':s==='OPEN'?'var(--warn)':'var(--text-muted)'};padding:1px 0;${i<ls.length-1?'border-bottom:1px solid #30363d88;margin-bottom:2px;':''}">${esc(s||'—')}</div>`; }).join('');
+      })()}</td>
       <td>${t.irActions!=='—'?t.irActions.split('; ').map(a=>`<span class="badge ${a==='INSTALLED'?'badge-installed':'badge-removed'}">${a==='INSTALLED'?'▲':'▼'} ${a}</span>`).join(' '):'—'}</td>
       <td style="white-space:normal;min-width:70px">${woEmbedded(t.irWoNums,'var(--text-muted)')}</td>
       <td style="color:${t.irWoStats.toUpperCase().includes('CLOSED')?'var(--success)':t.irWoStats!=='—'?'var(--warn)':'var(--text-dim)'}">${esc(t.irWoStats)}</td>
@@ -12593,8 +12647,9 @@ function exportCIReport() {
     // MBOM metadata
     'MBOM Qty', 'MBOM Status', 'MBOM WO#',
 
-    // ABOM metadata
-    'ABOM Qty', 'ABOM NH', 'ABOM Status', 'ABOM WO#', 'ABOM WO Status', 'ABOM Proc Code',
+    // ABOM metadata — per-line fan-out: one row per raw ABOM record
+    'ABOM Qty (Roll Up)', 'ABOM NH', 'ABOM Status',
+    'ABOM WO#', 'ABOM Qty (per WO)', 'ABOM Proc Code', 'ABOM WO Status',
     'SME-Linked WO#', 'WO Trace Source',   // v86 — manual CI→WO adjudication + source tag
 
     // Installed/Removed Report (WO5 file)
@@ -12614,25 +12669,37 @@ function exportCIReport() {
     'BOM Overall Status', 'Pedigree Trace',
   ];
 
-  const detailRows = traces.map(t => [
-    t.ciId, t.pn, t.partNomenclature, t.nh, t.foundInEbom,
-    t.ebomQty, t.ebomQtyText || '—',
-    t.partQtyText,
-    t.dcns, t.dcnDates, t.ecns, t.ecnStatuses, t.ecrs, t.ecrStatuses,
-    t.dwgNos, t.dwgRevs, t.sheets, t.sheetRevs,
-    t.mbomQty, t.mbomStatus, t.mbomWo,
-    t.abomQty, t.abomNhVal, t.abomStatus, t.abomWo, t.abomWoStatus, t.abomProcCode||'—',
-    t.smeWo || '—', t.woTraceSource || 'Auto-reconciled',
-    t.irActions, t.irWoNums, t.irWoStats, t.irSerials, t.irDates,
-    t.pnInstalled, t.dateInstalled, t.serialInstalled,
-    t.pnRemoved, t.dateRemoved, t.serialRemoved,
-    t.ncrNums, t.ncrStatuses, t.ncrDiscQtys||'—', t.ncrCauses, t.ncrCauseDescs,
-    t.ncrDefects, t.ncrDefectDescs,
-    t.ncrDispNos, t.ncrDispStats, t.ncrDispTypes, t.ncrDispCodes,
-    t.ncrTraceSources || '—',   // v84
-    t.overallStatus,
-    t.hasTrace ? 'TRACED' : 'NO TRACE FOUND',
-  ]);
+  // Fan out one row per raw ABOM record so each WO carries its own qty/proc/status.
+  // Falls back to a single row with blanks when no raw ABOM lines exist for the CI.
+  const detailRows = traces.flatMap(t => {
+    const lines = t.abomLines.length
+      ? t.abomLines
+      : [{ wo: '', qty: '', proc: '', status: '' }];
+    return lines.map(line => {
+      const _ls = String(line.status || '').toUpperCase();
+      const lineStat = _ls === 'CLOSED' ? 'CLOSED' : _ls === 'OPEN' ? 'OPEN' : _ls;
+      return [
+        t.ciId, t.pn, t.partNomenclature, t.nh, t.foundInEbom,
+        t.ebomQty, t.ebomQtyText || '—',
+        t.partQtyText,
+        t.dcns, t.dcnDates, t.ecns, t.ecnStatuses, t.ecrs, t.ecrStatuses,
+        t.dwgNos, t.dwgRevs, t.sheets, t.sheetRevs,
+        t.mbomQty, t.mbomStatus, t.mbomWo,
+        t.abomQty, t.abomNhVal, t.abomStatus,
+        line.wo || '—', line.qty || '—', line.proc || '—', lineStat || '—',
+        t.smeWo || '—', t.woTraceSource || 'Auto-reconciled',
+        t.irActions, t.irWoNums, t.irWoStats, t.irSerials, t.irDates,
+        t.pnInstalled, t.dateInstalled, t.serialInstalled,
+        t.pnRemoved, t.dateRemoved, t.serialRemoved,
+        t.ncrNums, t.ncrStatuses, t.ncrDiscQtys||'—', t.ncrCauses, t.ncrCauseDescs,
+        t.ncrDefects, t.ncrDefectDescs,
+        t.ncrDispNos, t.ncrDispStats, t.ncrDispTypes, t.ncrDispCodes,
+        t.ncrTraceSources || '—',   // v84
+        t.overallStatus,
+        t.hasTrace ? 'TRACED' : 'NO TRACE FOUND',
+      ];
+    });
+  });
 
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([detailHdr, ...detailRows]), 'CI Traceability Detail');
 
@@ -21212,6 +21279,11 @@ function exportRFVReport() {
         ]);
       });
     });
+
+    const wsC = XLSX.utils.aoa_to_sheet(sheetCRows);
+    if (wsC['A1']) wsC['A1'].s = { font: { bold: true, sz: 12 } };
+    applySheetFont(wsC);
+    XLSX.utils.book_append_sheet(wb, wsC, 'RFV WO Matches');
 
     // ── SHEET D: Unresolved — RFVs No Match ─────────────────────────────────
     const sheetDHdr = [
