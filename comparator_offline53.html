@@ -1854,7 +1854,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   </div>
   <div class="header-right">
     <span class="pill offline">● Offline Ready</span>
-    <span class="pill">v120</span>
+    <span class="pill" id="app-version-pill">—</span>
   </div>
 </div>
 
@@ -3656,6 +3656,19 @@ const COL = {
 //   'swap'   — part is temporarily removed and reinstalled in the same WO
 //              (net-zero contribution; treated as confirmed present if WO is closed)
 //
+// ── APP VERSION — SINGLE SOURCE OF TRUTH ───────────────────────────────────
+// The header pill used to hardcode its own version string and drifted 33
+// releases behind (it still read v120 at v153) because every bump replaced
+// only the then-current number, so the stale one was never in the search path.
+// The pill now renders from this constant: there is exactly one string to edit,
+// and nothing else in the UI states a version.
+const APP_VERSION = 'v153';
+
+function renderVersionPill() {
+  var el = document.getElementById('app-version-pill');
+  if (el) el.textContent = APP_VERSION;
+}
+
 // TO UPDATE the shipped defaults: edit only PROC_CODE_BASELINE below.
 // getProcBehavior() remains the sole consumer of the active table.
 //
@@ -27186,6 +27199,7 @@ function resetAll() {
 setMode('ebom_mbom_abom', document.querySelector('.mode-btn.active'));
 // v83 — initialise ABOM column-mapping toggle to default (Mapping 1)
 refreshAbomColumnMappingUI();
+renderVersionPill();   // header pill — see APP_VERSION
 // v153 — paint the proc code panel in its collapsed empty state and seed the
 // generated code lists in the help copy.
 try { renderProcCodePanel(); refreshProcCodeCopy(); } catch (e) { console.error(e); }
