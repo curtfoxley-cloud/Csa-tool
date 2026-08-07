@@ -2146,6 +2146,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                 onclick="invokeExport('export-ccl-btn')">Change Commitment List — Recommended Closures</button>
         <button class="export-menu-item" id="export-menu-ecnprem"
                 onclick="invokeExport('export-ecnprem-btn')">Premature ECN Closures — Closed Without Embodiment</button>
+        <button class="export-menu-item" id="export-menu-ncruntraced" role="menuitem"
+                onclick="invokeExport('export-ncruntraced-btn')">NCR Dispositions Without EBOM Trace</button>
       </div>
     </div>
 
@@ -2172,6 +2174,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     <button class="btn btn-export" id="export-planned-btn" onclick="exportPlannedNotInstalled()" style="display:none">Planned Not Installed Parts List</button>
     <button class="btn btn-export" id="export-ccl-btn" onclick="exportChangeCommitmentClosures()" style="display:none">Change Commitment List — Recommended Closures</button>
     <button class="btn btn-export" id="export-ecnprem-btn" onclick="exportPrematureEcnClosures()" style="display:none">Premature ECN Closures — Closed Without Embodiment</button>
+    <button class="btn btn-export" id="export-ncruntraced-btn" onclick="exportUntracedNcrDispositions()" style="display:none">NCR Dispositions Without EBOM Trace</button>
   </div>
 
   <!-- CERTIFICATE BANNER (shown when frozen) -->
@@ -7405,6 +7408,7 @@ function runComparison() {
     document.getElementById('export-planned-btn').style.display = (getModeRequired().includes('mbom') && state.boms.mbom && state.boms.abom) ? '' : 'none';
     document.getElementById('export-ccl-btn').style.display = (getModeRequired().includes('abom') && !!state.boms.abom && !!state.boms.chp) ? '' : 'none';
     document.getElementById('export-ecnprem-btn').style.display = (getModeRequired().includes('abom') && !!state.boms.abom && !!state.boms.chp) ? '' : 'none';
+    document.getElementById('export-ncruntraced-btn').style.display = !!state.boms.ncr ? '' : 'none';
     document.getElementById('freeze-btn').style.display  = '';
     document.getElementById('freeze-btn').disabled       = false;
 
@@ -16483,6 +16487,119 @@ function computeUntracedNcrs() {
     });
   });
   return out;
+}
+
+
+// ── v153 — NCR DISPOSITIONS WITHOUT EBOM TRACE (EXPORT) ────────────────────
+// Excel form of the on-screen helper. Same population, same predicate: an NCR
+// row is untraced when its (NCR #, Disposition #) pair appears in NEITHER
+// automated pool — Pool 1 (discrepant part matched an EBOM PN) nor Pool 2
+// (originating WO matched an ABOM Used-On) — and the NCR is not CANCELLED.
+//
+// GRAIN: ONE ROW PER DISPOSITION NUMBER.
+// computeUntracedNcrs() emits one entry per NCR FILE ROW, which is not the same
+// thing. A source file can carry several rows for one (NCR #, Disposition #)
+// pair — denormalized across discrepant parts, defect codes, or repeated
+// disposition text — and exporting those verbatim would overstate the size of
+// the backlog and make the sheet impossible to work from. So rows are collapsed
+// on the composite key (NCR # || Disposition #), which is exactly the key the
+// trace predicate itself uses, guaranteeing the export and the on-screen count
+// describe the same thing at the same grain.
+//
+// Collapsing never discards data. Where merged rows disagree on a field, the
+// distinct values are joined with ' | ', and 'Source Rows Merged' reports how
+// many file rows fed the line — so a value that varies is visible rather than
+// silently reduced to whichever row happened to come first.
+function exportUntracedNcrDispositions() {
+  if (!state.boms.ncr) { toast('NCR file not loaded.'); return; }
+  if (!state.results || !state.results.length) { toast('No reconciliation results to export.'); return; }
+
+  const ts   = new Date().toLocaleString();
+  const raw  = computeUntracedNcrs();
+
+  // ── Collapse to one row per (NCR #, Disposition #) ───────────────────────
+  const byDisp = new Map();
+  const MERGE_FIELDS = ['ncrStatus','origWo','discrepantPart','discNum','discStatus','discSummary',
+                        'defectQty','causeCode','causeCodeDesc','defectCode','defectCodeDesc',
+                        'discrepancyText','dispStatus','dispType','dispCode','dispText'];
+  raw.forEach(function (e) {
+    const key = e.ncrNum + '||' + e.dispNo;
+    if (!byDisp.has(key)) {
+      const rec = { ncrNum: e.ncrNum, dispNo: e.dispNo, srcRows: 0 };
+      MERGE_FIELDS.forEach(function (f) { rec[f] = new Set(); });
+      byDisp.set(key, rec);
+    }
+    const rec = byDisp.get(key);
+    rec.srcRows++;
+    MERGE_FIELDS.forEach(function (f) { if (e[f]) rec[f].add(e[f]); });
+  });
+
+  const join = (set) => [...set].join(' | ');
+  const items = [...byDisp.values()].sort(function (a, b) {
+    return String(a.ncrNum).localeCompare(String(b.ncrNum), undefined, { numeric: true }) ||
+           String(a.dispNo).localeCompare(String(b.dispNo), undefined, { numeric: true });
+  });
+  const mergedCount = items.filter(function (i) { return i.srcRows > 1; }).length;
+
+  const hdr = ['NCR Number', 'Disposition Number', 'Disposition Status', 'Disposition Type',
+               'Disposition Code', 'Disposition Text', 'NCR Status', 'Originating WO',
+               'Discrepant Part Number', 'Discrepancy Number', 'Discrepancy Status',
+               'Discrepancy Summary', 'Defect Qty', 'Cause Code', 'Cause Code Description',
+               'Defect Code', 'Defect Code Description', 'Discrepancy Text', 'Source Rows Merged'];
+
+  const rows = items.map(function (i) {
+    return [
+      i.ncrNum, i.dispNo, join(i.dispStatus), join(i.dispType), join(i.dispCode), join(i.dispText),
+      join(i.ncrStatus), join(i.origWo), join(i.discrepantPart), join(i.discNum), join(i.discStatus),
+      join(i.discSummary), join(i.defectQty), join(i.causeCode), join(i.causeCodeDesc),
+      join(i.defectCode), join(i.defectCodeDesc), join(i.discrepancyText), i.srcRows,
+    ];
+  });
+
+  const titleBlock = [
+    ['NCR DISPOSITIONS WITHOUT EBOM TRACE'],
+    ['Generated', ts],
+    [],
+    ['What this report is'],
+    ['NCR dispositions that Comparator could not anchor to any EBOM line item automatically.'],
+    ['These are not necessarily errors — they are the dispositions that need a person to read the'],
+    ['disposition text and identify the EBOM line manually.'],
+    [],
+    ['How it is derived'],
+    ['A disposition is listed when its (NCR Number, Disposition Number) pair appears in NEITHER'],
+    ['automated trace pool: Pool 1 matches the NCR discrepant part number against an EBOM part'],
+    ['number; Pool 2 matches the NCR originating work order against an ABOM Used-On. CANCELLED'],
+    ['NCRs are excluded. Typical causes are a discrepant part number that does not match any EBOM'],
+    ['PN (data entry), or an originating WO with no ABOM Used-On match.'],
+    [],
+    ['Grain'],
+    ['ONE ROW PER DISPOSITION NUMBER. Where the source file carries several rows for the same'],
+    ['(NCR Number, Disposition Number) pair, they are collapsed into a single line. Differing'],
+    ['values across those rows are joined with " | " rather than dropped, and Source Rows Merged'],
+    ['reports how many file rows fed the line. A value of 1 means no collapsing occurred.'],
+    [],
+    ['What to do with it'],
+    ['In the tool, the NCR Dispositions Without EBOM Trace Helper card opens the same list with an'],
+    ['SME Action button per row. That form lets a reviewer select the correct EBOM line(s) and file'],
+    ['either an embodiment claim (available when the disposition is CLOSED) or a non-embodiment'],
+    ['trace claim (any status). Filing a claim does not remove the row from this list — an SME may'],
+    ['add further EBOM associations later.'],
+    [],
+    ['Dispositions without EBOM trace', items.length],
+    ['Source NCR file rows', raw.length],
+    ['Dispositions collapsed from multiple file rows', mergedCount],
+    [],
+    hdr,
+    ...rows,
+  ];
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(titleBlock);
+  if (ws['A1']) ws['A1'].s = { font: { bold: true, sz: 13 } };
+  applySheetFont(ws);
+  XLSX.utils.book_append_sheet(wb, ws, 'Untraced NCR Dispositions');
+  XLSX.writeFile(wb, tsFilename('ncr_dispositions_without_ebom_trace', 'xlsx'));
+  toast('NCR Dispositions Without EBOM Trace exported — ' + items.length + ' disposition(s).');
 }
 
 // ── ACN KPI HELPER ─────────────────────────────────────────────────────────
@@ -26769,6 +26886,7 @@ function importSessionJson(file) {
       setShow('export-planned-btn',   getModeRequired().includes('mbom') && !!state.boms.mbom && !!state.boms.abom);
       setShow('export-ccl-btn',       getModeRequired().includes('abom') && !!state.boms.abom && !!state.boms.chp);
       setShow('export-ecnprem-btn',   getModeRequired().includes('abom') && !!state.boms.abom && !!state.boms.chp);
+      setShow('export-ncruntraced-btn', !!state.boms.ncr);
       const rfvSearchEl = document.getElementById('rfv-search-input');
       if (rfvSearchEl) rfvSearchEl.style.display = state.boms.rfv ? '' : 'none';
       const freezeBtn = document.getElementById('freeze-btn');
@@ -27091,7 +27209,8 @@ function _exportMenuItemMap() {
     ['export-unplanned-btn', 'export-menu-unplanned'],
     ['export-planned-btn',   'export-menu-planned'],
     ['export-ccl-btn',       'export-menu-ccl'],
-    ['export-ecnprem-btn',   'export-menu-ecnprem']
+    ['export-ecnprem-btn',   'export-menu-ecnprem'],
+    ['export-ncruntraced-btn','export-menu-ncruntraced']
   ];
 }
 
