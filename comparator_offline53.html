@@ -68,7 +68,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     --rfv-dim: #0a2422;
     --text: #e6edf3;
     --text-muted: #8b949e;
-    --text-dim: #7d8590;
+    /* --text-dim removed in v153: it sat 1.21:1 from --text-muted, i.e.
+       visually identical, while implying a hierarchy across ~560 sites.
+       All uses consolidated onto --text-muted, which has the better
+       contrast of the pair (6.15:1 vs 5.07:1 against --bg). Do not
+       reintroduce a second grey without checking it is distinguishable. */
     --mono: 'IBM Plex Mono', monospace;
     --sans: 'IBM Plex Sans', sans-serif;
     /* layout scales — see COLOR_CONTRACT companion notes */
@@ -97,9 +101,9 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
   .header-logo { font-family: var(--mono); font-size: 18px; font-weight: 700; letter-spacing: 0.05em; }
   .header-logo span { color: var(--accent); }
-  .header-sub { font-size: 10px; letter-spacing: 0.2em; color: var(--text-dim); text-transform: uppercase; font-family: var(--mono); }
+  .header-sub { font-size: 10px; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase; font-family: var(--mono); }
   .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .pill { font-size: 9px; letter-spacing: 0.15em; padding: 3px 10px; border-radius: 20px; border: 1px solid var(--border); color: var(--text-dim); font-family: var(--mono); text-transform: uppercase; }
+  .pill { font-size: 9px; letter-spacing: 0.15em; padding: 3px 10px; border-radius: 20px; border: 1px solid var(--border); color: var(--text-muted); font-family: var(--mono); text-transform: uppercase; }
   .pill.offline { border-color: var(--success); color: var(--success); }
   .pill.warn-pill { border-color: var(--warn); color: var(--warn); }
 
@@ -152,7 +156,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .upload-section-sublabel {
     font-family: var(--sans); font-size: 11px; font-weight: 400;
     letter-spacing: 0; text-transform: none;
-    color: var(--text-dim);
+    color: var(--text-muted);
   }
   .upload-grid-primary { grid-template-columns: repeat(3, 1fr); margin-bottom: 0; }
   .upload-grid-supplemental { grid-template-columns: repeat(6, 1fr); margin-bottom: 0; }
@@ -232,7 +236,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .upload-zone.loaded-ci   .upload-filename,
   .upload-zone.loaded-rfv  .upload-filename,
   .upload-zone.loaded-acn  .upload-filename { color: var(--text); }
-  .upload-rows { font-size: 10px; color: var(--text-dim); margin-top: 3px; font-family: var(--mono); }
+  .upload-rows { font-size: 10px; color: var(--text-muted); margin-top: 3px; font-family: var(--mono); }
 
   /* v83 — ABOM column-mapping toggle on the ABOM upload zone. Same monospace
      /uppercase aesthetic as the other inline pill controls. Stops the parent
@@ -250,7 +254,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .abom-cm-label {
     font-family: var(--mono);
     font-size: 8px;
-    color: var(--text-dim);
+    color: var(--text-muted);
     letter-spacing: 0.12em;
     text-transform: uppercase;
   }
@@ -294,7 +298,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     display: none;
   }
   .abom-cm-reparse-hint.visible { display: block; }
-  .optional-tag { font-size: 10px; font-family: var(--mono); color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 4px; }
+  .optional-tag { font-size: 10px; font-family: var(--mono); color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 4px; }
 
   /* ── v153 — PROC CODE BEHAVIOR PANEL ───────────────────────────────────────
      Full-width strip under the Primary BOM grid. Reads the distinct proc codes
@@ -315,7 +319,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     padding: 9px 12px; cursor: pointer; user-select: none;
   }
   .pcm-head:hover { background: var(--surface2); border-radius: var(--radius-md); }
-  .pcm-caret { font-family: var(--mono); font-size: 9px; color: var(--text-dim); width: 9px; }
+  .pcm-caret { font-family: var(--mono); font-size: 9px; color: var(--text-muted); width: 9px; }
   .pcm-title {
     font-family: var(--mono); font-size: 9px; font-weight: 700;
     letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);
@@ -336,12 +340,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     line-height: 1.55; margin: 10px 0 12px;
   }
   .pcm-empty {
-    font-family: var(--mono); font-size: 10px; color: var(--text-dim);
+    font-family: var(--mono); font-size: 10px; color: var(--text-muted);
     letter-spacing: 0.05em; padding: 14px 0; text-align: center;
   }
   .pcm-subhead {
     font-family: var(--mono); font-size: 8px; letter-spacing: 0.12em;
-    text-transform: uppercase; color: var(--text-dim);
+    text-transform: uppercase; color: var(--text-muted);
     margin: 14px 0 5px; padding-bottom: 4px; border-bottom: 1px solid var(--border);
   }
   .pcm-row {
@@ -354,8 +358,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     font-family: var(--mono); font-size: 11px; font-weight: 700;
     color: var(--text); letter-spacing: 0.04em; word-break: break-all;
   }
-  .pcm-code.blank { color: var(--text-dim); font-weight: 400; font-style: italic; }
-  .pcm-count { font-family: var(--mono); font-size: 9px; color: var(--text-dim); letter-spacing: 0.04em; }
+  .pcm-code.blank { color: var(--text-muted); font-weight: 400; font-style: italic; }
+  .pcm-count { font-family: var(--mono); font-size: 9px; color: var(--text-muted); letter-spacing: 0.04em; }
   .pcm-desc {
     font-family: var(--sans); font-size: 11px; color: var(--text-muted);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -370,7 +374,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     font-family: var(--mono); font-size: 9px; font-weight: 700;
     letter-spacing: 0.06em; text-transform: uppercase;
     padding: 3px 9px; border-radius: var(--radius-sm); cursor: pointer;
-    background: var(--bg); color: var(--text-dim);
+    background: var(--bg); color: var(--text-muted);
     border: 1px solid var(--border); transition: all var(--dur-fast);
   }
   .pcm-seg-btn:hover { border-color: var(--text-muted); color: var(--text); }
@@ -426,7 +430,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .col-map-panel th {
     text-align: left; font-family: var(--mono); font-size: 9px;
     font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
-    color: var(--text-dim); padding: 6px 10px;
+    color: var(--text-muted); padding: 6px 10px;
     border-bottom: 1px solid var(--border);
   }
   .col-map-panel td {
@@ -441,7 +445,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     font-family: var(--mono); color: var(--text); width: 200px;
   }
   .col-map-panel td.col-notes {
-    color: var(--text-dim); font-style: italic;
+    color: var(--text-muted); font-style: italic;
   }
   .col-map-close {
     float: right; cursor: pointer; background: transparent;
@@ -454,7 +458,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     display: inline-block; font-size: 8px; font-family: var(--mono);
     letter-spacing: 0.1em; text-transform: uppercase;
     padding: 1px 6px; border-radius:var(--radius-sm); margin-left: 10px;
-    background: rgba(255,255,255,0.04); color: var(--text-dim);
+    background: rgba(255,255,255,0.04); color: var(--text-muted);
     border: 1px solid var(--border);
   }
   .col-map-status.required { color: var(--accent); border-color: rgba(56,139,253,0.35); }
@@ -464,7 +468,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .btn { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; border: none; border-radius:var(--radius-md); padding: 10px 22px; cursor: pointer; transition: all var(--dur-fast); }
   .btn-primary { background: var(--accent); color: #fff; }
   .btn-primary:hover { opacity: 0.88; }
-  .btn-primary:disabled { background: var(--border); color: var(--text-dim); cursor: not-allowed; }
+  .btn-primary:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
   .btn-secondary { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
   .btn-secondary:hover { border-color: var(--text-muted); color: var(--text); }
   .btn-export { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); font-size: 10px; }
@@ -496,7 +500,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .export-menu-group-label {
     font-family: var(--mono); font-size: 9px; font-weight: 700;
     letter-spacing: 0.06em; text-transform: uppercase;
-    color: var(--text-dim); padding: 8px 14px 4px;
+    color: var(--text-muted); padding: 8px 14px 4px;
   }
   .export-menu-item {
     display: block; width: 100%; text-align: left;
@@ -515,7 +519,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
   .export-menu-raw-row input { accent-color: var(--accent); margin: 0; }
   .export-menu-raw-row .raw-hint {
-    font-family: var(--sans); font-size: 10px; color: var(--text-dim);
+    font-family: var(--sans); font-size: 10px; color: var(--text-muted);
     margin-left: 22px; margin-top: 2px; line-height: 1.4;
   }
   /* Hide the legacy export controls — JS still toggles their inline display
@@ -537,16 +541,16 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .cert-banner .cert-title { font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 6px; }
   .cert-banner .cert-row { color: var(--text-muted); }
   .cert-banner .cert-row span { color: var(--text); font-weight: 600; }
-  .cert-banner .cert-hash { color: var(--text-dim); font-size: 9px; word-break: break-all; margin-top: 4px; }
+  .cert-banner .cert-hash { color: var(--text-muted); font-size: 9px; word-break: break-all; margin-top: 4px; }
   .cert-banner .cert-locked-pill { display: inline-block; background: var(--ncr-dim); color: var(--ncr); border: 1px solid var(--ncr); border-radius:var(--radius-md); padding: 2px 10px; font-size: 9px; letter-spacing: 0.15em; margin-left: 10px; vertical-align: middle; animation: lock-pulse 2.5s ease-in-out infinite; }
   @keyframes lock-pulse { 0%,100%{opacity:1} 50%{opacity:0.65} }
 
   /* ── INDENTURE TREE ── */
-  .ind-toggle { cursor: pointer; font-size: 9px; margin-right: 4px; user-select: none; color: var(--text-dim); transition: color var(--dur-fast); }
+  .ind-toggle { cursor: pointer; font-size: 9px; margin-right: 4px; user-select: none; color: var(--text-muted); transition: color var(--dur-fast); }
   .ind-toggle:hover { color: var(--text); }
   .subtier-warn { display: inline-block; font-size: 10px; margin-left: 5px; cursor: default; }
   .badge-ncr { background: var(--ncr-dim); color: var(--ncr); border: 1px solid color-mix(in srgb, var(--ncr) 20%, transparent); }
-  .badge-ncr-none { background: transparent; color: var(--text-dim); font-size: 9px; }
+  .badge-ncr-none { background: transparent; color: var(--text-muted); font-size: 9px; }
 
   /* ── ERROR BOX ── */
   .error-box { background: var(--danger-dim); border: 1px solid var(--danger); border-radius:var(--radius-md); padding: 12px 16px; color: var(--danger); font-family: var(--sans); font-size: 13px; margin-bottom: 16px; line-height: 1.5; }
@@ -595,7 +599,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .metric-info-btn {
     position: absolute; top: 10px; right: 10px;
     font-size: 13px; line-height: 1; cursor: pointer;
-    color: var(--text-dim); z-index: 2; user-select: none;
+    color: var(--text-muted); z-index: 2; user-select: none;
     transition: color var(--dur-fast);
   }
   .metric-info-btn:hover { color: var(--accent); }
@@ -615,7 +619,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .metric-tooltip-plain { color: var(--text-muted); margin-bottom: 8px; }
   .metric-tooltip-dev {
     border-top: 1px solid var(--border); padding-top: 7px; margin-top: 2px;
-    color: var(--text-dim); font-size: 10px; line-height: 1.55;
+    color: var(--text-muted); font-size: 10px; line-height: 1.55;
     font-family: var(--mono);
   }
   .metric-tooltip-dev-label {
@@ -652,15 +656,15 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
   .chart-title-row .chart-title { margin-bottom: 0; }
   .chart-info-btn {
-    font-size: 13px; color: var(--text-dim); cursor: pointer;
+    font-size: 13px; color: var(--text-muted); cursor: pointer;
     line-height: 1; user-select: none; transition: color var(--dur-fast); position: relative;
   }
   .chart-info-btn:hover { color: var(--accent); }
   .chart-info-btn .metric-tooltip { top: calc(100% + 4px); left: 0; right: auto; }
   .metric-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius:var(--radius-lg) 10px 0 0; }
-  .metric-card.total::before { background: var(--text-dim); }
+  .metric-card.total::before { background: var(--text-muted); }
   .metric-card.mc-ok::before { background: var(--success); }
-  .metric-card.mc-scope::before { background: var(--text-dim); }
+  .metric-card.mc-scope::before { background: var(--text-muted); }
   .metric-card.mc-direct::before { background: var(--success); }
   .metric-card.mc-nh-match::before { background: var(--success-2); }
   .metric-card.mc-parent-emb::before { background: var(--success-3); }
@@ -684,8 +688,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .metric-card.mc-mbom-embodied::before { background: var(--success-3); }
   .metric-card.mc-mbom-qty::before { background: var(--warn); }
   /* Parentage Delta — shared neutral color for both MBOM and ABOM (informational) */
-  .metric-card.mc-parentage::before { background: var(--text-dim); }
-  .metric-card.mc-mbom-parentage::before { background: var(--text-dim); }
+  .metric-card.mc-parentage::before { background: var(--text-muted); }
+  .metric-card.mc-mbom-parentage::before { background: var(--text-muted); }
   /* Headline % cards: dedicated class for the section's hero metric (parallel to mc-direct-trace) */
   .metric-card.mc-mbom-headline::before { background: var(--success); }
   .metric-card.mc-mbom-headline .metric-num { color: var(--success); font-size: 36px; }
@@ -713,14 +717,14 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .metric-card.mc-mbom-embodied .metric-num { color: var(--success-3); }
   .metric-card.mc-mbom-qty .metric-num { color: var(--warn); }
   /* Parentage Delta — shared neutral color */
-  .metric-card.mc-parentage .metric-num { color: var(--text-dim); }
-  .metric-card.mc-mbom-parentage .metric-num { color: var(--text-dim); }
+  .metric-card.mc-parentage .metric-num { color: var(--text-muted); }
+  .metric-card.mc-mbom-parentage .metric-num { color: var(--text-muted); }
   .metric-label { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); font-family: var(--mono); margin-bottom: 8px; }
   .metric-sublabel { font-size: 11px; color: var(--text-muted); font-family: var(--sans); margin-top: 4px; line-height: 1.45; }
   .metric-bar { height: 4px; background: var(--border); border-radius:var(--radius-sm); overflow: hidden; }
   .metric-bar-fill { height: 100%; border-radius:var(--radius-sm); transition: width 0.8s ease; }
   .metric-card.mc-ok .metric-bar-fill { background: var(--success); }
-  .metric-card.mc-scope .metric-bar-fill { background: var(--text-dim); }
+  .metric-card.mc-scope .metric-bar-fill { background: var(--text-muted); }
   .metric-card.mc-direct .metric-bar-fill { background: var(--success); }
   .metric-card.mc-nh-match .metric-bar-fill { background: var(--success-2); }
   .metric-card.mc-parent-emb .metric-bar-fill { background: var(--success-3); }
@@ -741,8 +745,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .metric-card.mc-mbom-embodied .metric-bar-fill { background: var(--success-3); }
   .metric-card.mc-mbom-qty .metric-bar-fill { background: var(--warn); }
   /* Parentage Delta — shared neutral color */
-  .metric-card.mc-parentage .metric-bar-fill { background: var(--text-dim); }
-  .metric-card.mc-mbom-parentage .metric-bar-fill { background: var(--text-dim); }
+  .metric-card.mc-parentage .metric-bar-fill { background: var(--text-muted); }
+  .metric-card.mc-mbom-parentage .metric-bar-fill { background: var(--text-muted); }
 
   /* ── SUB/AR — informational card for EBOM SUB/AR items not embodied ── */
   /* Neutral: SUB/AR is informational (not a defect), so it carries no health hue. */
@@ -769,7 +773,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
   /* ── TABS ── */
   .tabs { display: flex; gap: 3px; margin-bottom: 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
-  .tab { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 9px 16px; border: none; background: transparent; color: var(--text-dim); cursor: pointer; border-radius:var(--radius-md) 6px 0 0; transition: all var(--dur-fast); margin-bottom: -1px; border-bottom: 2px solid transparent; }
+  .tab { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 9px 16px; border: none; background: transparent; color: var(--text-muted); cursor: pointer; border-radius:var(--radius-md) 6px 0 0; transition: all var(--dur-fast); margin-bottom: -1px; border-bottom: 2px solid transparent; }
   .tab:hover { color: var(--text-muted); }
   .tab.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--surface); }
   .tab-content { display: none; padding-top: 20px; }
@@ -782,7 +786,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .filter-btn.active { background: color-mix(in srgb, currentColor 12%, transparent); border-color: currentColor; font-weight: 700; }
   .search-input { background: var(--surface); border: 1px solid var(--border); border-radius:var(--radius-md); color: var(--text); font-family: var(--mono); font-size: 11px; padding: 5px 12px; outline: none; width: 220px; margin-left: auto; }
   .search-input:focus { border-color: var(--accent); }
-  .search-input::placeholder { color: var(--text-dim); }
+  .search-input::placeholder { color: var(--text-muted); }
 
   /* ── TABLE ── */
   .table-wrap { overflow-x: auto; overflow-y: auto; max-height: 68vh; border-radius:var(--radius-lg); border: 1px solid var(--border); }
@@ -823,7 +827,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   th.th-abom    { border-top: 4px solid var(--success); background: linear-gradient(rgba(63,185,80,0.06),   rgba(63,185,80,0.06)),   var(--surface); color: var(--text-muted); }
   th.th-abom-uo { border-top: 4px solid color-mix(in srgb, var(--success) 40%, transparent);      background: linear-gradient(rgba(63,185,80,0.03),   rgba(63,185,80,0.03)),   var(--surface); color: var(--text-muted); }
   th.th-chp      { border-top: 4px solid var(--border);   background: var(--surface); color: var(--text-muted); }
-  th.th-wo5     { border-top: 4px solid var(--text-dim);background: linear-gradient(rgba(56,189,248,0.05),  rgba(56,189,248,0.05)),  var(--surface); color: var(--text-muted); }
+  th.th-wo5     { border-top: 4px solid var(--text-muted);background: linear-gradient(rgba(56,189,248,0.05),  rgba(56,189,248,0.05)),  var(--surface); color: var(--text-muted); }
   th.th-ncr     { border-top: 4px solid var(--ncr);     background: linear-gradient(rgba(251,113,133,0.07), rgba(251,113,133,0.07)), var(--surface); color: var(--text-muted); }
   th.th-ncr-uo  { border-top: 4px solid color-mix(in srgb, var(--ncr) 40%, transparent);      background: linear-gradient(rgba(251,113,133,0.04), rgba(251,113,133,0.04)), var(--surface); color: var(--text-muted); }
 
@@ -869,12 +873,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   td { padding: 8px 14px; border-bottom: 1px solid #ffffff08; white-space: nowrap; font-family: var(--mono); font-size: 11px; vertical-align: middle; }
   td.hl-missing { background: color-mix(in srgb, var(--danger) 6%, transparent) !important; color: var(--danger); }
   td.hl-mismatch { background: color-mix(in srgb, var(--warn) 6%, transparent) !important; color: var(--warn); }
-  td.hl-parentage { background: color-mix(in srgb, var(--text-dim) 9%, transparent) !important; color: var(--text-dim); }
+  td.hl-parentage { background: color-mix(in srgb, var(--text-muted) 9%, transparent) !important; color: var(--text-muted); }
   td.hl-qty_mismatch { background: color-mix(in srgb, var(--warn) 6%, transparent) !important; color: var(--warn); }
   td.hl-woopen { background: color-mix(in srgb, var(--warn) 6%, transparent) !important; color: var(--warn); }
   td.pn-col { font-weight: 600; color: var(--text); }
   td.cell-issue { background: color-mix(in srgb, var(--danger) 8%, transparent) !important; }
-  td.td-indenture { color: var(--text-dim); font-size: 10px; }
+  td.td-indenture { color: var(--text-muted); font-size: 10px; }
   td.td-covered { color: var(--success); font-size: 10px; font-style: italic; }
   td.td-collector { color: var(--text-muted); font-size: 10px; font-style: italic; }   /* v149 — structural A/B marker */
   td.td-dcn { color: var(--text-muted); }
@@ -882,7 +886,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
      is informational only, not health/severity. Bold weight preserved so
      "Yes" still reads stronger than "No" structurally. */
   td.td-history-yes { color: var(--text); font-weight: 600; }
-  td.td-history-no { color: var(--text-dim); }
+  td.td-history-no { color: var(--text-muted); }
   td.td-installed { color: var(--success); }
   td.td-removed { color: var(--danger); }
   td.td-wo5-sn { color: var(--text-muted); }
@@ -905,12 +909,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
      undated DCN, which on a scoped extract should never happen. A rare
      anomaly does not need to throb. */
   .badge-chp-warn  { background: var(--warn-dim); color: var(--warn); border: 1px solid color-mix(in srgb, var(--warn) 20%, transparent); }
-  @keyframes chp-pulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+  /* v153 - pulse keyframe removed: its only consumer was the badge-chp-warn
+     animation, dropped when the DCN warning became rare. */
   .badge-installed { background: #0d2b1a; color: var(--success); border: 1px solid color-mix(in srgb, var(--success) 20%, transparent); }
   .badge-removed  { background: var(--danger-dim); color: var(--danger); border: 1px solid color-mix(in srgb, var(--danger) 20%, transparent); }
   .badge-ci       { background: var(--ci-dim); color: var(--ci); border: 1px solid color-mix(in srgb, var(--ci) 20%, transparent); }
   .badge-qty-over   { background: var(--success-dim); color: var(--success); border: 1px solid color-mix(in srgb, var(--success) 20%, transparent); }
-  .badge-nh-mismatch { background: color-mix(in srgb, var(--text-dim) 13%, transparent); color: var(--text-dim); border: 1px solid color-mix(in srgb, var(--text-dim) 33%, transparent); }
+  .badge-nh-mismatch { background: color-mix(in srgb, var(--text-muted) 13%, transparent); color: var(--text-muted); border: 1px solid color-mix(in srgb, var(--text-muted) 33%, transparent); }
   .badge-proc-removed { background: var(--warn-dim); color: var(--warn); border: 1px solid color-mix(in srgb, var(--warn) 20%, transparent); }
   td.hl-proc-removed  { background: color-mix(in srgb, var(--warn) 6%, transparent) !important; color: var(--warn); }
 
@@ -984,7 +989,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .bom-search-bar { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; align-items:center; }
   .bom-search-input { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); color:var(--text); font-family:var(--mono); font-size:11px; padding:5px 12px; outline:none; width:210px; }
   .bom-search-input:focus { border-color:var(--accent); }
-  .bom-search-input::placeholder { color:var(--text-dim); }
+  .bom-search-input::placeholder { color:var(--text-muted); }
   .bom-search-clear { background:transparent; border:1px solid var(--border); color:var(--text-muted); border-radius:var(--radius-md); padding:5px 10px; cursor:pointer; font-family:var(--mono); font-size:10px; letter-spacing:0.08em; }
   .bom-search-clear:hover { border-color:var(--danger); color:var(--danger); }
 
@@ -999,7 +1004,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     padding: 5px 12px; outline: none; width: 220px;
   }
   .wo-search-input:focus { border-color: var(--accent); }
-  .wo-search-input::placeholder { color: var(--text-dim); }
+  .wo-search-input::placeholder { color: var(--text-muted); }
   .ctx-toggle-group {
     display: flex; border: 1px solid var(--border); border-radius:var(--radius-md); overflow: hidden; margin-left: 4px;
   }
@@ -1052,7 +1057,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   td.ctx-rel.ctx-rel-seed { color: var(--text); font-weight: 700; }
 
   /* ── NO DATA / TOAST / MISC ── */
-  .no-data { text-align: center; padding: 60px 20px; color: var(--text-dim); font-family: var(--sans); font-size: 13px; letter-spacing: 0; }
+  .no-data { text-align: center; padding: 60px 20px; color: var(--text-muted); font-family: var(--sans); font-size: 13px; letter-spacing: 0; }
   .no-data .big { font-size: 36px; margin-bottom: 12px; }
   #toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--success); border-radius:var(--radius-lg); padding: 12px 20px; color: var(--success); font-family: var(--sans); font-size: 13px; display: none; z-index: 9999; }
   #sheetjs-warning { background: var(--warn-dim); border: 1px solid var(--warn); border-radius:var(--radius-lg); padding: 14px 18px; color: var(--warn); font-family: var(--sans); font-size: 12px; margin-bottom: 20px; line-height: 1.55; display: none; }
@@ -1082,7 +1087,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .kpi-info-btn {
     position: absolute; top: 10px; right: 10px;
     font-size: 13px; line-height: 1; cursor: pointer;
-    color: var(--text-dim); z-index: 10; user-select: none;
+    color: var(--text-muted); z-index: 10; user-select: none;
     transition: color var(--dur-fast);
   }
   .kpi-info-btn:hover { color: var(--accent); }
@@ -1124,14 +1129,14 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   /* CI Row 4 issue-bucket KPIs */
   .kpi-block.kpi-ci-open-wo::before { background: var(--warn); }
   .kpi-block.kpi-ci-open-wo .kpi-num { color: var(--warn); }
-  .kpi-block.kpi-ci-parentage::before { background: var(--text-dim); }
-  .kpi-block.kpi-ci-parentage .kpi-num { color: var(--text-dim); }
+  .kpi-block.kpi-ci-parentage::before { background: var(--text-muted); }
+  .kpi-block.kpi-ci-parentage .kpi-num { color: var(--text-muted); }
   .kpi-block.kpi-ci-qty::before { background: var(--warn); }
   .kpi-block.kpi-ci-qty .kpi-num { color: var(--warn); }
 
   /* New CI KPI classes */
-  .kpi-block.kpi-ci-scope::before { background: var(--text-dim); }
-  .kpi-block.kpi-ci-scope .kpi-num { color: var(--text-dim); }
+  .kpi-block.kpi-ci-scope::before { background: var(--text-muted); }
+  .kpi-block.kpi-ci-scope .kpi-num { color: var(--text-muted); }
   .kpi-block.kpi-ci-pct-direct::before { background: var(--success); }
   .kpi-block.kpi-ci-pct-direct .kpi-num { color: var(--success); }
   .kpi-block.kpi-ci-pct-any::before { background: var(--success-2); }
@@ -1152,12 +1157,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .kpi-block.kpi-ncr-closed::before { background: var(--success); }
   .kpi-block.kpi-ncr-closed .kpi-num { color: var(--success); }
 
-  .kpi-block.kpi-ci-acn::before { background: var(--text-dim); }
+  .kpi-block.kpi-ci-acn::before { background: var(--text-muted); }
   .kpi-block.kpi-ci-acn .kpi-num { color: var(--text); }
 
   .kpi-block.kpi-acn-flight::before { background: var(--success); }
   .kpi-block.kpi-acn-flight .kpi-num { color: var(--success); }
-  .kpi-block.kpi-acn-l6::before { background: var(--text-dim); }
+  .kpi-block.kpi-acn-l6::before { background: var(--text-muted); }
   .kpi-block.kpi-acn-l6 .kpi-num { color: var(--text); }
   .kpi-block.kpi-acn-ncr::before { background: var(--ncr); }
   .kpi-block.kpi-acn-ncr .kpi-num { color: var(--ncr); }
@@ -1190,7 +1195,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .section-kpi-header {
     font-family: var(--mono); font-size: 12px; font-weight: 700;
     letter-spacing: 0.12em; text-transform: uppercase;
-    color: var(--text-dim); text-align: center;
+    color: var(--text-muted); text-align: center;
     margin-bottom: 14px; padding-bottom: 10px;
     border-bottom: 1px solid var(--border);
   }
@@ -1367,7 +1372,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .section-nav-label {
     font-family: var(--mono); font-size: 9px; font-weight: 700;
     letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--text-dim); margin-right: 4px;
+    color: var(--text-muted); margin-right: 4px;
   }
   .section-nav a {
     font-family: var(--mono); font-size: 10px; font-weight: 700;
@@ -1457,7 +1462,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .funnel-card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; gap:12px; flex-wrap:wrap; }
   .funnel-card-title { font-family:var(--mono); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--text); }
   .funnel-card-meta  { font-family:var(--mono); font-size:9px; color:var(--text-muted); }
-  .funnel-toggle-btn { font-family:var(--mono); font-size:9px; color:var(--text-dim); background:none; border:1px solid var(--border); border-radius:var(--radius-md); padding:3px 8px; cursor:pointer; white-space:nowrap; transition:color .15s,border-color .15s; }
+  .funnel-toggle-btn { font-family:var(--mono); font-size:9px; color:var(--text-muted); background:none; border:1px solid var(--border); border-radius:var(--radius-md); padding:3px 8px; cursor:pointer; white-space:nowrap; transition:color .15s,border-color .15s; }
   .funnel-toggle-btn:hover,.funnel-toggle-btn.active { color:#58a6ff; border-color:#58a6ff; }
   .funnel-panels-wrap { display:grid; grid-template-columns:1fr auto 1fr; gap:0 20px; align-items:start; }
   .funnel-panels-wrap.single { grid-template-columns:1fr; }
@@ -1515,7 +1520,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* ── PAGINATION ── */
-  .page-bar { display: flex; align-items: center; gap: 10px; padding: 10px 0 4px; font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
+  .page-bar { display: flex; align-items: center; gap: 10px; padding: 10px 0 4px; font-family: var(--mono); font-size: 10px; color: var(--text-muted); }
   .page-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); border-radius:var(--radius-md); padding: 4px 12px; cursor: pointer; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; }
   .page-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
   .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
@@ -1605,7 +1610,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .adj-workbench .adj-hint {
     font-family: var(--mono);
     font-size: 9px;
-    color: var(--text-dim);
+    color: var(--text-muted);
     letter-spacing: 0.08em;
   }
 
@@ -1895,7 +1900,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     </button>
     <input type="file" id="adj-prerun-import-input" accept=".json,application/json"
            style="display:none" onchange="importSessionJson(this.files[0])">
-    <span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);letter-spacing:0.08em">
+    <span style="font-family:var(--mono);font-size:9px;color:var(--text-muted);letter-spacing:0.08em">
       ↑ Restore a saved session without re-uploading source BOM files
     </span>
   </div>
@@ -2093,7 +2098,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     <div id="run-spinner"></div>
     <button class="btn btn-secondary" onclick="resetAll()">↺ Reset</button>
     <button class="btn btn-freeze" id="freeze-btn" onclick="freezeReport()" style="display:none" disabled>🔒 Finalize &amp; Freeze Report</button>
-    <span id="run-hint" style="font-size:12px;color:var(--text-dim);font-family:var(--sans)">Select mode and load required files to begin</span>
+    <span id="run-hint" style="font-size:12px;color:var(--text-muted);font-family:var(--sans)">Select mode and load required files to begin</span>
     <span style="flex:1"></span>
 
     <!-- ── EXPORT DROPDOWN (consolidated) ──
@@ -2112,32 +2117,32 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <div class="export-menu" id="export-menu" role="menu" aria-label="Export and report options">
         <div class="export-menu-group-label">Base exports</div>
         <button class="export-menu-item" id="export-menu-xlsx" role="menuitem"
-                onclick="invokeExport('export-xlsx-btn')">⬇ Excel (.xlsx)</button>
+                onclick="invokeExport('export-xlsx-btn')">Excel (.xlsx)</button>
         <label class="export-menu-raw-row" id="export-menu-raw-row" title="Including raw source sheets greatly increases file size and may cause crashes on large datasets.">
           <input type="checkbox" id="export-menu-raw-chk" onchange="document.getElementById('export-raw-chk').checked = this.checked">
           Include raw source sheets
         </label>
-        <div class="raw-hint" style="font-family:var(--sans);font-size:10px;color:var(--text-dim);padding:0 14px 6px 36px;line-height:1.4">
+        <div class="raw-hint" style="font-family:var(--sans);font-size:10px;color:var(--text-muted);padding:0 14px 6px 36px;line-height:1.4">
           Increases file size; may crash on large datasets.
         </div>
         <button class="export-menu-item" id="export-menu-csv" role="menuitem"
-                onclick="invokeExport('export-csv-btn')">⬇ CSV</button>
+                onclick="invokeExport('export-csv-btn')">CSV</button>
         <button class="export-menu-item" id="export-menu-html" role="menuitem"
-                onclick="invokeExport('export-html-btn')">⬇ HTML Report</button>
+                onclick="invokeExport('export-html-btn')">HTML Report</button>
 
         <div class="export-menu-separator"></div>
 
         <div class="export-menu-group-label">Traceability reports</div>
         <button class="export-menu-item" id="export-menu-ci" role="menuitem"
-                onclick="invokeExport('export-ci-btn')">⬇ CI Traceability Report</button>
+                onclick="invokeExport('export-ci-btn')">CI Traceability Report</button>
         <button class="export-menu-item" id="export-menu-ci-guide" role="menuitem"
-                onclick="invokeExport('export-ci-guide-btn')">⬇ CI As-Built Records Guide</button>
+                onclick="invokeExport('export-ci-guide-btn')">CI As-Built Records Guide</button>
         <button class="export-menu-item" id="export-menu-acn" role="menuitem"
-                onclick="invokeExport('export-acn-btn')">⬇ ACN Traceability Report</button>
+                onclick="invokeExport('export-acn-btn')">ACN Traceability Report</button>
         <button class="export-menu-item" id="export-menu-rfv" role="menuitem"
-                onclick="invokeExport('export-rfv-btn')">⬇ RFV Traceability Report</button>
+                onclick="invokeExport('export-rfv-btn')">RFV Traceability Report</button>
         <button class="export-menu-item" id="export-menu-wo5disc" role="menuitem"
-                onclick="invokeExport('export-wo5disc-btn')">⬇ I/R ABOM Discrepancy</button>
+                onclick="invokeExport('export-wo5disc-btn')">I/R ABOM Discrepancy</button>
         <button class="export-menu-item" id="export-menu-unplanned" role="menuitem"
                 onclick="invokeExport('export-unplanned-btn')">Unplanned Not Installed Parts List</button>
         <button class="export-menu-item" id="export-menu-planned" role="menuitem"
@@ -2156,7 +2161,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
          dropdown menu reads when it opens. Do not remove. -->
     <span class="export-legacy-hidden">
     <button class="btn btn-export" id="export-xlsx-btn" onclick="exportXLSX()" style="display:none">⬇ Export Excel</button>
-    <label id="export-raw-label" style="display:none;font-family:var(--mono);font-size:9px;color:var(--text-dim);letter-spacing:0.1em;cursor:pointer;user-select:none" title="Including raw source sheets greatly increases file size and may cause crashes on large datasets">
+    <label id="export-raw-label" style="display:none;font-family:var(--mono);font-size:9px;color:var(--text-muted);letter-spacing:0.1em;cursor:pointer;user-select:none" title="Including raw source sheets greatly increases file size and may cause crashes on large datasets">
       <input type="checkbox" id="export-raw-chk" style="accent-color:var(--accent);margin-right:4px">INCLUDE RAW SHEETS
     </label>
     <button class="btn btn-export" id="export-csv-btn" onclick="exportCSV()" style="display:none">⬇ Export CSV</button>
@@ -2256,7 +2261,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <div class="metric-num" id="m-total">—</div>
         <div class="metric-label">EBOM Line Items</div>
         <div class="metric-sublabel">All items in engineering BOM</div>
-        <div class="metric-bar"><div class="metric-bar-fill" style="width:100%;background:var(--text-dim)"></div></div>
+        <div class="metric-bar"><div class="metric-bar-fill" style="width:100%;background:var(--text-muted)"></div></div>
       </div>
       <div class="metric-card mc-scope">
         <span class="metric-info-btn">ⓘ<div class="metric-tooltip"><div class="metric-tooltip-plain">Active EBOM items after excluding non-reconcilable items. Four categories are excluded: Part Type = COLLECTOR, REFERENCE, and BULK MATL (structural placeholders, not physical parts), and REMOVAL items (EBOM lines whose Description contains "REMOVAL" without an "INSTALL" or "INSTL" override, plus all their indenture descendants — these are instructions to remove previously-embodied parts, not parts to be built). This is the reconciliation scope used as the denominator for all issue and coverage metrics.</div><div class="metric-tooltip-dev"><div class="metric-tooltip-dev-label">Dev / Logic</div>total − ptExcluded.<br>ptExcluded: results where overall ∈ {'pt_collector', 'pt_reference', 'pt_bulk', 'pt_removal'}.<br>pt_collector/reference/bulk driven by EBOM col Z (COL.ebom.partType, index 25).<br>pt_removal driven by buildEbomRemovalScope() — description substring match on "REMOVAL" (case-insensitive), with "INSTALL"/"INSTL" substring override. BFS-cascades to all indenture descendants.</div></div></span>
@@ -2361,7 +2366,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <span class="metric-info-btn">ⓘ<div class="metric-tooltip"><div class="metric-tooltip-plain">EBOM items with Part Qty Text = SUB or AR that failed every MBOM reconciliation path. SUB = manufacturer substitution at discretion; AR = as-required quantity. By design, these items are not required to appear in the MBOM, so their absence is acceptable rather than a defect. Echoed here from the Traceability Funnel for KPI visibility — the gap between "% EBOM Accounted For in MBOM (Any Path)" and 100% consists of Missing in MBOM + EBOM-MBOM Part Qty Mismatch + this card.</div><div class="metric-tooltip-dev"><div class="metric-tooltip-dev-label">Dev / Logic</div>rFunnelScope.filter(x => x.ms === 'flex_missing').<br>ms='flex_missing' when isFlexKey (Part Qty Text = SUB or AR) AND item fails all three MBOM reconciliation paths.<br>Informational metric — these items are excluded from Missing in MBOM by design.<br>Bar denominator: funnelScopeTotal.</div></div></span>
             <div class="metric-num" id="m-mbom-subar">—</div>
             <div class="metric-label">EBOM-MBOM SUB/AR Items Not Used</div>
-            <div class="metric-sublabel" style="font-style:italic;color:var(--text-dim)">Informational — absence acceptable by design</div>
+            <div class="metric-sublabel" style="font-style:italic;color:var(--text-muted)">Informational — absence acceptable by design</div>
             <div class="metric-bar"><div class="metric-bar-fill" id="bar-mbom-subar" style="width:0%"></div></div>
           </div>
 
@@ -2374,7 +2379,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <span class="metric-info-btn">ⓘ<div class="metric-tooltip"><div class="metric-tooltip-plain">EBOM items where the part number reconciles to the MBOM but the next-higher (parent) differs from the EBOM specification. Restructuring is normal and expected in EBOM → MBOM transformation; manufacturing engineering frequently re-parents parts for assembly sequencing. This standalone KPI is retired in the live dashboard — the same nhMismatchMbom flag is now surfaced by the EBOM-MBOM NH-Mismatch Adjudication Helper, which couples the observation with a candidate-list for missing-item adjudication. The card is hidden but kept in the DOM for back-compat with session imports.</div><div class="metric-tooltip-dev"><div class="metric-tooltip-dev-label">Dev / Logic</div>rFunnelScope.filter(x => x.nhMismatchMbom).<br>nhMismatchMbom is an orthogonal observational flag set on each result row by an independent query against the raw MBOM dataset. It does NOT participate in the Pass 1 → Pass 2 → Pass 3 cascade and does NOT take a status slot. The flag fires when the bare EBOM PN exists in the MBOM under a different NH than this EBOM row specifies (Pass 1 strict PN+NH would fail).<br>Items can co-occur with any cascade outcome: a flagged item that's also Pass 2-saved appears in BOTH the EBOM Acting as Used On card AND would land here. A flagged item with no other coverage resolves to Missing in MBOM AND would land here.<br>Card visibility: hidden by default (display:none). The flag itself remains live and is consumed by computeNhMismatchCandidates('mbom').</div></div></span>
             <div class="metric-num" id="m-mbom-parentage">—</div>
             <div class="metric-label">EBOM-MBOM Part Parentage Delta</div>
-            <div class="metric-sublabel" style="font-style:italic;color:var(--text-dim)">Informational — restructuring is normal</div>
+            <div class="metric-sublabel" style="font-style:italic;color:var(--text-muted)">Informational — restructuring is normal</div>
             <div class="metric-bar"><div class="metric-bar-fill" id="bar-mbom-parentage" style="width:0%"></div></div>
           </div>
 
@@ -2481,7 +2486,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <span class="metric-info-btn">ⓘ<div class="metric-tooltip"><div class="metric-tooltip-plain">EBOM items with Part Qty Text = SUB or AR that failed every ABOM reconciliation path at any work order status. SUB = manufacturer substitution at discretion; AR = as-required quantity. By design, these items are not required to appear in the ABOM, so their absence is acceptable rather than a defect. Echoed here from the Traceability Funnel for KPI visibility — the gap between "EBOM Embodiment Coverage" and 100% includes Missing in ABOM + EBOM-ABOM Part Qty Mismatch + this card + WO-not-closed populations.</div><div class="metric-tooltip-dev"><div class="metric-tooltip-dev-label">Dev / Logic</div>rFunnelScope.filter(x => x.as === 'flex_missing').<br>as='flex_missing' when isFlexKey (Part Qty Text = SUB or AR) AND item fails all three ABOM reconciliation paths.<br>Informational metric — these items are excluded from Missing in ABOM by design.<br>Bar denominator: funnelScopeTotal.</div></div></span>
         <div class="metric-num" id="m-abom-subar">—</div>
         <div class="metric-label">EBOM-ABOM SUB/AR Items Not Embodied</div>
-        <div class="metric-sublabel" style="font-style:italic;color:var(--text-dim)">Informational — absence acceptable by design</div>
+        <div class="metric-sublabel" style="font-style:italic;color:var(--text-muted)">Informational — absence acceptable by design</div>
         <div class="metric-bar"><div class="metric-bar-fill" id="bar-abom-subar" style="width:0%"></div></div>
       </div>
       <!-- Phase-1 NH-mismatch noise removal: card hidden. nhMismatchAbom flag
@@ -2491,7 +2496,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <span class="metric-info-btn">ⓘ<div class="metric-tooltip"><div class="metric-tooltip-plain">EBOM items where the part number is found in the ABOM but listed under a different next-higher (parent) assembly than specified in the EBOM. The part is physically present in the as-built record but its installed parent assembly differs from the design intent. Restructuring is normal and expected in EBOM → ABOM transformation; build engineering frequently re-parents parts for assembly sequencing. This standalone KPI is retired in the live dashboard — the same nhMismatchAbom flag is now surfaced by the EBOM-ABOM NH-Mismatch Adjudication Helper, which couples the observation with a candidate-list for missing-item adjudication. The card is hidden but kept in the DOM for back-compat with session imports.</div><div class="metric-tooltip-dev"><div class="metric-tooltip-dev-label">Dev / Logic</div>rFunnelScope.filter(x => x.nhMismatchAbom).<br>nhMismatchAbom is an orthogonal observational flag set on each result row by an independent query against the raw ABOM dataset. It does NOT participate in the Pass 1 → Pass 2 → Pass 3 cascade and does NOT take a status slot. The flag fires when the bare EBOM PN exists in the ABOM under a different NH than this EBOM row specifies (Pass 1 strict PN+NH would fail). Detection is WO-status-agnostic — scans the full raw ABOM, independent of the closed/open partition.<br>Items can co-occur with any cascade outcome: a flagged item that's also Pass 2-saved (used-on, WO closed) would land here AND on the Embodied as Used On card. A flagged item with no other coverage resolves to Missing in ABOM AND would land here.<br>Card visibility: hidden by default (display:none). The flag itself remains live and is consumed by computeNhMismatchCandidates('abom').</div></div></span>
         <div class="metric-num" id="m-nh-mismatch">—</div>
         <div class="metric-label">EBOM-ABOM Part Parentage Delta</div>
-        <div class="metric-sublabel" style="font-style:italic;color:var(--text-dim)">Informational — review per program tolerance</div>
+        <div class="metric-sublabel" style="font-style:italic;color:var(--text-muted)">Informational — review per program tolerance</div>
         <div class="metric-bar"><div class="metric-bar-fill" id="bar-nh-mismatch" style="width:0%"></div></div>
       </div>
       <div class="metric-card mc-apex-missing" id="card-apex-missing-abom" onclick="showApexMissingModal('abom')" style="cursor:pointer;display:none" title="Click to view the highest-level unreconciled ABOM assemblies">
@@ -3060,7 +3065,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       </div>
       <!-- v74: MBOM-leg filter row -->
       <div class="filter-bar" id="filter-bar-mbom">
-        <span style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--text-dim);text-transform:uppercase;padding:5px 8px 5px 0">MBOM:</span>
+        <span style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--text-muted);text-transform:uppercase;padding:5px 8px 5px 0">MBOM:</span>
         <button class="filter-btn" data-fk="mbom_direct" onclick="setFilter('mbom_direct',this)" style="border-color:#3fb950;color:#3fb950">Direct Reconciled</button>
         <button class="filter-btn" data-fk="mbom_pn_as_usedon" onclick="setFilter('mbom_pn_as_usedon',this)" style="border-color:#86efac;color:#86efac">PN as Used-On</button>
         <button class="filter-btn" data-fk="mbom_covered" onclick="setFilter('mbom_covered',this)" style="border-color:#bbf7d0;color:#bbf7d0">Parent Ind. Match</button>
@@ -3074,7 +3079,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       </div>
       <!-- v74: ABOM-leg filter row -->
       <div class="filter-bar" id="filter-bar-abom">
-        <span style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--text-dim);text-transform:uppercase;padding:5px 8px 5px 0">ABOM:</span>
+        <span style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--text-muted);text-transform:uppercase;padding:5px 8px 5px 0">ABOM:</span>
         <button class="filter-btn" data-fk="abom_direct" onclick="setFilter('abom_direct',this)" style="border-color:#3fb950;color:#3fb950">Direct Embodied</button>
         <button class="filter-btn" data-fk="abom_pn_as_usedon" onclick="setFilter('abom_pn_as_usedon',this)" style="border-color:#86efac;color:#86efac">PN as Used-On</button>
         <button class="filter-btn" data-fk="abom_covered" onclick="setFilter('abom_covered',this)" style="border-color:#bbf7d0;color:#bbf7d0">Parent Embodied</button>
@@ -3097,7 +3102,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           <button class="ctx-toggle-btn ctx-mode" id="ctx-btn-context" onclick="setSearchMode('context')">⊕ Context</button>
         </div>
         <button class="btn-export-ctx" id="ctx-export-btn" onclick="exportContextResults()" style="display:none;margin-left:8px">⬇ Export Context XLSX</button>
-        <span id="ctx-count-label" style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-left:6px"></span>
+        <span id="ctx-count-label" style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:6px"></span>
         <span id="ctx-legend" style="display:none;font-family:var(--mono);font-size:9px;margin-left:10px;display:flex;gap:12px;align-items:center"></span>
       </div>
       <div class="table-wrap" id="summary-table-wrap"></div>
@@ -3110,7 +3115,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <button class="ctx-toggle-btn active" id="ebom-ctx-btn-isolated" onclick="setEbomTabMode('isolated')" title="Show only matching rows">Isolated</button>
         <button class="ctx-toggle-btn" id="ebom-ctx-btn-context"  onclick="setEbomTabMode('context')"  title="Show matches plus ancestor and descendant rows">⊕ Context</button>
         <button class="bom-search-clear" onclick="clearEbomTabSearch()">✕ Clear</button>
-        <span id="ebom-search-count" style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-left:4px"></span>
+        <span id="ebom-search-count" style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:4px"></span>
       </div>
       <div id="ebom-ctx-legend" style="display:none;font-family:var(--mono);font-size:9px;margin-bottom:8px;display:flex;gap:12px;align-items:center"></div>
       <div class="table-wrap" id="ebom-table-wrap"></div>
@@ -3121,7 +3126,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <input class="bom-search-input" id="mbom-search-uo" placeholder="🔍 Search by Used On Number…" oninput="filterBomTable('mbom')">
         <input class="bom-search-input" id="mbom-search-wo" placeholder="🔍 Search by Work Order #…" oninput="filterBomTable('mbom')">
         <button class="bom-search-clear" onclick="clearBomSearch('mbom')">✕ Clear</button>
-        <span id="mbom-search-count" style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-left:4px;"></span>
+        <span id="mbom-search-count" style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:4px;"></span>
       </div>
       <div class="table-wrap" id="mbom-table-wrap"></div>
     </div>
@@ -3131,7 +3136,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <input class="bom-search-input" id="abom-search-uo" placeholder="🔍 Search by Used On Number…" oninput="filterBomTable('abom')">
         <input class="bom-search-input" id="abom-search-wo" placeholder="🔍 Search by Work Order #…" oninput="filterBomTable('abom')">
         <button class="bom-search-clear" onclick="clearBomSearch('abom')">✕ Clear</button>
-        <span id="abom-search-count" style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-left:4px;"></span>
+        <span id="abom-search-count" style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:4px;"></span>
       </div>
       <div class="table-wrap" id="abom-table-wrap"></div>
     </div>
@@ -3141,7 +3146,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <button class="ctx-toggle-btn active" id="chp-ctx-btn-isolated" onclick="setChpTabMode('isolated')" title="Show only matching rows">Isolated</button>
         <button class="ctx-toggle-btn" id="chp-ctx-btn-context"  onclick="setChpTabMode('context')"  title="Show matches plus ancestor and descendant rows">⊕ Context</button>
         <button class="bom-search-clear" onclick="clearChpTabSearch()">✕ Clear</button>
-        <span id="chp-search-count" style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-left:4px"></span>
+        <span id="chp-search-count" style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:4px"></span>
       </div>
       <div id="chp-ctx-legend" style="display:none;font-family:var(--mono);font-size:9px;margin-bottom:8px;display:flex;gap:12px;align-items:center"></div>
       <div class="table-wrap" id="chp-table-wrap"></div>
@@ -3151,7 +3156,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <input class="bom-search-input" id="wo5-search-pn" placeholder="🔍 Search by Part Number…" oninput="filterBomTable('wo5')">
         <input class="bom-search-input" id="wo5-search-uo" placeholder="🔍 Search by WO / Used On Number…" oninput="filterBomTable('wo5')">
         <button class="bom-search-clear" onclick="clearBomSearch('wo5')">✕ Clear</button>
-        <span id="wo5-search-count" style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-left:4px;"></span>
+        <span id="wo5-search-count" style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:4px;"></span>
       </div>
       <div class="table-wrap" id="wo5-table-wrap"></div>
     </div>
@@ -3171,7 +3176,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
              Both filters AND together at the data layer in renderNcrTable. -->
         <input class="bom-search-input" id="ncr-tab-search-pn" placeholder="🔍 Search by Discrepant Part #…" oninput="triggerNcrTabSearch()" style="width:240px;border-color:rgba(251,113,133,0.4);margin-left:6px">
         <button class="bom-search-clear" onclick="clearNcrTabSearch()">✕ Clear</button>
-        <span id="ncr-tab-search-count" style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-left:4px"></span>
+        <span id="ncr-tab-search-count" style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-left:4px"></span>
       </div>
       <div class="table-wrap" id="ncr-table-wrap"></div>
     </div>
@@ -4429,9 +4434,9 @@ function _procRowHtml(c) {
   }
 
   const desc = c.rows === 0
-    ? '<span style="color:var(--text-dim)">Not present in this ABOM.</span>'
+    ? '<span style="color:var(--text-muted)">Not present in this ABOM.</span>'
     : (c.sample ? esc2(c.sample.length > 90 ? c.sample.slice(0, 90) + '…' : c.sample)
-                : '<span style="color:var(--text-dim)">No description on file.</span>');
+                : '<span style="color:var(--text-muted)">No description on file.</span>');
 
   return '<div class="pcm-row">' +
     '<span class="pcm-code">' + esc2(c.code) + '</span>' +
@@ -4577,7 +4582,7 @@ function openEbomManualMap(ev) {
                       padding:4px 8px;background:var(--bg);border:1px solid var(--border);
                       border-radius:var(--radius-sm);color:var(--text)">
       </td>
-      <td style="padding:6px 0 6px 12px;font-size:11px;color:var(--text-dim)">column letter (e.g. A, B, AA)</td>
+      <td style="padding:6px 0 6px 12px;font-size:11px;color:var(--text-muted)">column letter (e.g. A, B, AA)</td>
     </tr>`;
   }).join('');
 
@@ -4695,7 +4700,7 @@ function _openBomManualMap(bom) {
                       padding:4px 8px;background:var(--bg);border:1px solid var(--border);
                       border-radius:var(--radius-sm);color:var(--text)">
       </td>
-      <td style="padding:6px 0 6px 12px;font-size:11px;color:var(--text-dim)">column letter (e.g. A, B, AA)</td>
+      <td style="padding:6px 0 6px 12px;font-size:11px;color:var(--text-muted)">column letter (e.g. A, B, AA)</td>
     </tr>`;
   }).join('');
   const presetNote = bom === 'abom'
@@ -4906,7 +4911,7 @@ function openSuppManualMap(bom, ev) {
                       padding:4px 8px;background:var(--bg);border:1px solid var(--border);
                       border-radius:var(--radius-sm);color:var(--text)">
       </td>
-      <td style="padding:6px 0 6px 12px;font-size:11px;color:var(--text-dim)">column letter (e.g. A, B, AA)</td>
+      <td style="padding:6px 0 6px 12px;font-size:11px;color:var(--text-muted)">column letter (e.g. A, B, AA)</td>
     </tr>`;
   }).join('');
   const reqList = defs.filter(d => d.required).map(d => d.label).join(', ');
@@ -7950,7 +7955,7 @@ function _renderNmModal() {
     const set = lookups.candidateProcMap[normPN(pn)];
     return set && set.size ? [...set].join(', ') : '—';
   };
-  const wsColor   = ws => ws && ws.toUpperCase() === 'CLOSED' ? 'var(--success)' : ws ? 'var(--warn)' : 'var(--text-dim)';
+  const wsColor   = ws => ws && ws.toUpperCase() === 'CLOSED' ? 'var(--success)' : ws ? 'var(--warn)' : 'var(--text-muted)';
 
   // Page math
   const totalPages = Math.max(1, Math.ceil(filteredAnchors.length / pageSize));
@@ -8080,7 +8085,7 @@ function _renderNmModal() {
         : ' (covers ' + chp + ' downstream missing items)';
       apexBadgeHtml = `<span title="Apex assembly with ${chp} cascade descendant${chp === 1 ? '' : 's'} — resolving this anchor first lets Pass 3 cascade-cover its descendants automatically" style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--warn);padding:3px 9px;border:1.5px solid var(--warn);border-radius:var(--radius-sm);background:rgba(210,153,34,0.08)">▲ APEX${descLabel}</span>`;
     } else if (ancApex && ancApex !== ancPn) {
-      apexBadgeHtml = `<span title="This anchor lives below a missing apex assembly. Resolving the apex first may auto-cover this item via Pass 3 ancestor walk." style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-dim);padding:3px 9px;border:1px dashed var(--border);border-radius:var(--radius-sm)">↑ under apex ${esc(ancApex)}</span>`;
+      apexBadgeHtml = `<span title="This anchor lives below a missing apex assembly. Resolving the apex first may auto-cover this item via Pass 3 ancestor walk." style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);padding:3px 9px;border:1px dashed var(--border);border-radius:var(--radius-sm)">↑ under apex ${esc(ancApex)}</span>`;
     }
 
     const anchorRowKey = (g.ebomPn || '') + '||' + (g.ebomNh || '');
@@ -8111,10 +8116,10 @@ function _renderNmModal() {
         <span style="font-family:var(--mono);font-size:12px;color:var(--text)">${esc(g.ebomNh || '—')}</span>
         <span style="font-family:var(--sans);font-size:11px;color:var(--text-muted)">· indenture <span style="font-family:var(--mono);color:var(--text)">${esc(g.ebomIndenture || '—')}</span> · part type <span style="font-family:var(--mono);color:var(--text)">${esc(ancPt)}</span></span>
         <span style="flex:1"></span>
-        <span style="font-family:var(--sans);font-size:11px;color:var(--text-dim)">${g.pool.length} candidate${g.pool.length === 1 ? '' : 's'}</span>
+        <span style="font-family:var(--sans);font-size:11px;color:var(--text-muted)">${g.pool.length} candidate${g.pool.length === 1 ? '' : 's'}</span>
       </div>`;
     if (ancDesc && ancDesc !== '—') {
-      html += `<div style="padding:6px 14px;font-family:var(--sans);font-size:11px;color:var(--text-dim);background:var(--surface);border-bottom:1px solid var(--border);line-height:1.45">${esc(ancDesc)}</div>`;
+      html += `<div style="padding:6px 14px;font-family:var(--sans);font-size:11px;color:var(--text-muted);background:var(--surface);border-bottom:1px solid var(--border);line-height:1.45">${esc(ancDesc)}</div>`;
     }
     // v85 — anchor-level action row removed. The cascade toggle stays as a
     // standalone control. Claim filing is per-candidate (see candidate table
@@ -8122,7 +8127,7 @@ function _renderNmModal() {
     const cascadeToggle = g.cascade.length
       ? `<a href="#" onclick="_nmToggleCascade(${localIdx});return false" id="nm-cascade-btn-${localIdx}"
             style="color:var(--accent);text-decoration:none;font-family:var(--mono);font-size:10px;letter-spacing:0.06em">▸ ${g.cascade.length} cascade descendant${g.cascade.length === 1 ? '' : 's'}</a>`
-      : `<span style="font-family:var(--sans);font-size:11px;color:var(--text-dim);font-style:italic">no cascade descendants</span>`;
+      : `<span style="font-family:var(--sans);font-size:11px;color:var(--text-muted);font-style:italic">no cascade descendants</span>`;
     html += `<div style="padding:8px 14px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;flex-wrap:wrap">
       <span style="font-family:var(--sans);font-size:11px;color:var(--text-muted);font-style:italic">Click a candidate row's <strong style="color:var(--text);font-style:normal">⚑ Claim</strong> button to file an embodiment claim against that specific dash variant.</span>
       <span style="flex:1"></span>
@@ -8150,7 +8155,7 @@ function _renderNmModal() {
       if (thisCandClaimed) {
         actionCell = `<span style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--success);padding:4px 10px;border:1px solid var(--success);border-radius:var(--radius-sm)">✓ Claimed</span>`;
       } else if (dashAnchorAlreadyClaimed) {
-        actionCell = `<span title="Another candidate has been claimed for this anchor — remove that claim first to file a different one" style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-dim);padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);opacity:0.6">Anchor claimed</span>`;
+        actionCell = `<span title="Another candidate has been claimed for this anchor — remove that claim first to file a different one" style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);opacity:0.6">Anchor claimed</span>`;
       } else {
         const escArg = s => String(s == null ? '' : s)
           .replace(/&/g, '&amp;').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
@@ -8168,7 +8173,7 @@ function _renderNmModal() {
       html += `<tr${thisCandClaimed ? ' style="background:var(--surface2)"' : ''}>
         <td style="padding:8px 12px;font-family:var(--mono);font-size:10px;color:var(--text-muted);border-bottom:1px solid var(--border)">
           <span style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--accent);padding:2px 8px;border:1px solid color-mix(in srgb, var(--accent) 33%, transparent);border-radius:var(--radius-sm)">${esc(matchTxt)}</span>
-          ${row.similarityDetail ? `<div style="margin-top:4px;font-family:var(--sans);font-size:10px;color:var(--text-dim);line-height:1.4">${esc(row.similarityDetail)}</div>` : ''}
+          ${row.similarityDetail ? `<div style="margin-top:4px;font-family:var(--sans);font-size:10px;color:var(--text-muted);line-height:1.4">${esc(row.similarityDetail)}</div>` : ''}
         </td>
         <td style="padding:8px 12px;font-family:var(--mono);font-size:10px;color:var(--text-muted);border-bottom:1px solid var(--border)">${esc(poolTxt)}</td>
         <td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--text);font-weight:700;border-bottom:1px solid var(--border)">${esc(row.candidatePn || '—')}</td>
@@ -8195,11 +8200,11 @@ function _renderNmModal() {
       html += `</tr></thead><tbody>`;
       g.cascade.forEach(row => {
         html += `<tr>
-          <td style="padding:6px 10px;font-family:var(--mono);font-size:10px;color:var(--text-dim);border-bottom:1px solid var(--border)">${esc(row.ebomIndenture || '—')}</td>
-          <td style="padding:6px 10px;font-family:var(--mono);font-size:10px;color:var(--text-dim);font-style:italic;border-bottom:1px solid var(--border)">${esc(row.ebomPn || '—')}</td>
-          <td style="padding:6px 10px;font-family:var(--mono);font-size:10px;color:var(--text-dim);border-bottom:1px solid var(--border)">${esc(row.ebomNh || '—')}</td>
-          <td style="padding:6px 10px;font-family:var(--sans);font-size:11px;color:var(--text-dim);border-bottom:1px solid var(--border);max-width:280px;line-height:1.4">${esc(getDesc(row.ebomPn))}</td>
-          <td style="padding:6px 10px;font-family:var(--mono);font-size:10px;color:var(--text-dim);border-bottom:1px solid var(--border)">${esc(getPt(row.ebomPn))}</td>
+          <td style="padding:6px 10px;font-family:var(--mono);font-size:10px;color:var(--text-muted);border-bottom:1px solid var(--border)">${esc(row.ebomIndenture || '—')}</td>
+          <td style="padding:6px 10px;font-family:var(--mono);font-size:10px;color:var(--text-muted);font-style:italic;border-bottom:1px solid var(--border)">${esc(row.ebomPn || '—')}</td>
+          <td style="padding:6px 10px;font-family:var(--mono);font-size:10px;color:var(--text-muted);border-bottom:1px solid var(--border)">${esc(row.ebomNh || '—')}</td>
+          <td style="padding:6px 10px;font-family:var(--sans);font-size:11px;color:var(--text-muted);border-bottom:1px solid var(--border);max-width:280px;line-height:1.4">${esc(getDesc(row.ebomPn))}</td>
+          <td style="padding:6px 10px;font-family:var(--mono);font-size:10px;color:var(--text-muted);border-bottom:1px solid var(--border)">${esc(getPt(row.ebomPn))}</td>
         </tr>`;
       });
       html += `</tbody></table></div>`;
@@ -8813,7 +8818,7 @@ function renderFunnelPanel(data, bom, label, sublabel) {
           res_woopen_rfv, res_woopen_bare,
           newDirect, newUsedOn, newParent,
           adjDirect, adjParent } = data;   // v84 — adj contribution callouts
-  if (!scopeN) return `<div class="funnel-panel" style="color:var(--text-dim);font-family:var(--mono);font-size:10px;text-align:center;padding-top:40px">No data</div>`;
+  if (!scopeN) return `<div class="funnel-panel" style="color:var(--text-muted);font-family:var(--mono);font-size:10px;text-align:center;padding-top:40px">No data</div>`;
 
   function pct(n) { return scopeN ? Math.round(n / scopeN * 100) : 0; }
   function fmt(n) { return n.toLocaleString(); }
@@ -8825,7 +8830,7 @@ function renderFunnelPanel(data, bom, label, sublabel) {
   const gain3 = p3 - p2;
 
   const C = { direct:'var(--success)', usedon:'var(--success-2)', parent:'var(--success-3)',
-              missing:'var(--danger)', qty:'var(--warn)', parentage:'var(--text-dim)', other:'var(--text-dim)' };
+              missing:'var(--danger)', qty:'var(--warn)', parentage:'var(--text-muted)', other:'var(--text-muted)' };
 
   // ── Reference bars (context, not progression) ──
   // Optional stage parameter makes the bar clickable for funnel filtering (v74).
@@ -8981,7 +8986,7 @@ function renderFunnelPanel(data, bom, label, sublabel) {
       ${qty > 0 || woopen > 0 ? `
       <div class="funnel-ref-section" style="margin-top:10px;border-top:1px dashed #30363d;padding-top:8px">
         <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:2px;text-transform:uppercase">Reference — full per-leg KPI totals</div>
-        <div style="font-family:var(--sans);font-size:9px;color:var(--text-dim);margin-bottom:6px;font-style:italic;text-transform:none;letter-spacing:0">Ties to KPI cards · may exceed residual (items with other-path coverage)</div>
+        <div style="font-family:var(--sans);font-size:9px;color:var(--text-muted);margin-bottom:6px;font-style:italic;text-transform:none;letter-spacing:0">Ties to KPI cards · may exceed residual (items with other-path coverage)</div>
         ${qty > 0 ? refBar('Part Qty Mismatch', qty, 'ref_qty') : ''}
         ${bom === 'abom' && woopen > 0 ? refBar('Part WO Not Closed', woopen, 'ref_woopen') : ''}
       </div>` : ''}
@@ -10010,7 +10015,7 @@ function drawNcrDispStatusChart(id, results) {
 
   const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
   if (!entries.length) {
-    listEl.innerHTML = '<div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);padding:8px 0">No NCR disposition data</div>';
+    listEl.innerHTML = '<div style="font-family:var(--mono);font-size:11px;color:var(--text-muted);padding:8px 0">No NCR disposition data</div>';
     return;
   }
 
@@ -10680,7 +10685,7 @@ function renderSummaryTable() {
   html += '</tr></thead><tbody>';
 
   if (!rows.length) {
-    html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:30px;color:var(--text-dim)">No records match this filter.</td></tr>`;
+    html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:30px;color:var(--text-muted)">No records match this filter.</td></tr>`;
   } else {
     rows.forEach(r => {
       // v80: adjudication-overlay overall values fold into existing categories.
@@ -10720,7 +10725,7 @@ function renderSummaryTable() {
       const chpTooltip = chpTraceTooltip(r.trace);
       const hasNonApproved = chpRel.warn;
       const historyBadge = chpRel.state === 'none'
-        ? `<span style="color:var(--text-dim);font-size:10px" title="${esc(chpTooltip)}">NO HISTORY</span>`
+        ? `<span style="color:var(--text-muted);font-size:10px" title="${esc(chpTooltip)}">NO HISTORY</span>`
         : `<span class="${chpStateClass(chpRel.state)}" title="${esc(chpTooltip)}">${esc(chpRel.label)}</span>`;
 
       let wo5ActionCell = '—', wo5MetaCell = '—';
@@ -10737,7 +10742,7 @@ function renderSummaryTable() {
       // Disp# leads (most prevalent field). Defect Code Desc excluded from UI.
       let pnTitle = '';
       function ncrEmbed(vals, color, bold) {
-        if (!vals || !vals.length) return '<span style="color:var(--text-dim);font-size:10px">—</span>';
+        if (!vals || !vals.length) return '<span style="color:var(--text-muted);font-size:10px">—</span>';
         const style = `font-size:10px;${bold ? 'font-weight:600;' : ''}`;
         if (vals.length === 1) return `<span style="color:${color};${style}">${esc(vals[0] || '—')}</span>`;
         return vals.map((v, i) =>
@@ -10745,14 +10750,14 @@ function renderSummaryTable() {
         ).join('');
       }
       function dispStatColor(s) {
-        if (!s || s === '—') return 'var(--text-dim)';
+        if (!s || s === '—') return 'var(--text-muted)';
         return s.toUpperCase() === 'CLOSED' ? 'var(--success)' : 'var(--warn)';
       }
       // Build NCR cells for both pools using the shared ncrEmbed helper.
       // Colors: NCR# and Disp# use wo-open/success to indicate open/closed status.
       // All other fields use neutral text-muted — data-type color removed per design philosophy.
       function buildNcrCells(entries, idPrefix) {
-        const empty = '<span style="color:var(--text-dim);font-size:10px">—</span>';
+        const empty = '<span style="color:var(--text-muted);font-size:10px">—</span>';
         if (!entries || !entries.length) {
           return { num: empty, dispText: empty, status: empty, dispNo: empty, dispStat: empty, dispType: empty, dispCode: empty, causeDesc: empty, discQty: empty };
         }
@@ -10794,17 +10799,17 @@ function renderSummaryTable() {
           dispType:  ncrEmbed(entries.map(e => e.dispType      || '—'), 'var(--text-muted)', false),
           dispCode:  ncrEmbed(entries.map(e => e.dispCode      || '—'), 'var(--text-muted)', false),
           causeDesc: ncrEmbed(entries.map(e => e.causeCodeDesc || '—'), 'var(--text-muted)', false),
-          discQty:   ncrEmbed(entries.map(e => e.defectQty     || '—'), 'var(--text-dim)',   false),
+          discQty:   ncrEmbed(entries.map(e => e.defectQty     || '—'), 'var(--text-muted)',   false),
           // Disposition text: paragraph-length; render expandable (preview + ⋯ toggle)
           // so it stays compact in the row, mirroring the NCR-CI modal treatment.
           dispText: (() => {
             const parts = entries.map((e, i) => {
               const txt = e.dispText || '';
-              if (!txt) return '<span style="color:var(--text-dim);font-size:10px">—</span>';
+              if (!txt) return '<span style="color:var(--text-muted);font-size:10px">—</span>';
               if (txt.length <= 40) return '<span style="font-size:10px;color:var(--text-muted)">' + esc(txt) + '</span>';
               const eid = 'sum-ncr-disptext-' + (idPrefix || 'x') + '-' + i;
               return '<span style="font-size:10px;color:var(--text-muted)">' + esc(txt.slice(0, 40)) + '… </span>'
-                + '<button onclick="(function(){var el=document.getElementById(\'' + eid + '\');if(el){el.style.display=el.style.display===\'none\'?\'block\':\'none\';}})()" style="background:none;border:1px solid var(--border);color:var(--text-dim);border-radius:var(--radius-sm);font-size:9px;cursor:pointer;padding:0 4px">⋯</button>'
+                + '<button onclick="(function(){var el=document.getElementById(\'' + eid + '\');if(el){el.style.display=el.style.display===\'none\'?\'block\':\'none\';}})()" style="background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:var(--radius-sm);font-size:9px;cursor:pointer;padding:0 4px">⋯</button>'
                 + '<div id="' + eid + '" style="display:none;margin-top:4px;padding:6px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:10px;color:var(--text);white-space:normal;word-break:break-word;max-width:280px">' + esc(txt) + '</div>';
             });
             return parts.length === 1 ? parts[0] : parts.map((h, i) => '<div style="padding:1px 0;' + (i < parts.length - 1 ? 'border-bottom:1px solid var(--border)' : '') + '">' + h + '</div>').join('');
@@ -10865,7 +10870,7 @@ function renderSummaryTable() {
       const ptCodeDisp = r.partTypeCode || '';
       const ptCellHtml = ptCodeDisp
         ? `<td style="color:var(--text-muted);font-family:var(--mono);font-size:10px;font-weight:600">${esc(ptCodeDisp)}</td>`
-        : `<td style="color:var(--text-dim);font-size:10px">—</td>`;
+        : `<td style="color:var(--text-muted);font-size:10px">—</td>`;
 
       const relCell = inContextMode
         ? `<td class="ctx-rel${ctxType === 'seed' ? ' ctx-rel-seed' : ''}">${relationshipLabel(contextRowDepth.get(r) ?? 0)}</td>`
@@ -10882,7 +10887,7 @@ function renderSummaryTable() {
           dqParts.push({ label: 'AD', delta: r.aq - r.eq, partial: !!r._abomPartialAdj, claimed: r._abomQtyClaimed, accepted: !!r._abomQtyAccepted });
         }
         if (dqParts.length === 0) {
-          html += `<td style="color:var(--text-dim)">—</td>`;
+          html += `<td style="color:var(--text-muted)">—</td>`;
         } else {
           const parts = dqParts.map(p => {
             const sign = p.delta >= 0 ? '+' : '';
@@ -10896,7 +10901,7 @@ function renderSummaryTable() {
             }
             return `<span style="color:${col};font-weight:700;font-family:var(--mono)">${dqParts.length > 1 ? p.label + ':' : ''}${sign}${p.delta}</span>${adjNote}`;
           });
-          html += `<td style="white-space:nowrap">${parts.join('<span style="color:var(--text-dim)"> / </span>')}</td>`;
+          html += `<td style="white-space:nowrap">${parts.join('<span style="color:var(--text-muted)"> / </span>')}</td>`;
         }
       }
 
@@ -10919,7 +10924,7 @@ function renderSummaryTable() {
         const _mJobs = (_meta.mbomJobsByKey && _meta.mbomJobsByKey.get(r.pn + '||' + (r.nh || ''))) || [];
         const mJobHtml = _mJobs.length > 1
           ? _mJobs.map((v, i) => `<div style="padding:1px 0;${i < _mJobs.length-1 ? 'border-bottom:1px solid #30363d88;margin-bottom:2px;' : ''}">${esc(v)}</div>`).join('')
-          : (_mJobs.length === 1 ? esc(_mJobs[0]) : '<span style="color:var(--text-dim)">—</span>');
+          : (_mJobs.length === 1 ? esc(_mJobs[0]) : '<span style="color:var(--text-muted)">—</span>');
         // v47.2: emit Traceability & Reconciliation Notes columns first when EBOM present
         if (req.includes('ebom')) {
           html += `<td class="td-gutter-l">${buildMbomTraceability(r)}</td><td style="font-family:var(--mono);font-size:11px;white-space:normal">${mJobHtml}</td><td>${buildMbomNotes(r)}</td>`;
@@ -10986,7 +10991,7 @@ function renderSummaryTable() {
         if (_adjWoNo && !aLines.some(l => l.wo === _adjWoNo)) {
           aLines.push({ wo: _adjWoNo, qty: '', proc: '', status: '', adj: true });
         }
-        const _dim = '<span style="color:var(--text-dim)">—</span>';
+        const _dim = '<span style="color:var(--text-muted)">—</span>';
         // Stack helper — identical row structure across all four columns keeps
         // the embedded rows visually aligned line-for-line.
         const _stack = (items) => {
@@ -11031,7 +11036,7 @@ function renderSummaryTable() {
         const _uoJob1 = (wo) => { const s = _meta.abomWoToJobs && _meta.abomWoToJobs.get(wo); return s && s.size ? [...s].join(' / ') : ''; };
         let aUoJobHtml;
         if (aUoWoSet.length > 1) {
-          aUoJobHtml = aUoWoSet.map((v, i) => `<div style="padding:1px 0;${i < aUoWoSet.length-1 ? 'border-bottom:1px solid #30363d88;margin-bottom:2px;' : ''}">${_uoJob1(v) ? esc(_uoJob1(v)) : '<span style="color:var(--text-dim)">—</span>'}</div>`).join('');
+          aUoJobHtml = aUoWoSet.map((v, i) => `<div style="padding:1px 0;${i < aUoWoSet.length-1 ? 'border-bottom:1px solid #30363d88;margin-bottom:2px;' : ''}">${_uoJob1(v) ? esc(_uoJob1(v)) : '<span style="color:var(--text-muted)">—</span>'}</div>`).join('');
         } else if (aUoWoSet.length === 1) {
           aUoJobHtml = _uoJob1(aUoWoSet[0]) ? esc(_uoJob1(aUoWoSet[0])) : '—';
         } else {
@@ -11044,8 +11049,8 @@ function renderSummaryTable() {
       if (hasEbom) {
         const _drw    = _chpDrawingMap[r.pn + '||' + (r.nh || '')] || '';
         const _drwRev = _ebomDrawingRevMap[r.pn + '||' + (r.nh || '')] || '';
-        html += `<td class="td-gutter-l" style="font-family:var(--mono);font-size:11px">${esc(_drw) || '<span style=\"color:var(--text-dim)\">\u2014</span>'}</td>`;
-        html += `<td style="font-family:var(--mono);font-size:11px">${esc(_drwRev) || '<span style=\"color:var(--text-dim)\">\u2014</span>'}</td>`;
+        html += `<td class="td-gutter-l" style="font-family:var(--mono);font-size:11px">${esc(_drw) || '<span style=\"color:var(--text-muted)\">\u2014</span>'}</td>`;
+        html += `<td style="font-family:var(--mono);font-size:11px">${esc(_drwRev) || '<span style=\"color:var(--text-muted)\">\u2014</span>'}</td>`;
       }
       if (state.boms.chp) {
         const dcnStatusStr = r.trace && r.trace.dcn.size > 0 ? [...r.trace.dcn.values()].join(', ') : '—';
@@ -11062,7 +11067,7 @@ function renderSummaryTable() {
       if (state.boms.rfv) {
         const rfvLinks = getRowRfvLinks(r);
         if (!rfvLinks.length) {
-          html += `<td class="td-gutter-l" style="color:var(--text-dim)">—</td>`;
+          html += `<td class="td-gutter-l" style="color:var(--text-muted)">—</td>`;
         } else {
           const pills = rfvLinks.map(lnk => {
             const linkedNote = lnk.pass === 2 ? `Via NCR Disp #: ${lnk.linkedKey}` : lnk.pass === 3 ? `Via WO #: ${lnk.linkedKey}` : '';
@@ -11173,7 +11178,7 @@ function renderSummaryTable() {
           }
           html += `<td class="td-gutter-l" style="white-space:nowrap;min-width:90px">${pieces.join('<br>')}</td>`;
         } else {
-          html += `<td class="td-gutter-l" style="color:var(--text-dim)">—</td>`;
+          html += `<td class="td-gutter-l" style="color:var(--text-muted)">—</td>`;
         }
       }
       html += `<td class="td-gutter-l">${badgeOverall(r.overall)}</td></tr>`;
@@ -11188,7 +11193,7 @@ function renderSummaryTable() {
     <button class="page-btn" onclick="changeSummaryPage(-1)" ${summaryPage===0?'disabled':''}>← Prev</button>
     <span>Rows ${start}–${end} of ${totalRows}</span>
     <button class="page-btn" onclick="changeSummaryPage(1)" ${summaryPage>=totalPages-1?'disabled':''}>Next →</button>
-    <span style="margin-left:auto;color:var(--text-dim)">Page ${summaryPage+1} / ${totalPages} · ${PAGE_SIZE} rows/page</span>
+    <span style="margin-left:auto;color:var(--text-muted)">Page ${summaryPage+1} / ${totalPages} · ${PAGE_SIZE} rows/page</span>
   </div>`;
 
   document.getElementById('summary-table-wrap').innerHTML = html;
@@ -11317,7 +11322,7 @@ function badgeOverall(status) {
 
 function badgeStack(badges) {
   // Stack vertically with small separators. Empty array renders as em-dash.
-  if (!badges.length) return '<span style="color:var(--text-dim)">—</span>';
+  if (!badges.length) return '<span style="color:var(--text-muted)">—</span>';
   return badges.map((b, i) =>
     `<div style="padding:1px 0;${i < badges.length - 1 ? 'margin-bottom:3px;' : ''}">${b}</div>`
   ).join('');
@@ -11598,7 +11603,7 @@ function renderFullBom(type, page, filter) {
       : (type === 'ebom' && i === indIdx)
       ? ' <span style="color:var(--accent);font-size:8px">[INDENTURE]</span>'
       : (type === 'ebom' && i === COL.ebom.partType)
-      ? ' <span style="color:var(--text-dim);font-size:8px">[PART TYPE]</span>'
+      ? ' <span style="color:var(--text-muted);font-size:8px">[PART TYPE]</span>'
       : '';
     html += `<th>${esc(String(label))}${extra}</th>`;
   }
@@ -11667,7 +11672,7 @@ function renderFullBom(type, page, filter) {
     <button class="page-btn" onclick="renderFullBom('${type}',${bomPageState[type]-1})" ${bomPageState[type]===0?'disabled':''}>← Prev</button>
     <span>Rows ${start}–${end} of ${totalRows}</span>
     <button class="page-btn" onclick="renderFullBom('${type}',${bomPageState[type]+1})" ${bomPageState[type]>=totalPages-1?'disabled':''}>Next →</button>
-    <span style="margin-left:auto;color:var(--text-dim)">Page ${bomPageState[type]+1} / ${totalPages} · ${PAGE_SIZE} rows/page</span>
+    <span style="margin-left:auto;color:var(--text-muted)">Page ${bomPageState[type]+1} / ${totalPages} · ${PAGE_SIZE} rows/page</span>
   </div>`;
 
   document.getElementById(type+'-table-wrap').innerHTML = html;
@@ -11746,7 +11751,7 @@ function renderChpTable(page) {
   if (_chpCtx) html += '<th>Relationship</th>';
   for (let i = 0; i < colCount; i++) {
     const label = bom.header[i] || String.fromCharCode(65+i);
-    const extra = chpHighlight[i] ? ` <span style="color:var(--text-dim);font-size:8px">${chpHighlight[i]}</span>` : '';
+    const extra = chpHighlight[i] ? ` <span style="color:var(--text-muted);font-size:8px">${chpHighlight[i]}</span>` : '';
     html += `<th class="th-chp">${esc(String(label))}${extra}</th>`;
   }
   html += '<th>TRACE STATUS</th></tr></thead><tbody>';
@@ -11787,7 +11792,7 @@ function renderChpTable(page) {
     <button class="page-btn" onclick="renderChpTable(${chpPage-1})" ${chpPage===0?'disabled':''}>← Prev</button>
     <span>Rows ${start}–${end} of ${totalRows}</span>
     <button class="page-btn" onclick="renderChpTable(${chpPage+1})" ${chpPage>=totalPages-1?'disabled':''}>Next →</button>
-    <span style="margin-left:auto;color:var(--text-dim)">Page ${chpPage+1} / ${totalPages} · ${PAGE_SIZE} rows/page</span>
+    <span style="margin-left:auto;color:var(--text-muted)">Page ${chpPage+1} / ${totalPages} · ${PAGE_SIZE} rows/page</span>
   </div>`;
 
   document.getElementById('chp-table-wrap').innerHTML = html;
@@ -11846,7 +11851,7 @@ function renderWo5Table(page) {
     <button class="page-btn" onclick="renderWo5Table(${wo5Page-1})" ${wo5Page===0?'disabled':''}>← Prev</button>
     <span>Rows ${start}–${end} of ${totalRows}</span>
     <button class="page-btn" onclick="renderWo5Table(${wo5Page+1})" ${wo5Page>=totalPages-1?'disabled':''}>Next →</button>
-    <span style="margin-left:auto;color:var(--text-dim)">Page ${wo5Page+1} / ${totalPages} · ${PAGE_SIZE} rows/page</span>
+    <span style="margin-left:auto;color:var(--text-muted)">Page ${wo5Page+1} / ${totalPages} · ${PAGE_SIZE} rows/page</span>
   </div>`;
 
   document.getElementById('wo5-table-wrap').innerHTML = html;
@@ -11928,7 +11933,7 @@ function renderWo5DiscrepancyView(page) {
       <button class="page-btn" onclick="renderWo5DiscrepancyView(${wo5discPage-1})" ${wo5discPage===0?'disabled':''}>← Prev</button>
       <span>Rows ${start}–${end} of ${totalRows}</span>
       <button class="page-btn" onclick="renderWo5DiscrepancyView(${wo5discPage+1})" ${wo5discPage>=totalPages-1?'disabled':''}>Next →</button>
-      <span style="margin-left:auto;color:var(--text-dim)">Page ${wo5discPage+1} / ${totalPages} · ${PAGE_SIZE} rows/page</span>
+      <span style="margin-left:auto;color:var(--text-muted)">Page ${wo5discPage+1} / ${totalPages} · ${PAGE_SIZE} rows/page</span>
     </div>`;
   }
 
@@ -12136,7 +12141,7 @@ function renderNcrTable(page) {
     html += `<td><span class="badge ${matched ? 'badge-ok' : 'badge-missing'}">${matched ? '✓ MATCHED' : '— UNMATCHED'}</span></td>`;
     // v84 — sticky SME Action cell
     const actionCell = !rowDispNo
-      ? '<span style="color:var(--text-dim);font-size:9px">— no disp#</span>'
+      ? '<span style="color:var(--text-muted);font-size:9px">— no disp#</span>'
       : alreadyClaimed
         ? '<span class="adj-row-btn claimed" title="A manual CI ↔ NCR claim exists for this disposition">✓ Claimed</span>'
         : `<button class="adj-row-btn" onclick="_adjOpenNcrCiFromNcrTab(${origIdx})">⚑ Manual CI Trace</button>`;
@@ -12151,7 +12156,7 @@ function renderNcrTable(page) {
     <button class="page-btn" onclick="renderNcrTable(${ncrPage-1})" ${ncrPage===0?'disabled':''}>← Prev</button>
     <span>Rows ${start}–${end} of ${totalRows}</span>
     <button class="page-btn" onclick="renderNcrTable(${ncrPage+1})" ${ncrPage>=totalPages-1?'disabled':''}>Next →</button>
-    <span style="margin-left:auto;color:var(--text-dim)">Page ${ncrPage+1} / ${totalPages} · ${PAGE_SIZE} rows/page</span>
+    <span style="margin-left:auto;color:var(--text-muted)">Page ${ncrPage+1} / ${totalPages} · ${PAGE_SIZE} rows/page</span>
   </div>`;
 
   document.getElementById('ncr-table-wrap').innerHTML = html;
@@ -13602,12 +13607,12 @@ function renderCITraceTable() {
   html += '</tr></thead><tbody>';
 
   if (!traces.length) {
-    html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:30px;color:var(--text-dim)">No CI records found.</td></tr>`;
+    html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:30px;color:var(--text-muted)">No CI records found.</td></tr>`;
   }
 
   // NCR embedded-row helpers — defined once outside the loop
   function ciNcrEmbed(vals, color, bold) {
-    if (!vals || !vals.length) return `<span style="color:var(--text-dim)">—</span>`;
+    if (!vals || !vals.length) return `<span style="color:var(--text-muted)">—</span>`;
     const sty = bold ? 'font-weight:600;' : '';
     if (vals.length === 1) return `<span style="color:${color};${sty}">${esc(vals[0] || '—')}</span>`;
     return vals.map((v, i) =>
@@ -13615,7 +13620,7 @@ function renderCITraceTable() {
     ).join('');
   }
   function ciDispStatColor(s) {
-    if (!s || s === '—') return 'var(--text-dim)';
+    if (!s || s === '—') return 'var(--text-muted)';
     return s.toUpperCase() === 'CLOSED' ? 'var(--success)' : 'var(--warn)';
   }
 
@@ -13625,7 +13630,7 @@ function renderCITraceTable() {
     const traceLabel= t.hasTrace ? '✓ TRACED' : '✗ NO TRACE';
     const bomBadge  = t.overallStatus !== '—'
       ? badgeOverall(t.overallStatus)
-      : '<span style="color:var(--text-dim)">—</span>';
+      : '<span style="color:var(--text-muted)">—</span>';
     // v153 — A3. ECN and ECR statuses no longer raise a warning anywhere. An
     // open ECN means CM has not finished CSA — the expected state for anything
     // being reconciled here — and an ECR is provenance, not a defect. Both are
@@ -13635,7 +13640,7 @@ function renderCITraceTable() {
 
     // Render WO numbers as embedded rows with dividing lines (no delimiter)
     function woEmbedded(woStr, color) {
-      if (!woStr || woStr === '—') return `<span style="color:var(--text-dim)">—</span>`;
+      if (!woStr || woStr === '—') return `<span style="color:var(--text-muted)">—</span>`;
       const vals = woStr.split('; ').filter(Boolean);
       if (vals.length <= 1) return `<span style="color:${color}">${esc(woStr)}</span>`;
       return vals.map((v, i) =>
@@ -13649,7 +13654,7 @@ function renderCITraceTable() {
     const ciNcrStatHtml = ciNcrEmbed(ciNcrEntries.map(e => e.ncrStatus     || '—'), 'var(--text-muted)', false);
     const ciDispNoHtml  = ciNcrEmbed(ciNcrEntries.map(e => e.dispNo        || '—'), 'var(--ncr)',        true);
     const ciDispStatHtml = (() => {
-      if (!ciNcrEntries.length) return `<span style="color:var(--text-dim)">—</span>`;
+      if (!ciNcrEntries.length) return `<span style="color:var(--text-muted)">—</span>`;
       const items = ciNcrEntries.map(e => e.dispStatus || '—');
       if (items.length === 1) return `<span style="color:${ciDispStatColor(items[0])};font-weight:600">${esc(items[0])}</span>`;
       return items.map((v, i) =>
@@ -13669,7 +13674,7 @@ function renderCITraceTable() {
       <td style="color:var(--text);font-style:italic">${esc(t.partNomenclature)}</td>
       <td style="font-family:var(--mono);font-size:11px;color:var(--text)">${esc(t.nh)||'—'}</td>
       <td style="${ebomCls}">${t.foundInEbom}</td>
-      <td style="color:var(--text)">${esc(t.ebomQtyText||'—')}${t.isEbomRef ? ' <span style="font-size:9px;color:var(--text-dim);font-family:var(--mono)">[REF — excluded]</span>' : ''}</td>
+      <td style="color:var(--text)">${esc(t.ebomQtyText||'—')}${t.isEbomRef ? ' <span style="font-size:9px;color:var(--text-muted);font-family:var(--mono)">[REF — excluded]</span>' : ''}</td>
       <td style="color:var(--text)">${esc(t.partQtyText||'—')}</td>
       <td class="td-dcn">${esc(t.dcns)}</td>
       <td style="color:var(--text)">${esc(t.dcnDates)}</td>
@@ -13685,28 +13690,28 @@ function renderCITraceTable() {
       <td style="color:var(--success)">${t.abomQty ?? '—'}</td>
       <td>${esc(t.abomNhVal||'—')}</td>
       <td style="white-space:normal;min-width:70px">${(() => {
-        const ls = t.abomLines; if (!ls.length) return '<span style="color:var(--text-dim)">—</span>';
+        const ls = t.abomLines; if (!ls.length) return '<span style="color:var(--text-muted)">—</span>';
         if (ls.length===1) return `<span style="color:var(--success)">${esc(ls[0].wo||'—')}</span>`;
         return ls.map((l,i) => `<div style="color:var(--success);padding:1px 0;${i<ls.length-1?'border-bottom:1px solid #30363d88;margin-bottom:2px;':''}">${esc(l.wo||'—')}</div>`).join('');
       })()}</td>
       <td style="white-space:normal">${(() => {
-        const ls = t.abomLines; if (!ls.length) return '<span style="color:var(--text-dim)">—</span>';
+        const ls = t.abomLines; if (!ls.length) return '<span style="color:var(--text-muted)">—</span>';
         if (ls.length===1) return esc(ls[0].qty||'—');
         return ls.map((l,i) => `<div style="padding:1px 0;${i<ls.length-1?'border-bottom:1px solid #30363d88;margin-bottom:2px;':''}">${esc(l.qty||'—')}</div>`).join('');
       })()}</td>
       <td style="white-space:normal">${(() => {
-        const ls = t.abomLines; if (!ls.length) return '<span style="color:var(--text-dim)">—</span>';
+        const ls = t.abomLines; if (!ls.length) return '<span style="color:var(--text-muted)">—</span>';
         if (ls.length===1) return `<span style="color:var(--text-muted)">${esc(ls[0].proc||'—')}</span>`;
         return ls.map((l,i) => `<div style="color:var(--text-muted);padding:1px 0;${i<ls.length-1?'border-bottom:1px solid #30363d88;margin-bottom:2px;':''}">${esc(l.proc||'—')}</div>`).join('');
       })()}</td>
       <td style="white-space:normal">${(() => {
-        const ls = t.abomLines; if (!ls.length) return '<span style="color:var(--text-dim)">—</span>';
+        const ls = t.abomLines; if (!ls.length) return '<span style="color:var(--text-muted)">—</span>';
         if (ls.length===1) { const s=String(ls[0].status||'').toUpperCase(); return `<span style="color:${s==='CLOSED'?'var(--success)':s==='OPEN'?'var(--warn)':'var(--text-muted)'}">${esc(s||'—')}</span>`; }
         return ls.map((l,i) => { const s=String(l.status||'').toUpperCase(); return `<div style="color:${s==='CLOSED'?'var(--success)':s==='OPEN'?'var(--warn)':'var(--text-muted)'};padding:1px 0;${i<ls.length-1?'border-bottom:1px solid #30363d88;margin-bottom:2px;':''}">${esc(s||'—')}</div>`; }).join('');
       })()}</td>
       <td>${t.irActions!=='—'?t.irActions.split('; ').map(a=>`<span class="badge ${a==='INSTALLED'?'badge-installed':'badge-removed'}">${a==='INSTALLED'?'▲':'▼'} ${a}</span>`).join(' '):'—'}</td>
       <td style="white-space:normal;min-width:70px">${woEmbedded(t.irWoNums,'var(--text-muted)')}</td>
-      <td style="color:${t.irWoStats.toUpperCase().includes('CLOSED')?'var(--success)':t.irWoStats!=='—'?'var(--warn)':'var(--text-dim)'}">${esc(t.irWoStats)}</td>
+      <td style="color:${t.irWoStats.toUpperCase().includes('CLOSED')?'var(--success)':t.irWoStats!=='—'?'var(--warn)':'var(--text-muted)'}">${esc(t.irWoStats)}</td>
       <td style="color:var(--text)">${esc(t.irSerials)}</td>
       <td style="color:var(--text)">${esc(t.irDates)}</td>
       <td class="td-installed">${esc(t.pnInstalled)}</td>
@@ -17271,7 +17276,7 @@ function _renderNhMismatchHelperModal(bom) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   const fmtQty = v => (v == null || v === '') ? '—' : String(v);
   const woStatusColor = ws => {
-    if (!ws) return 'var(--text-dim)';
+    if (!ws) return 'var(--text-muted)';
     const u = String(ws).toUpperCase();
     if (u === 'CLOSED') return 'var(--success)';
     return 'var(--warn)';
@@ -17343,12 +17348,12 @@ function _renderNhMismatchHelperModal(bom) {
       <span style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">~ Softer — Pass 3 Covered Ancestor</span>
       <br>The alternate-NH parent was reconciled only via Pass 3 (ancestor walk) — meaning <em>its</em> ancestor reconciled, not the parent itself. This is the softest signal: it depends on the assumption that everything between the reconciled ancestor and the alternate parent was correctly embodied. Worth reviewing carefully before filing.
       <br><br>
-      <span style="color:var(--text-dim);font-size:11px"><strong>Note:</strong> evidence strength describes the CONTEXT for the claim, not the validity of the claim itself. A "Strong" candidate may still be the wrong adjudication if the parts are functionally distinct; a "Softer" candidate may be entirely correct if the SME has independent knowledge of the build. Treat these as a sorting aid, not a verdict.</span>
+      <span style="color:var(--text-muted);font-size:11px"><strong>Note:</strong> evidence strength describes the CONTEXT for the claim, not the validity of the claim itself. A "Strong" candidate may still be the wrong adjudication if the parts are functionally distinct; a "Softer" candidate may be entirely correct if the SME has independent knowledge of the build. Treat these as a sorting aid, not a verdict.</span>
     </div>
   </details>
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding:10px 14px;background:var(--surface2);border-radius:var(--radius-md);border:1px solid var(--border)">
     <span style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Indenture scope:</span>
-    ${chipHtml || '<span style="font-family:var(--sans);font-size:12px;color:var(--text-dim)">No indentures detected</span>'}
+    ${chipHtml || '<span style="font-family:var(--sans);font-size:12px;color:var(--text-muted)">No indentures detected</span>'}
     <span style="flex:1"></span>
     <span style="font-family:var(--sans);font-size:11px;color:var(--text-muted)">
       ${inScopeAnchors.length} anchor(s) in scope · ${totalCandidates} candidate(s) · ${allAnchors.length - inScopeAnchors.length} hidden by scope${apexInScope.length > 0 ? ` · <span style="color:var(--warn)">▲ ${apexInScope.length} apex${apexInScope.length === 1 ? '' : 'es'}${totalCascadePotential > 0 ? ' (' + totalCascadePotential + ' cascade potential)' : ''}</span>` : ''}
@@ -17360,7 +17365,7 @@ function _renderNhMismatchHelperModal(bom) {
     html += `<div style="padding:40px;text-align:center;color:var(--text-muted);font-family:var(--sans);font-size:13px;line-height:1.5">
       No missing EBOM items in the current indenture scope have alternate-NH evidence in the ${esc(bomLabel)}.
       ${allAnchors.length > 0
-        ? `<br><br><span style="color:var(--text-dim);font-size:12px">${allAnchors.length} eligible anchor(s) exist at other indentures — toggle chips above to broaden scope.</span>`
+        ? `<br><br><span style="color:var(--text-muted);font-size:12px">${allAnchors.length} eligible anchor(s) exist at other indentures — toggle chips above to broaden scope.</span>`
         : ''}
     </div>`;
   } else {
@@ -17390,7 +17395,7 @@ function _renderNhMismatchHelperModal(bom) {
         // Show the apex's PN + NH so the SME can disambiguate cases where the
         // same PN appears at multiple NHs in the EBOM.
         const apexNhLabel = anc.apexNh ? ' / ' + esc(anc.apexNh) : '';
-        apexBadgeHtml = `<span title="This anchor lives below a missing apex assembly. Resolving the apex first may auto-cover this item via Pass 3 ancestor walk." style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-dim);padding:3px 9px;border:1px dashed var(--border);border-radius:var(--radius-sm)">↑ under apex ${esc(anc.apexPn)}${apexNhLabel}</span>`;
+        apexBadgeHtml = `<span title="This anchor lives below a missing apex assembly. Resolving the apex first may auto-cover this item via Pass 3 ancestor walk." style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);padding:3px 9px;border:1px dashed var(--border);border-radius:var(--radius-sm)">↑ under apex ${esc(anc.apexPn)}${apexNhLabel}</span>`;
       }
       // Anchor header
       html += `<div style="margin-bottom:18px;border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden">
@@ -17402,10 +17407,10 @@ function _renderNhMismatchHelperModal(bom) {
           <span style="font-family:var(--mono);font-size:12px;color:var(--text)">${esc(anc.nh || '—')}</span>
           <span style="font-family:var(--sans);font-size:11px;color:var(--text-muted)">· indenture <span style="font-family:var(--mono);color:var(--text)">${esc(anc.indenture || '—')}</span> · qty <span style="font-family:var(--mono);color:var(--text)">${esc(fmtQty(anc.qty))}</span></span>
           <span style="flex:1"></span>
-          <span style="font-family:var(--sans);font-size:11px;color:var(--text-dim)">${cands.length} candidate${cands.length === 1 ? '' : 's'}</span>
+          <span style="font-family:var(--sans);font-size:11px;color:var(--text-muted)">${cands.length} candidate${cands.length === 1 ? '' : 's'}</span>
         </div>`;
       if (anc.desc) {
-        html += `<div style="padding:6px 14px;font-family:var(--sans);font-size:11px;color:var(--text-dim);background:var(--surface);border-bottom:1px solid var(--border);line-height:1.45">${esc(anc.desc)}</div>`;
+        html += `<div style="padding:6px 14px;font-family:var(--sans);font-size:11px;color:var(--text-muted);background:var(--surface);border-bottom:1px solid var(--border);line-height:1.45">${esc(anc.desc)}</div>`;
       }
       // Candidate table
       html += `<table style="width:100%;border-collapse:collapse">
@@ -17437,7 +17442,7 @@ function _renderNhMismatchHelperModal(bom) {
         if (thisCellClaimed) {
           html += `<span style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--success);padding:4px 10px;border:1px solid var(--success);border-radius:var(--radius-sm)">✓ Claimed</span>`;
         } else if (anchorAlreadyClaimed) {
-          html += `<span style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-dim);padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);opacity:0.6" title="Another candidate has been claimed for this anchor — remove that claim first to file a different one">Anchor claimed</span>`;
+          html += `<span style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);opacity:0.6" title="Another candidate has been claimed for this anchor — remove that claim first to file a different one">Anchor claimed</span>`;
         } else {
           // Encode all payload fields safely for the onclick attribute. Use
           // single-quoted JSON-ish args and HTML-escape critical chars.
@@ -18679,7 +18684,7 @@ function showMissingItemsModal(type) {
   </div>
   <div style="font-family:var(--sans);font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:1.55">
     ${esc(qualifier)}<br>
-    <span style="color:var(--text-dim)">Part Type — Collector, Reference, and Bulk Material items are excluded from this list (they are out of reconciliation scope).</span>
+    <span style="color:var(--text-muted)">Part Type — Collector, Reference, and Bulk Material items are excluded from this list (they are out of reconciliation scope).</span>
   </div>`;
 
   html += '<div class="table-wrap"><table><thead><tr>';
@@ -18687,7 +18692,7 @@ function showMissingItemsModal(type) {
   html += '</tr></thead><tbody>';
 
   if (!items.length) {
-    html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:24px;color:var(--text-dim)">
+    html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:24px;color:var(--text-muted)">
       No EBOM items are missing from the ${esc(bomLabel)}.
     </td></tr>`;
   } else {
@@ -18700,7 +18705,7 @@ function showMissingItemsModal(type) {
       // overlay knows which leg(s) to flip to 'ok' when processed.
       const adjBtn = _adjRowActionCell(r, type === 'mbom' ? 'mbom_missing' : 'abom_missing');
       html += `<tr>
-        <td style="padding-left:${indPad + 8}px;font-family:var(--mono);font-size:10px;color:var(--text-dim)">${esc(r.indenture || '—')}</td>
+        <td style="padding-left:${indPad + 8}px;font-family:var(--mono);font-size:10px;color:var(--text-muted)">${esc(r.indenture || '—')}</td>
         <td style="font-family:var(--mono);font-size:11px;color:var(--text)">${esc(r.pn || '—')}</td>
         <td style="font-size:11px;color:var(--text);max-width:240px;white-space:normal">${esc(desc)}</td>
         <td style="font-family:var(--mono);font-size:11px">${esc(r.nh || '—')}</td>
@@ -18709,7 +18714,7 @@ function showMissingItemsModal(type) {
         <td style="font-family:var(--mono);font-size:10px;color:var(--text)">${esc(r.eqText || '—')}</td>
         ${type === 'abom' ? (r.openAncestorPn
           ? `<td><span class="badge badge-woopen" title="A higher assembly (${esc(r.openAncestorPn)}) is in the ABOM but under an open WO; coverage pending WO closure">⚠ Ancestor ${esc(r.openAncestorPn)} (open WO)</span></td><td style="font-family:var(--mono);color:var(--wo-open)">${esc(r.openAncestorWo || '')}</td>`
-          : `<td><span style="color:var(--text-dim)">—</span></td><td><span style="color:var(--text-dim)">—</span></td>`) : ''}
+          : `<td><span style="color:var(--text-muted)">—</span></td><td><span style="color:var(--text-muted)">—</span></td>`) : ''}
         <td>${adjBtn}</td>
       </tr>`;
     });
@@ -18811,7 +18816,7 @@ function showApexMissingModal(type) {
     Each <span class="badge badge-missing" style="font-size:9px;vertical-align:middle">▲ ROOT</span> row is the
     <strong style="color:${color}">highest-level EBOM item</strong> in a missing indenture subtree —
     the point where the gap begins. Missing items indented beneath it are part of the same unreconciled subtree.
-    <span style="color:var(--text-dim);display:block;margin-top:4px">
+    <span style="color:var(--text-muted);display:block;margin-top:4px">
       Resolving an apex assembly first may close its descendants automatically via the Pass 3 ancestor indenture walk,
       without requiring individual line-item fixes. Sort order: most descendants first.
     </span>
@@ -18840,7 +18845,7 @@ function showApexMissingModal(type) {
   html += '</tr></thead><tbody>';
 
   if (!sortedGroups.length) {
-    html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:24px;color:var(--text-dim)">
+    html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:24px;color:var(--text-muted)">
       No missing apex assemblies found.
     </td></tr>`;
   } else {
@@ -18857,16 +18862,16 @@ function showApexMissingModal(type) {
         .sort((a, b) => (a.indenture || '').localeCompare(b.indenture || '') || (a.pn || '').localeCompare(b.pn || ''));
       const descCount = descendants.length;
       const hasChildren = descCount > 0;
-      const apexAdjBtn = ar ? _adjRowActionCell(ar, reasonCode) : '<span style="color:var(--text-dim);font-size:9px">—</span>';
+      const apexAdjBtn = ar ? _adjRowActionCell(ar, reasonCode) : '<span style="color:var(--text-muted);font-size:9px">—</span>';
 
       // ── Apex row — clickable to toggle children ────────────────────────
       const chevron = hasChildren
-        ? `<span id="apex-chev-${gi}" style="font-family:var(--mono);font-size:10px;color:var(--text-dim);cursor:pointer;user-select:none;padding:0 2px">▶</span>`
+        ? `<span id="apex-chev-${gi}" style="font-family:var(--mono);font-size:10px;color:var(--text-muted);cursor:pointer;user-select:none;padding:0 2px">▶</span>`
         : `<span style="font-family:var(--mono);font-size:10px;color:var(--border)">·</span>`;
       const clickAttr = hasChildren ? `onclick="_nmApexToggle(${gi})" style="cursor:pointer;background:rgba(248,81,73,0.09)"` : `style="background:rgba(248,81,73,0.09)"`;
       html += `<tr ${clickAttr} title="${hasChildren ? 'Click to expand/collapse children' : ''}">
         <td style="border-left:3px solid var(--danger);text-align:center;padding:4px 6px">${chevron}</td>
-        <td style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">${esc(apexInd)}</td>
+        <td style="font-family:var(--mono);font-size:10px;color:var(--text-muted)">${esc(apexInd)}</td>
         <td style="font-family:var(--mono);font-size:11px;color:var(--text)" style="font-weight:700">
           <span class="badge badge-missing" style="margin-right:6px;font-size:9px;vertical-align:middle">▲ ROOT</span>${esc(g.apexPn)}
         </td>
@@ -18887,7 +18892,7 @@ function showApexMissingModal(type) {
         const descAdjBtn = _adjRowActionCell(m, reasonCode);
         html += `<tr data-apex-group="${gi}" style="display:none;opacity:0.78">
           <td style="border-left:3px solid var(--border)"></td>
-          <td style="padding-left:24px;font-family:var(--mono);font-size:10px;color:var(--text-dim)">${esc(m.indenture || '—')}</td>
+          <td style="padding-left:24px;font-family:var(--mono);font-size:10px;color:var(--text-muted)">${esc(m.indenture || '—')}</td>
           <td style="padding-left:24px;font-family:var(--mono);font-size:11px;color:var(--danger);font-style:italic">${esc(m.pn || '—')}</td>
           <td style="font-size:10px;color:var(--text);max-width:260px;white-space:normal">${esc(desc)}</td>
           <td style="font-family:var(--mono);font-size:11px">${esc(m.nh || '—')}</td>
@@ -19088,7 +19093,7 @@ function showProcRemovedModal() {
   <div style="font-family:var(--sans);font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:1.55">
     EBOM items whose <strong style="color:${color}">ABOM records show permanent removal only</strong> — all proc codes are REMOVE codes (${_procCodeListText('remove')}) with no net ADD record found.
     These parts exist in the EBOM but the ABOM confirms they were permanently removed from the build.
-    <br><span style="color:var(--text-dim)">SWAP proc codes (${_procCodeListText('swap')}) are <em>excluded</em> from this view. A SWAP-only key is treated as present (ADD) when no ADD row exists, or net-zero when an ADD row coexists.</span>
+    <br><span style="color:var(--text-muted)">SWAP proc codes (${_procCodeListText('swap')}) are <em>excluded</em> from this view. A SWAP-only key is treated as present (ADD) when no ADD row exists, or net-zero when an ADD row coexists.</span>
   </div>`;
 
   html += '<div class="table-wrap"><table><thead><tr>';
@@ -19096,7 +19101,7 @@ function showProcRemovedModal() {
   html += '</tr></thead><tbody>';
 
   if (!items.length) {
-    html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:24px;color:var(--text-dim)">No proc-removed items found.</td></tr>`;
+    html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:24px;color:var(--text-muted)">No proc-removed items found.</td></tr>`;
   } else {
     items.forEach(r => {
       const indLevel  = getIndentureLevel(r.indenture);
@@ -19107,14 +19112,14 @@ function showProcRemovedModal() {
       // Per-line ABOM breakdown
       const _k = r.pn + '||' + (r.nh || '');
       const _lines = (_meta.abomLinesByKey && _meta.abomLinesByKey.get(_k)) || [];
-      const _dm = '<span style="color:var(--text-dim)">—</span>';
+      const _dm = '<span style="color:var(--text-muted)">—</span>';
       const _stk = (arr) => { if(!arr.length) return _dm; if(arr.length===1) return arr[0]; return arr.map((h,i)=>`<div style="padding:1px 0;${i<arr.length-1?'border-bottom:1px solid #30363d88;margin-bottom:2px;':''}">${h}</div>`).join(''); };
       const _woH = _stk(_lines.map(l=>l.wo?esc(l.wo):_dm));
       const _qH  = _stk(_lines.map(l=>l.qty!==''?esc(l.qty):_dm));
       const _pH  = _stk(_lines.map(l=>l.proc?`<span style="color:${color};font-weight:700">${esc(l.proc)}</span>`:_dm));
       const _sH  = _stk(_lines.map(l=>{ const s=String(l.status||'').toUpperCase(); return s==='CLOSED'?`<span style="color:var(--success)">${s}</span>`:s==='OPEN'?`<span style="color:var(--warn)">${s}</span>`:s?esc(s):_dm; }));
       html += `<tr>
-        <td style="padding-left:${indPad + 8}px;font-family:var(--mono);font-size:10px;color:var(--text-dim)">${esc(r.indenture || '—')}</td>
+        <td style="padding-left:${indPad + 8}px;font-family:var(--mono);font-size:10px;color:var(--text-muted)">${esc(r.indenture || '—')}</td>
         <td style="font-family:var(--mono);font-size:11px;color:var(--text)">${esc(r.pn || '—')}</td>
         <td style="font-size:11px;color:var(--text);max-width:220px;white-space:normal">${esc(desc)}</td>
         <td style="font-family:var(--mono);font-size:11px">${esc(r.nh || '—')}</td>
@@ -19174,7 +19179,7 @@ function showQtyMismatchModal() {
   html += '</tr></thead><tbody>';
 
   if (!items.length) {
-    html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:24px;color:var(--text-dim)">No quantity mismatch items found.</td></tr>`;
+    html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:24px;color:var(--text-muted)">No quantity mismatch items found.</td></tr>`;
   } else {
     items.forEach(r => {
       const indLevel  = getIndentureLevel(r.indenture);
@@ -19183,13 +19188,13 @@ function showQtyMismatchModal() {
       const aqDisp    = r.aq ?? '—';
       const delta     = (typeof r.eq === 'number' && typeof r.aq === 'number') ? (r.aq - r.eq) : '—';
       const deltaStr  = delta !== '—' ? (delta > 0 ? '+' + delta : String(delta)) : '—';
-      const deltaColor= delta !== '—' && delta < 0 ? 'var(--danger)' : delta !== '—' && delta > 0 ? 'var(--success)' : 'var(--text-dim)';
+      const deltaColor= delta !== '—' && delta < 0 ? 'var(--danger)' : delta !== '—' && delta > 0 ? 'var(--success)' : 'var(--text-muted)';
       const desc      = ebomDescMap[r.pn] || '—';
       const abomNh    = esc(r.abomNh || '—');
       // Per-line ABOM breakdown
       const _k = r.pn + '||' + (r.nh || '');
       const _lines = (_meta.abomLinesByKey && _meta.abomLinesByKey.get(_k)) || [];
-      const _dm = '<span style="color:var(--text-dim)">—</span>';
+      const _dm = '<span style="color:var(--text-muted)">—</span>';
       const _stk = (arr) => { if(!arr.length) return _dm; if(arr.length===1) return arr[0]; return arr.map((h,i)=>`<div style="padding:1px 0;${i<arr.length-1?'border-bottom:1px solid #30363d88;margin-bottom:2px;':''}">${h}</div>`).join(''); };
       const _woH = _stk(_lines.map(l=>l.wo?esc(l.wo):_dm));
       const _qH  = _stk(_lines.map(l=>l.qty!==''?esc(l.qty):_dm));
@@ -19198,7 +19203,7 @@ function showQtyMismatchModal() {
       // v80: per-row Adjudicate action (ABOM-side qty mismatch — the modal is ABOM-scoped).
       const adjBtn = _adjRowActionCell(r, 'qty_mismatch_abom');
       html += `<tr>
-        <td style="padding-left:${indPad + 8}px;font-family:var(--mono);font-size:10px;color:var(--text-dim)">${esc(r.indenture || '—')}</td>
+        <td style="padding-left:${indPad + 8}px;font-family:var(--mono);font-size:10px;color:var(--text-muted)">${esc(r.indenture || '—')}</td>
         <td style="font-family:var(--mono);font-size:11px;color:var(--text)">${esc(r.pn || '—')}</td>
         <td style="font-size:11px;color:var(--text);max-width:220px;white-space:normal">${esc(desc)}</td>
         <td style="font-family:var(--mono);font-size:11px">${esc(r.nh || '—')}</td>
@@ -19267,7 +19272,7 @@ function showMbomQtyMismatchModal() {
   html += '</tr></thead><tbody>';
 
   if (!items.length) {
-    html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:24px;color:var(--text-dim)">No quantity mismatch items found.</td></tr>`;
+    html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:24px;color:var(--text-muted)">No quantity mismatch items found.</td></tr>`;
   } else {
     items.forEach(r => {
       const indLevel  = getIndentureLevel(r.indenture);
@@ -19276,14 +19281,14 @@ function showMbomQtyMismatchModal() {
       const mqDisp    = r.mq ?? '—';
       const delta     = (typeof r.eq === 'number' && typeof r.mq === 'number') ? (r.mq - r.eq) : '—';
       const deltaStr  = delta !== '—' ? (delta > 0 ? '+' + delta : String(delta)) : '—';
-      const deltaColor= delta !== '—' && delta < 0 ? 'var(--danger)' : delta !== '—' && delta > 0 ? 'var(--success)' : 'var(--text-dim)';
+      const deltaColor= delta !== '—' && delta < 0 ? 'var(--danger)' : delta !== '—' && delta > 0 ? 'var(--success)' : 'var(--text-muted)';
       const desc      = ebomDescMap[r.pn] || '—';
       // Reason code 'qty_mismatch_mbom' — the overlay flips ms='qty_mismatch'
       // to ms='qty_mismatch_accepted' (a direct-OK family status) and writes
       // r.adjudication.mbom with type='direct'.
       const adjBtn = _adjRowActionCell(r, 'qty_mismatch_mbom');
       html += `<tr>
-        <td style="padding-left:${indPad + 8}px;font-family:var(--mono);font-size:10px;color:var(--text-dim)">${esc(r.indenture || '—')}</td>
+        <td style="padding-left:${indPad + 8}px;font-family:var(--mono);font-size:10px;color:var(--text-muted)">${esc(r.indenture || '—')}</td>
         <td style="font-family:var(--mono);font-size:11px;color:var(--text)">${esc(r.pn || '—')}</td>
         <td style="font-size:11px;color:var(--text);max-width:220px;white-space:normal">${esc(desc)}</td>
         <td style="font-family:var(--mono);font-size:11px">${esc(r.nh || '—')}</td>
@@ -19343,7 +19348,7 @@ function showSubArModal(type) {
   html += '</tr></thead><tbody>';
 
   if (!items.length) {
-    html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:24px;color:var(--text-dim)">No SUB/AR items found in this BOM leg.</td></tr>`;
+    html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:24px;color:var(--text-muted)">No SUB/AR items found in this BOM leg.</td></tr>`;
   } else {
     items.forEach(r => {
       const indLevel  = getIndentureLevel(r.indenture);
@@ -19357,7 +19362,7 @@ function showSubArModal(type) {
                       : '—';
       const desc      = ebomDescMap[r.pn] || '—';
       html += `<tr>
-        <td style="padding-left:${indPad + 8}px;font-family:var(--mono);font-size:10px;color:var(--text-dim)">${esc(r.indenture || '—')}</td>
+        <td style="padding-left:${indPad + 8}px;font-family:var(--mono);font-size:10px;color:var(--text-muted)">${esc(r.indenture || '—')}</td>
         <td style="font-family:var(--mono);font-size:11px;color:var(--text)">${esc(r.pn || '—')}</td>
         <td style="font-size:11px;color:var(--text);max-width:240px;white-space:normal">${esc(desc)}</td>
         <td style="font-family:var(--mono);font-size:11px">${esc(r.nh || '—')}</td>
@@ -19473,7 +19478,7 @@ function showCoverageModal(tier) {
   html += '</tr></thead><tbody>';
 
   if (!items.length) {
-    html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:24px;color:var(--text-dim)">No matching line items.</td></tr>`;
+    html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:24px;color:var(--text-muted)">No matching line items.</td></tr>`;
   } else {
     items.forEach(r => {
       const indLevel = getIndentureLevel(r.indenture);
@@ -19508,7 +19513,7 @@ function showCoverageModal(tier) {
       }
       const _dm = '\u2014';
       const _stk = (arr) => {
-        if (!arr.length) return `<span style="color:var(--text-dim)">${_dm}</span>`;
+        if (!arr.length) return `<span style="color:var(--text-muted)">${_dm}</span>`;
         if (arr.length === 1) return arr[0];
         return arr.map((v,i) => `<div style="padding:1px 0;${i<arr.length-1?'border-bottom:1px solid #30363d88;margin-bottom:2px;':''}">` + v + '</div>').join('');
       };
@@ -19530,7 +19535,7 @@ function showCoverageModal(tier) {
       }));
 
       html += `<tr>
-        <td style="padding-left:${indPad + 8}px;font-family:var(--mono);font-size:10px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(String(r.indenture || ''))}</td>
+        <td style="padding-left:${indPad + 8}px;font-family:var(--mono);font-size:10px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(String(r.indenture || ''))}</td>
         <td style="font-family:var(--mono);font-size:11px;color:var(--text);white-space:nowrap">${esc(r.pn || '')}${_rfvMark}</td>
         <td style="font-size:11px;color:var(--text);white-space:normal;word-break:break-word;overflow:hidden">${esc(desc)}</td>
         <td style="font-family:var(--mono);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.nh || '')}</td>${ancCell}
@@ -19736,7 +19741,7 @@ function _noEbomRenderBody() {
   const endIdx = Math.min(startIdx + _NOEBOM_PAGE_SIZE, total);
 
   if (total === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-dim)">
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-muted)">
       No rows match the current search.</td></tr>`;
   } else {
     const parts = [];
@@ -19748,14 +19753,14 @@ function _noEbomRenderBody() {
   // Page navigator (mirrors the dash-suffix helper pattern).
   if (pager) {
     if (total <= _NOEBOM_PAGE_SIZE) {
-      pager.innerHTML = total ? `<span style="color:var(--text-dim)">Showing all ${total} rows</span>` : '';
+      pager.innerHTML = total ? `<span style="color:var(--text-muted)">Showing all ${total} rows</span>` : '';
     } else {
       const prevDis = _noEbomPage <= 1 ? 'disabled' : '';
       const nextDis = _noEbomPage >= totalPages ? 'disabled' : '';
       const btn = 'padding:3px 9px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);cursor:pointer';
       const dis = 'opacity:0.4;cursor:not-allowed';
       pager.innerHTML = `
-        <span style="color:var(--text-dim)">Showing rows <strong style="color:var(--text)">${startIdx + 1}–${endIdx}</strong> of <strong style="color:var(--text)">${total}</strong></span>
+        <span style="color:var(--text-muted)">Showing rows <strong style="color:var(--text)">${startIdx + 1}–${endIdx}</strong> of <strong style="color:var(--text)">${total}</strong></span>
         <span style="margin-left:auto"></span>
         <button onclick="_noEbomGoToPage(1)" style="${btn};${prevDis ? dis : ''}" ${prevDis}>« First</button>
         <button onclick="_noEbomGoToPage(${_noEbomPage - 1})" style="${btn};${prevDis ? dis : ''}" ${prevDis}>‹ Prev</button>
@@ -19787,8 +19792,8 @@ function _noEbomOnSearch() {
 // picker in the standard form overlay.
 function _noEbomRowHtml(bom, r) {
   const woColor = r.woStatus && r.woStatus.toUpperCase() === 'CLOSED' ? 'var(--success)'
-                : r.woStatus ? 'var(--warn)' : 'var(--text-dim)';
-  const dash = '<span style="color:var(--text-dim)">\u2014</span>';
+                : r.woStatus ? 'var(--warn)' : 'var(--text-muted)';
+  const dash = '<span style="color:var(--text-muted)">\u2014</span>';
   return `<tr data-job="${esc((r.jobNo||'').toLowerCase())}" data-pn="${esc((r.pn||'').toLowerCase())}" data-uo="${esc((r.usedOn||'').toLowerCase())}">
     <td style="font-family:var(--mono);font-size:11px">${esc(r.jobNo) || dash}</td>
     <td style="font-family:var(--mono);font-size:11px;color:var(--text)" style="font-family:var(--mono);font-size:11px">${esc(r.pn)}</td>
@@ -19870,7 +19875,7 @@ function _filterNoEbomEbomPicker() {
          onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
       <strong style="color:var(--text)">${esc(m.pn)}</strong>
       &nbsp;&nbsp; NH: <span style="color:var(--text-muted)">${esc(m.nh || '')}</span>
-      &nbsp;&nbsp; Qty: <span style="color:var(--text-dim)">${esc(m.qtyText || '')}</span>
+      &nbsp;&nbsp; Qty: <span style="color:var(--text-muted)">${esc(m.qtyText || '')}</span>
     </div>
   `).join('');
   resultsEl.style.display = 'block';
@@ -19974,7 +19979,7 @@ function exportCiMissingEbomXlsx() {
 // those modals (Description, EBOM/ABOM Qty, Work Order #, WO Status).
 function _ciResMap(){ const m=new Map(); (state.results||[]).forEach(r=>{ if(r&&r.key!=null) m.set(r.key,r); }); return m; }
 function _ebomColMap(colIdx){ const m={}; if(state.boms.ebom){ state.boms.ebom.data.forEach(row=>{ const pn=normPN(row[COL.ebom.pn]); const v=String(row[colIdx]!=null?row[colIdx]:'').trim(); if(pn&&v&&!(pn in m)) m[pn]=v; }); } return m; }
-function _woStatCellColor(sv){ const u=String(sv).toUpperCase(); if(u==='CLOSED') return 'var(--success)'; if(sv==='\u2014'||u==='') return 'var(--text-dim)'; return 'var(--warn)'; }
+function _woStatCellColor(sv){ const u=String(sv).toUpperCase(); if(u==='CLOSED') return 'var(--success)'; if(sv==='\u2014'||u==='') return 'var(--text-muted)'; return 'var(--warn)'; }
 function _ciEnrich(ci, RB, DESC, PT, rfvWoSet){
   const r = RB.get((ci.pn||'')+'||'+(ci.nh||'')) || {};
   const eqDisp = (r.eqText && isNaN(Number(r.eqText))) ? r.eqText : (r.eq!=null ? r.eq : '');
@@ -19996,7 +20001,7 @@ function _ciCoverageTable(list, color, emptyMsg, ancestorCol){
   let h='<div class="table-wrap"><table><thead><tr>';
   cols.forEach(c=>h+=`<th style="color:${color}">${esc(c)}</th>`);
   h+='</tr></thead><tbody>';
-  if(!list||!list.length){ h+=`<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-dim)">${esc(emptyMsg)}</td></tr>`; }
+  if(!list||!list.length){ h+=`<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-muted)">${esc(emptyMsg)}</td></tr>`; }
   (list||[]).forEach(ci=>{
     const e=_ciEnrich(ci,RB,DESC,null,null);
     const ancCell = ancestorCol ? `<td style="color:var(--text);font-family:var(--mono);font-size:11px">${esc(ci.ancestorPn||'\u2014')}</td>` : '';
@@ -20023,7 +20028,7 @@ function _ciCoverageTable(list, color, emptyMsg, ancestorCol){
     }
     const _dm = '\u2014';
     const _stk = (arr) => {
-      if (!arr.length) return `<span style="color:var(--text-dim)">${_dm}</span>`;
+      if (!arr.length) return `<span style="color:var(--text-muted)">${_dm}</span>`;
       if (arr.length === 1) return arr[0];
       return arr.map((v,i) => `<div style="padding:1px 0;${i<arr.length-1?'border-bottom:1px solid #30363d88;margin-bottom:2px;':''}">` + v + '</div>').join('');
     };
@@ -20115,7 +20120,7 @@ function _decorateReport(panel){
         const bar = document.createElement('div');
         bar.className = 'modal-filter-bar';
         bar.innerHTML = '<input class="bom-search-input modal-filter-input" style="width:280px" placeholder="Filter rows \u2014 PN, WO, CI, any text" oninput="_modalFilterRows(this)">' +
-                        '<span class="modal-filter-count" style="font-family:var(--mono);font-size:10px;color:var(--text-dim)"></span>';
+                        '<span class="modal-filter-count" style="font-family:var(--mono);font-size:10px;color:var(--text-muted)"></span>';
         firstWrap.parentNode.insertBefore(bar, firstWrap);
         _modalFilterRows(bar.querySelector('.modal-filter-input'));
       }
@@ -20152,7 +20157,7 @@ function _decorateReport(panel){
       bar.style.cssText='display:flex;gap:10px;align-items:center;margin:0 0 10px;padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md)';
       bar.innerHTML='<span style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Filter</span>'
         +'<input type="text" class="report-filter-input" placeholder="Type to filter rows…" oninput="_reportFilter(this)" style="flex:1;max-width:360px;font-family:var(--mono);font-size:11px;padding:5px 10px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-sm)">'
-        +'<span class="report-filter-count" style="font-family:var(--sans);font-size:11px;color:var(--text-dim)"></span>';
+        +'<span class="report-filter-count" style="font-family:var(--sans);font-size:11px;color:var(--text-muted)"></span>';
       if(table.parentNode) table.parentNode.insertBefore(bar, table);
     }
   }catch(e){ /* decoration is non-fatal */ }
@@ -20255,7 +20260,7 @@ function showKpiReport(type) {
       A CSA subject matter expert must review each entry — examining the originating work order,
       the ABOM used-on context, and the part's role in the build — to adjudicate whether the
       discrepant part is or is not acting as a CI in that work order context.<br>
-      <span style="color:var(--text-dim)">
+      <span style="color:var(--text-muted)">
         <strong>Type A</strong> — Originating WO not found in ABOM (lab, inspection, or standalone quality WO). &nbsp;|&nbsp;
         <strong>Type B</strong> — WO present in ABOM but used-on context does not link to this part's CI configuration path.
         CANCELLED NCRs are excluded. All disposition statuses included.
@@ -20278,7 +20283,7 @@ function showKpiReport(type) {
     html += '</tr></thead><tbody>';
 
     if (!data.length) {
-      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:24px;color:var(--text-dim)">
+      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:24px;color:var(--text-muted)">
         No NCR rows require CI adjudication. All NCR discrepant parts that match a CI file PN are
         accounted for through an established CI trace path.
       </td></tr>`;
@@ -20294,16 +20299,16 @@ function showKpiReport(type) {
       sorted.forEach(r => {
         // Click-to-expand for paragraph-length text cells (mirrors the untraced helper).
         const _expand = (text, fieldKey) => {
-          if (!text) return '<span style="color:var(--text-dim)">—</span>';
+          if (!text) return '<span style="color:var(--text-muted)">—</span>';
           if (text.length <= 60) return `<span style="font-size:10px;color:var(--text-muted)">${esc(text)}</span>`;
           const trunc = text.slice(0, 60) + '…';
           const eid = `ncr-ci-text-${r._origIdx}-${fieldKey}`;
           return `<span style="font-size:10px;color:var(--text-muted)">${esc(trunc)}</span>`
-            + `<button onclick="(function(){var e=document.getElementById('${eid}');if(e){e.style.display=e.style.display==='none'?'block':'none';}})()" style="margin-left:4px;background:none;border:1px solid var(--border);color:var(--text-dim);border-radius:var(--radius-sm);font-size:9px;cursor:pointer;padding:0 4px">⋯</button>`
+            + `<button onclick="(function(){var e=document.getElementById('${eid}');if(e){e.style.display=e.style.display==='none'?'block':'none';}})()" style="margin-left:4px;background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:var(--radius-sm);font-size:9px;cursor:pointer;padding:0 4px">⋯</button>`
             + `<div id="${eid}" style="display:none;margin-top:6px;padding:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:10px;color:var(--text);white-space:normal;word-break:break-word">${esc(text)}</div>`;
         };
         const dspColor  = r.dispStatus && r.dispStatus.toUpperCase() === 'CLOSED'
-          ? 'var(--success)' : r.dispStatus ? 'var(--warn)' : 'var(--text-dim)';
+          ? 'var(--success)' : r.dispStatus ? 'var(--warn)' : 'var(--text-muted)';
         // v84 — check whether an NCR-CI claim already exists for this (CI, disp) edge
         const ciKey = (r.ciId || r.ciPn) + '||' + r.ciPn + '||' + (r.ciNh || '');
         const ciRowKey = (r.ciPn || '') + '||' + (r.ciNh || '');
@@ -20322,7 +20327,7 @@ function showKpiReport(type) {
           <td style="color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.ncrStatus || '—')}</td>
           <td style="font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.origWo || '—')}</td>
           <td style="color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.discrepantPart || '—')}</td>
-          <td style="color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.discQty || '—')}</td>
+          <td style="color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.discQty || '—')}</td>
           <td style="white-space:normal;word-break:break-word;overflow:hidden">${_expand(r.discrepancyText || '', 'discr')}</td>
           <td style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.dispNo || '—')}</td>
           <td style="white-space:normal;word-break:break-word;overflow:hidden">${_expand(r.dispText || '', 'disp')}</td>
@@ -20434,7 +20439,7 @@ function showKpiReport(type) {
       ranked.forEach((r, i) => {
         const share = totalContrib ? Math.round(r.contrib / totalContrib * 100) : 0;
         html += `<tr>
-          <td style="color:var(--text-dim);font-family:var(--mono)">${i + 1}</td>
+          <td style="color:var(--text-muted);font-family:var(--mono)">${i + 1}</td>
           <td style="font-family:var(--mono);font-weight:600;color:var(--warn);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.rfv ? '◆ ' : ''}${esc(r.wo)}</td>
           <td style="font-family:var(--mono);font-size:10px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.status)}</td>
           <td style="font-family:var(--mono);font-weight:700" data-sort="${r.contrib}">${r.contrib.toLocaleString()} item${r.contrib === 1 ? '' : 's'}</td>
@@ -20446,8 +20451,8 @@ function showKpiReport(type) {
               <span style="font-family:var(--mono);font-size:10px">${share}%</span>
             </div>
           </td>
-          <td style="font-family:var(--mono);color:${r.rfv ? 'var(--rfv)' : 'var(--text-dim)'}">${r.rfv ? '◆ Yes' : '—'}</td>
-          <td style="font-family:var(--mono);font-size:11px;color:var(--rfv)">${r.rfvNums && r.rfvNums.length ? esc(r.rfvNums.join(', ')) : '<span style=\"color:var(--text-dim)\">—</span>'}</td>
+          <td style="font-family:var(--mono);color:${r.rfv ? 'var(--rfv)' : 'var(--text-muted)'}">${r.rfv ? '◆ Yes' : '—'}</td>
+          <td style="font-family:var(--mono);font-size:11px;color:var(--rfv)">${r.rfvNums && r.rfvNums.length ? esc(r.rfvNums.join(', ')) : '<span style=\"color:var(--text-muted)\">—</span>'}</td>
         </tr>`;
       });
     }
@@ -20509,13 +20514,13 @@ function showKpiReport(type) {
     html += '</tr></thead><tbody>';
 
     if (data.length === 0) {
-      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:30px;color:var(--text-dim)">
+      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:30px;color:var(--text-muted)">
         No untraced NCRs — every NCR disposition is currently anchored to at least one EBOM line item via Pool 1 or Pool 2.
       </td></tr>`;
     } else {
       data.forEach((r, idx) => {
         const dspColor = r.dispStatus && r.dispStatus.toUpperCase() === 'CLOSED'
-          ? 'var(--success)' : r.dispStatus ? 'var(--warn)' : 'var(--text-dim)';
+          ? 'var(--success)' : r.dispStatus ? 'var(--warn)' : 'var(--text-muted)';
         // Check whether any ebom_ncr_trace claim already exists for this NCR row
         const claimsForThis = (state.adjudications || []).filter(c =>
           c.type === 'ebom_ncr_trace' &&
@@ -20525,7 +20530,7 @@ function showKpiReport(type) {
         const adjCell = `<button class="adj-row-btn" onclick="_adjOpenEbomNcrFromHelper(${r._origIdx})">⚑ Manual EBOM Trace${claimedCount > 0 ? ` (+${claimedCount})` : ''}</button>`;
         // Render long free-text fields truncated with click-to-expand panel
         const renderExpandable = (text, fieldKey) => {
-          if (!text) return '<span style="color:var(--text-dim)">—</span>';
+          if (!text) return '<span style="color:var(--text-muted)">—</span>';
           const truncated = text.length > 60 ? text.slice(0, 60) + '…' : text;
           if (text.length <= 60) {
             return `<span style="font-size:10px;color:var(--text-muted)">${esc(truncated)}</span>`;
@@ -20535,7 +20540,7 @@ function showKpiReport(type) {
           return `
             <span style="font-size:10px;color:var(--text-muted)">${esc(truncated)}</span>
             <button onclick="(function(){var e=document.getElementById('${expandId}');if(e){e.style.display=e.style.display==='none'?'block':'none';}})()"
-                    style="margin-left:4px;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:var(--mono);font-size:9px;padding:1px 4px;border-radius:var(--radius-sm);cursor:pointer">⤡ expand</button>
+                    style="margin-left:4px;background:none;border:1px solid var(--border);color:var(--text-muted);font-family:var(--mono);font-size:9px;padding:1px 4px;border-radius:var(--radius-sm);cursor:pointer">⤡ expand</button>
             <div id="${expandId}" style="display:none;margin-top:6px;padding:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:10px;color:var(--text);white-space:normal;max-width:420px;line-height:1.5">${esc(text)}</div>
           `;
         };
@@ -20544,7 +20549,7 @@ function showKpiReport(type) {
           <td style="color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.ncrStatus || '—')}</td>
           <td style="font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.origWo || '—')}</td>
           <td style="color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.discrepantPart || '—')}</td>
-          <td style="color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.defectQty || '—')}</td>
+          <td style="color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.defectQty || '—')}</td>
           <td style="white-space:normal;word-break:break-word;overflow:hidden">${renderExpandable(r.discrepancyText, 'discr')}</td>
           <td style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.dispNo || '—')}</td>
           <td style="white-space:normal;word-break:break-word;overflow:hidden">${renderExpandable(r.dispText, 'disp')}</td>
@@ -20607,7 +20612,7 @@ function showKpiReport(type) {
     cols.forEach(c => html += `<th style="color:var(--text-muted)">${c}</th>`);
     html += '</tr></thead><tbody>';
     if (!data.length) {
-      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-dim)">No CIs with open NCR dispositions found.</td></tr>`;
+      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-muted)">No CIs with open NCR dispositions found.</td></tr>`;
     }
     data.forEach((ci, gi) => {
       ci.ncrEntries.forEach((e, idx) => {
@@ -20632,10 +20637,10 @@ function showKpiReport(type) {
           <td>${(function(){
             const _dno=String(e.dispNo||'').trim();
             const _rn=rfvNumsByDisp[_dno]||[];
-            if(!state.boms.rfv) return '<span style="color:var(--text-dim)">— (no RFV file)</span>';
+            if(!state.boms.rfv) return '<span style="color:var(--text-muted)">— (no RFV file)</span>';
             return _rn.length
               ? '<span style="color:var(--rfv);font-weight:600">◆ Yes</span> <span style="font-family:var(--mono);font-size:10px;color:var(--rfv)">'+esc(_rn.join(', '))+'</span>'
-              : '<span style="color:var(--text-dim)">No</span>';
+              : '<span style="color:var(--text-muted)">No</span>';
           })()}</td>
           <td style="font-family:var(--mono);color:var(--text)">${esc(e.causeCode||'—')}</td>
           <td style="color:var(--text)">${esc(e.causeCodeDesc||'—')}</td>
@@ -20660,7 +20665,7 @@ function showKpiReport(type) {
       These CIs are <strong style="color:var(--danger)">not embodied in the ABOM under any closed work order</strong>:
       not as a direct line item (Pass 1), not as a Used On assembly (Pass 2), and not covered by a reconciled
       closed-WO ancestor (Pass 3). They are absent from the as-built record at any closed WO.
-      <div style="margin-top:8px;color:var(--text-dim)">
+      <div style="margin-top:8px;color:var(--text-muted)">
         <strong style="color:var(--warn)">Ancestor Under Open WO:</strong> some of these items are not true orphans \u2014
         a higher assembly (ancestor) does appear in the ABOM, but under a work order that is still
         <strong>open</strong>, so it does not yet qualify as embodied (Pass 3 requires a closed WO).
@@ -20680,7 +20685,7 @@ function showKpiReport(type) {
     ncols.forEach(c => html += `<th style="color:var(--danger)">${esc(c)}</th>`);
     html += '</tr></thead><tbody>';
     if (!data.length) {
-      html += `<tr><td colspan="${ncols.length}" style="text-align:center;padding:20px;color:var(--text-dim)">All CIs are embodied in the ABOM.</td></tr>`;
+      html += `<tr><td colspan="${ncols.length}" style="text-align:center;padding:20px;color:var(--text-muted)">All CIs are embodied in the ABOM.</td></tr>`;
     }
     data.forEach(ci => {
       const e=_ciEnrich(ci,RB,DESC,PT,null);
@@ -20688,10 +20693,10 @@ function showKpiReport(type) {
       const hasOpenAnc = !!ci.openAncestorPn;
       const flagCell = hasOpenAnc
         ? `<span class="badge badge-woopen" title="A higher assembly (${esc(ci.openAncestorPn)}) is in the ABOM but under an open WO; coverage pending WO closure">⚠ Ancestor ${esc(ci.openAncestorPn)} (open WO)</span>`
-        : `<span style="color:var(--text-dim)">—</span>`;
+        : `<span style="color:var(--text-muted)">—</span>`;
       const woCell = (hasOpenAnc && ci.openAncestorWo)
         ? `<span style="font-family:var(--mono);color:var(--wo-open)">${esc(ci.openAncestorWo)}</span>`
-        : `<span style="color:var(--text-dim)">—</span>`;
+        : `<span style="color:var(--text-muted)">—</span>`;
       html += `<tr>
         <td style="color:var(--text)">${esc(ci.ciId||'')}</td>
         <td style="font-family:var(--mono);font-size:11px;color:var(--text)">${esc(ci.pn||'')}</td>
@@ -20719,7 +20724,7 @@ function showKpiReport(type) {
     </div>
     <div style="font-family:var(--sans);font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:1.55;border-left:3px solid var(--warn);padding-left:12px">
       These CIs are <strong style="color:var(--warn)">physically traceable in the ABOM</strong> via Pass 1 (direct line item) or Pass 2 (CI PN as Used On), but the associated work order is NOT in CLOSED status — the build is in progress, on hold, or otherwise not finalized.<br>
-      <span style="color:var(--text-dim)">
+      <span style="color:var(--text-muted)">
         "Open WO Leg" indicates which pool fired: <strong>P1 (direct)</strong>, <strong>P2 (used-on)</strong>, or both. A CI can have an open WO on one pool and a closed WO (or another open WO) on the other.
       </span>
     </div>`;
@@ -20729,7 +20734,7 @@ function showKpiReport(type) {
     ocols.forEach(c => html += `<th style="color:var(--warn)">${esc(c)}</th>`);
     html += '</tr></thead><tbody>';
     if (!data.length) {
-      html += `<tr><td colspan="${ocols.length}" style="text-align:center;padding:20px;color:var(--text-dim)">No CIs found on open work orders.</td></tr>`;
+      html += `<tr><td colspan="${ocols.length}" style="text-align:center;padding:20px;color:var(--text-muted)">No CIs found on open work orders.</td></tr>`;
     }
     data.forEach(ci => {
       const legs = [];
@@ -20740,13 +20745,13 @@ function showKpiReport(type) {
       openWos.forEach(function(w){ if (rfvWoSet.has(w)) (rfvNumsByWo[w] || []).forEach(function(rn){ if (rfvNums.indexOf(rn) < 0) rfvNums.push(rn); }); });
       const hasRfv = rfvNums.length > 0;
       const rfvCell = !state.boms.rfv
-        ? '<span style="color:var(--text-dim)">— (no RFV file)</span>'
+        ? '<span style="color:var(--text-muted)">— (no RFV file)</span>'
         : (hasRfv
             ? '<span style="color:var(--rfv);font-weight:600">◆ Yes</span> <span style="font-family:var(--mono);font-size:10px;color:var(--rfv)">' + esc(rfvNums.join(', ')) + '</span>'
-            : '<span style="color:var(--text-dim)">No</span>');
+            : '<span style="color:var(--text-muted)">No</span>');
       const woCell = openWos.length
         ? '<span style="font-family:var(--mono);font-size:11px;color:var(--wo-open)">' + esc(openWos.join(', ')) + '</span>'
-        : '<span style="color:var(--text-dim)">—</span>';
+        : '<span style="color:var(--text-muted)">—</span>';
       const desc=(DESC[ci.pn]||'');
       html += `<tr>
         <td style="color:var(--text)">${esc(ci.ciId||'—')}</td>
@@ -20777,7 +20782,7 @@ function showKpiReport(type) {
     </div>
     <div style="font-family:var(--sans);font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:1.55;border-left:3px solid var(--warn);padding-left:12px">
       These CIs are <strong style="color:var(--warn)">found in the ABOM</strong> by PN + Next Higher match, but the as-built quantity is less than the EBOM-specified quantity. Indicates partial installation or a documentation discrepancy requiring review.<br>
-      <span style="color:var(--text-dim)">
+      <span style="color:var(--text-muted)">
         Only shortfalls are flagged. Surplus ABOM quantities are not flagged.
       </span>
     </div>`;
@@ -20787,18 +20792,18 @@ function showKpiReport(type) {
     qcols.forEach(c => html += `<th style="color:var(--warn)">${esc(c)}</th>`);
     html += '</tr></thead><tbody>';
     if (!data.length) {
-      html += `<tr><td colspan="${qcols.length}" style="text-align:center;padding:20px;color:var(--text-dim)">No CIs with quantity mismatches found.</td></tr>`;
+      html += `<tr><td colspan="${qcols.length}" style="text-align:center;padding:20px;color:var(--text-muted)">No CIs with quantity mismatches found.</td></tr>`;
     }
     data.forEach(ci => {
       const e=_ciEnrich(ci,RB,DESC,null,null); const r=e.r;
       const eqN=Number(e.eqDisp), aqN=Number(e.aqDisp);
       const dQty=(!isNaN(eqN)&&!isNaN(aqN)&&e.eqDisp!==''&&e.aqDisp!=='')?(aqN-eqN):'';
-      const dColor=(dQty!==''&&dQty<0)?'var(--danger)':((dQty!==''&&dQty>0)?'var(--success)':'var(--text-dim)');
+      const dColor=(dQty!==''&&dQty<0)?'var(--danger)':((dQty!==''&&dQty>0)?'var(--success)':'var(--text-muted)');
       const abomNh=r.abomNh||r.abomNhUsedOn||'';
       // Per-line ABOM breakdown
       const _k = (ci.pn||'') + '||' + (ci.nh||'');
       const _lines = (_meta.abomLinesByKey && _meta.abomLinesByKey.get(_k)) || [];
-      const _dm = '<span style="color:var(--text-dim)">—</span>';
+      const _dm = '<span style="color:var(--text-muted)">—</span>';
       const _stk = (arr) => { if(!arr.length) return _dm; if(arr.length===1) return arr[0]; return arr.map((h,i)=>`<div style="padding:1px 0;${i<arr.length-1?'border-bottom:1px solid #30363d88;margin-bottom:2px;':''}">${h}</div>`).join(''); };
       const _woH = _stk(_lines.map(l=>l.wo?esc(l.wo):_dm));
       const _qH  = _stk(_lines.map(l=>l.qty!==''?esc(l.qty):_dm));
@@ -20849,7 +20854,7 @@ function showKpiReport(type) {
       <strong style="color:var(--text-muted)">Path 2 (Used-On Match):</strong>
       CI Part Number appears as an ABOM Used-On value for the NCR's Originating Work Order.<br>
       <strong style="color:var(--adj)">Adjudication claims</strong> appear here too: a CI manually traced to a <strong>CLOSED</strong> disposition (via the Manual CI Trace form or the EBOM→ABOM embodiment form) is shown with its Match Path column reading <strong style="color:var(--adj)">Adjudicated</strong> (purple), and the adjudicator is recorded.<br>
-      <span style="color:var(--text-dim)">
+      <span style="color:var(--text-muted)">
         A CI with both open and closed dispositions appears in this KPI and in "CIs with Open NCR Dispositions" — they are not mutually exclusive.
       </span>
     </div>`;
@@ -20857,7 +20862,7 @@ function showKpiReport(type) {
     cols.forEach(c => html += `<th style="color:var(--text-muted)">${c}</th>`);
     html += '</tr></thead><tbody>';
     if (!data.length) {
-      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-dim)">No CIs with closed NCR dispositions found.</td></tr>`;
+      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-muted)">No CIs with closed NCR dispositions found.</td></tr>`;
     }
     data.forEach((ci, gi) => {
       ci.ncrEntries.forEach((e, idx) => {
@@ -20894,7 +20899,7 @@ function showKpiReport(type) {
     <div style="font-family:var(--sans);font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:1.55">
       These CIs are <strong style="color:var(--success)">directly traceable</strong> to the ABOM as a Part Number + Next Higher line item, with quantity satisfied and the associated Work Order in CLOSED status.
       This is the strictest, most audit-defensible CI status — the equivalent of "EBOM Line-Items Directly Embodied" on the dashboard, scoped to the CI population.
-      <br><span style="color:var(--text-dim)">Trigger: the ABOM direct leg (result.as) is a Pass 1 success — 'ok' / 'flex_ok', or the SME-adjudicated equivalents 'direct_adjudicated' / 'qty_mismatch_accepted'. The per-leg status is used, not the overall rollup, so an MBOM-side miss cannot exclude a CI whose ABOM leg is fully reconciled.</span>
+      <br><span style="color:var(--text-muted)">Trigger: the ABOM direct leg (result.as) is a Pass 1 success — 'ok' / 'flex_ok', or the SME-adjudicated equivalents 'direct_adjudicated' / 'qty_mismatch_accepted'. The per-leg status is used, not the overall rollup, so an MBOM-side miss cannot exclude a CI whose ABOM leg is fully reconciled.</span>
     </div>`;
     html += _ciCoverageTable(data, 'var(--success)', 'No CIs directly reconciled.', false);
     _setReportHtml(html);
@@ -20947,15 +20952,15 @@ function showKpiReport(type) {
     </div>
     <div style="font-family:var(--sans);font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:1.55">
       CIs whose <strong style="color:${dc}">Part Number + Next Higher PN</strong> was not found in the EBOM. These CIs sit outside EBOM scope, so they cannot be embodiment-reconciled against the build — review whether each is a valid CI for this program or an input-data issue.
-      <br><span style="color:var(--text-dim)">A CI is missing when no EBOM row carries both the CI Part Number and the CI Next Higher PN.</span>
+      <br><span style="color:var(--text-muted)">A CI is missing when no EBOM row carries both the CI Part Number and the CI Next Higher PN.</span>
     </div>`;
     html += '<div class="table-wrap"><table><thead><tr>';
     cols.forEach(c => html += `<th style="color:${dc}">${c}</th>`);
     html += '</tr></thead><tbody>';
     if (!state.boms.ebom) {
-      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-dim)">EBOM not loaded — load the EBOM to evaluate CI coverage.</td></tr>`;
+      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-muted)">EBOM not loaded — load the EBOM to evaluate CI coverage.</td></tr>`;
     } else if (!data.length) {
-      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-dim)">All CIs were matched in the EBOM by Part Number + Next Higher PN.</td></tr>`;
+      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-muted)">All CIs were matched in the EBOM by Part Number + Next Higher PN.</td></tr>`;
     }
     data.forEach(ci => {
       const found = ci.pnInEbom
@@ -20990,7 +20995,7 @@ function showKpiReport(type) {
     cols.forEach(c => html += `<th style="color:var(--text-muted)">${esc(c)}</th>`);
     html += '</tr></thead><tbody>';
     if (!data.length) {
-      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-dim)">No CIs with direct RFV PN+NH matches found.</td></tr>`;
+      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-muted)">No CIs with direct RFV PN+NH matches found.</td></tr>`;
     }
     data.forEach(ci => {
       ci.rfvEntries.forEach((e, idx) => {
@@ -21030,7 +21035,7 @@ function showKpiReport(type) {
     cols.forEach(c => html += `<th style="color:var(--text-muted)">${esc(c)}</th>`);
     html += '</tr></thead><tbody>';
     if (!data.length) {
-      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-dim)">No CIs with NCR-linked RFV coverage found.</td></tr>`;
+      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-muted)">No CIs with NCR-linked RFV coverage found.</td></tr>`;
     }
     data.forEach(ci => {
       ci.rfvEntries.forEach((e, idx) => {
@@ -21071,7 +21076,7 @@ function showKpiReport(type) {
     cols.forEach(c => html += `<th style="color:var(--text-muted)">${esc(c)}</th>`);
     html += '</tr></thead><tbody>';
     if (!data.length) {
-      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-dim)">No CIs with WO-linked RFV coverage found.</td></tr>`;
+      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-muted)">No CIs with WO-linked RFV coverage found.</td></tr>`;
     }
     data.forEach(ci => {
       ci.rfvEntries.forEach((e, idx) => {
@@ -21115,12 +21120,12 @@ function showKpiReport(type) {
     cols.forEach(c => html += `<th style="color:var(--text-muted)">${esc(c)}</th>`);
     html += '</tr></thead><tbody>';
     if (!data.length) {
-      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-dim)">No CIs with RFV coverage found.</td></tr>`;
+      html += `<tr><td colspan="${cols.length}" style="text-align:center;padding:20px;color:var(--text-muted)">No CIs with RFV coverage found.</td></tr>`;
     }
     data.forEach(ci => {
-      const p1 = ci.passFlags.p1 ? `<span style="color:var(--text);font-weight:700">◈ YES</span>` : `<span style="color:var(--text-dim)">—</span>`;
-      const p2 = ci.passFlags.p2 ? `<span style="color:var(--text);font-weight:700">◈ YES</span>` : `<span style="color:var(--text-dim)">—</span>`;
-      const p3 = ci.passFlags.p3 ? `<span style="color:var(--text);font-weight:700">◈ YES</span>` : `<span style="color:var(--text-dim)">—</span>`;
+      const p1 = ci.passFlags.p1 ? `<span style="color:var(--text);font-weight:700">◈ YES</span>` : `<span style="color:var(--text-muted)">—</span>`;
+      const p2 = ci.passFlags.p2 ? `<span style="color:var(--text);font-weight:700">◈ YES</span>` : `<span style="color:var(--text-muted)">—</span>`;
+      const p3 = ci.passFlags.p3 ? `<span style="color:var(--text);font-weight:700">◈ YES</span>` : `<span style="color:var(--text-muted)">—</span>`;
       html += `<tr>
         <td style="color:var(--text)">${esc(ci.ciId||'—')}</td>
         <td style="font-family:var(--mono);font-size:11px;color:var(--text)">${esc(ci.pn||'—')}</td>
@@ -21196,7 +21201,7 @@ function showKpiReport(type) {
     html += '<div class="table-wrap"><table><thead><tr>';
     [...acnCols, ...abomHdr].forEach(c => html += `<th style="color:var(--text-muted)">${esc(c)}</th>`);
     html += '</tr></thead><tbody>';
-    if (!embodied.length) html += `<tr><td colspan="${acnCols.length + abomHdr.length}" style="text-align:center;padding:16px;color:var(--text-dim)">No Level 4–7 ACN parts are embodied.</td></tr>`;
+    if (!embodied.length) html += `<tr><td colspan="${acnCols.length + abomHdr.length}" style="text-align:center;padding:16px;color:var(--text-muted)">No Level 4–7 ACN parts are embodied.</td></tr>`;
     embodied.forEach(r => {
       const rows = r.abomRows.length ? r.abomRows : [{}];
       rows.forEach((a, i) => {
@@ -21279,7 +21284,7 @@ function showKpiReport(type) {
     html += '<div class="table-wrap"><table><thead><tr>';
     acnCols.forEach(c => html += `<th>${esc(c)}</th>`);
     html += '</tr></thead><tbody>';
-    if (!notEmbodied.length) html += `<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--text-dim)">All Level 6 ACN parts are embodied.</td></tr>`;
+    if (!notEmbodied.length) html += `<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--text-muted)">All Level 6 ACN parts are embodied.</td></tr>`;
     notEmbodied.forEach(r => {
       html += `<tr>
         <td style="color:var(--text);font-weight:600">${esc(r.recNo)}</td>
@@ -21361,7 +21366,7 @@ function showKpiReport(type) {
       html += `<th style="color:var(--text-muted)">${esc(c)}</th>`);
     html += '</tr></thead><tbody>';
     if (!linked.length) {
-      html += `<tr><td colspan="7" style="text-align:center;padding:16px;color:var(--text-dim)">No CIs trace to an ACN.</td></tr>`;
+      html += `<tr><td colspan="7" style="text-align:center;padding:16px;color:var(--text-muted)">No CIs trace to an ACN.</td></tr>`;
     }
     linked.forEach(r => {
       r.acnMatches.forEach((a, i) => {
@@ -21907,7 +21912,7 @@ const EXPLAIN_CONTENT = {
       <h4>Job Numbers and the cell markers</h4>
       <p><strong>Job Number columns (v149):</strong> the MBOM and ABOM upload files carry a Job Number on every row, now surfaced verbatim — no inference. <strong>MBOM Job Number</strong> lists the distinct jobs across the MBOM rows matching the line's PN + Next Higher. <strong>ABOM Direct Job Number</strong> shows each as-built record's own job, aligned line-for-line with its WO# / per-WO Qty / Proc Code rows. <strong>ABOM Used On Job Number</strong> resolves per work order, each embedded row aligning with its WO in the next column. In the Excel exports these fan with their rows. (The always-empty MBOM / ABOM Used-On Qty columns were removed in the same build — the engine never computed a component-level quantity for the used-on passes.)</p>
       <p><strong>The "↑ parent" marker</strong> in the Direct Qty columns carries exactly two styles, the same on both BOM sides: <span style="color:var(--success);font-style:italic">green italic</span> = the line is reconciled via a Pass-3 indenture ancestor (no direct quantity of its own to show); <span style="color:var(--text-muted);font-style:italic">muted italic</span> = a structural indenture A/B collector row, outside reconciliation scope.</p>
-      <p style="color:var(--text-dim);font-size:11px">The dashboard and the HTML report stack in place and are never fanned; these two columns exist only in the CSV / XLSX / context exports. Sessions saved before v145 gain the line numbers automatically on import.</p>
+      <p style="color:var(--text-muted);font-size:11px">The dashboard and the HTML report stack in place and are never fanned; these two columns exist only in the CSV / XLSX / context exports. Sessions saved before v145 gain the line numbers automatically on import.</p>
     `,
   },
   'adjudication-workbench': {
@@ -22460,7 +22465,7 @@ function renderRFVTable(page) {
     <span style="color:var(--text-muted)">P2 NCR Disp: <strong>${p2c}</strong> rows</span>
     <span style="color:var(--text-muted)">P3 Work Order: <strong>${p3c}</strong> rows</span>
     <span style="color:var(--danger)">No Match (all passes): <strong>${umc}</strong></span>
-    <span style="color:var(--text-dim);margin-left:auto;font-size:9px">Passes independent — one RFV row may appear in multiple passes · Total: ${totalRows}</span>
+    <span style="color:var(--text-muted);margin-left:auto;font-size:9px">Passes independent — one RFV row may appear in multiple passes · Total: ${totalRows}</span>
   </div>`;
 
   html += '<table><thead><tr>';
@@ -22494,7 +22499,7 @@ function renderRFVTable(page) {
     <button class="page-btn" onclick="renderRFVTable(${rfvPage - 1})" ${rfvPage === 0 ? 'disabled' : ''}>← Prev</button>
     <span>Rows ${start}–${end} of ${totalRows}</span>
     <button class="page-btn" onclick="renderRFVTable(${rfvPage + 1})" ${rfvPage >= totalPages - 1 ? 'disabled' : ''}>Next →</button>
-    <span style="margin-left:auto;color:var(--text-dim)">Page ${rfvPage + 1} / ${totalPages} · ${PAGE_SIZE} rows/page</span>
+    <span style="margin-left:auto;color:var(--text-muted)">Page ${rfvPage + 1} / ${totalPages} · ${PAGE_SIZE} rows/page</span>
   </div>`;
 
   document.getElementById('rfv-table-wrap').innerHTML = html;
@@ -23368,7 +23373,7 @@ function _adjWoTypeahead() {
         const rows = idx.filter(w => w.wo.toUpperCase() === q);
         if (rows.length === 1)      match.innerHTML = '<span style="color:var(--success)">\u2713 Matches ABOM WO \u00b7 ' + esc(rows[0].status || 'no status') + '</span>';
         else if (rows.length > 1)   match.innerHTML = '<span style="color:var(--warn)">' + rows.length + ' ABOM rows on this WO \u2014 pick one below to link the exact PN / Used-On</span>';
-        else                        match.innerHTML = '<span style="color:var(--text-dim)">Not found in loaded ABOM \u2014 will be saved as free-text</span>';
+        else                        match.innerHTML = '<span style="color:var(--text-muted)">Not found in loaded ABOM \u2014 will be saved as free-text</span>';
       }
     }
   }
@@ -23496,14 +23501,14 @@ function _adjOpen(rowKey, reasonCode) {
     </div>
     <div class="adj-form-row">
       <label>Quantity Adjudicated <span class="req">*</span>
-        <span style="color:var(--text-dim);font-weight:400;letter-spacing:0">${_reqQtyNum != null ? ('(' + (_legStatus === 'qty_mismatch' ? ('shortfall of ' + _reqQtyNum + ' (EBOM ' + _eqNum + ' \u2212 already ' + _legQtyNum + ')') : ('EBOM requires ' + _reqQtyNum)) + '; ' + _remainQty + ' still unaccounted)') : '(enter the quantity this claim accounts for)'}</span>
+        <span style="color:var(--text-muted);font-weight:400;letter-spacing:0">${_reqQtyNum != null ? ('(' + (_legStatus === 'qty_mismatch' ? ('shortfall of ' + _reqQtyNum + ' (EBOM ' + _eqNum + ' \u2212 already ' + _legQtyNum + ')') : ('EBOM requires ' + _reqQtyNum)) + '; ' + _remainQty + ' still unaccounted)') : '(enter the quantity this claim accounts for)'}</span>
       </label>
       <input type="number" id="adj-form-qty" min="0" step="any" placeholder="Required — enter qty this claim accounts for" autocomplete="off"
              data-required-qty="${_reqQtyNum != null ? _reqQtyNum : ''}" data-remaining-qty="${_remainQty != null ? _remainQty : ''}">
       <div id="adj-form-qty-err" style="font-size:10px;color:var(--danger);min-height:12px;margin-top:2px"></div>
     </div>
     <div class="adj-form-row">
-      <label>Work Order Number <span style="color:var(--text-dim);font-weight:400;letter-spacing:0">(optional)</span></label>
+      <label>Work Order Number <span style="color:var(--text-muted);font-weight:400;letter-spacing:0">(optional)</span></label>
       <div style="position:relative">
         <input type="text" id="adj-form-wo" placeholder="Type to search ABOM work orders…" autocomplete="off"
                oninput="_adjWoTypeahead()" onfocus="_adjWoTypeahead()"
@@ -23527,7 +23532,7 @@ function _adjOpen(rowKey, reasonCode) {
          this picker since NCRs are post-build inspection records and don't
          apply to procurement/planning. -->
     <div class="adj-form-row">
-      <label>NCR Disposition Number(s) <span style="color:var(--text-dim);font-weight:400;letter-spacing:0">(optional — embodiment evidence)</span></label>
+      <label>NCR Disposition Number(s) <span style="color:var(--text-muted);font-weight:400;letter-spacing:0">(optional — embodiment evidence)</span></label>
       <div id="adj-form-ncr-multipicker-host">
         <input type="text" id="adj-form-ncr-picker-input" placeholder="🔍 Search closed NCR dispositions by Disp # or NCR #…" autocomplete="off"
                oninput="_adjFilterNcrMultiPicker()" style="width:100%;padding:8px 12px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:var(--mono);font-size:11px">
@@ -23647,7 +23652,7 @@ function _adjOpenNhMismatch(bom, rowKey, altNh, altRowIdx, altQty, attribution, 
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     const fmtQty = v => (v == null || v === '') ? '—' : String(v);
     const woColor = ws => {
-      if (!ws) return 'var(--text-dim)';
+      if (!ws) return 'var(--text-muted)';
       const u = String(ws).toUpperCase();
       if (u === 'CLOSED') return 'var(--success)';
       return 'var(--warn)';
@@ -23701,7 +23706,7 @@ function _adjOpenNhMismatch(bom, rowKey, altNh, altRowIdx, altQty, attribution, 
           .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
           .replace(/"/g, '&quot;');
         const statusColor = (function(ws) {
-          if (!ws) return 'var(--text-dim)';
+          if (!ws) return 'var(--text-muted)';
           return String(ws).toUpperCase() === 'CLOSED' ? 'var(--success)' : 'var(--warn)';
         })(altWoStatus);
         // Strip the "(optional)" hint — for NH claims the WO is auto-linked,
@@ -23742,7 +23747,7 @@ function _adjOpenNhMismatch(bom, rowKey, altNh, altRowIdx, altQty, attribution, 
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:${enabled ? 'pointer' : 'not-allowed'};opacity:${enabled ? '1' : '0.55'}">
           <input type="checkbox" id="adj-form-nh-bothlegs" ${enabled ? '' : 'disabled'} style="accent-color:var(--accent);margin-top:2px;cursor:${enabled ? 'pointer' : 'not-allowed'}">
           <div style="flex:1">
-            <div style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:${enabled ? 'var(--text)' : 'var(--text-dim)'};margin-bottom:4px;text-transform:uppercase">
+            <div style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:${enabled ? 'var(--text)' : 'var(--text-muted)'};margin-bottom:4px;text-transform:uppercase">
               Also apply this claim to EBOM-MBOM
             </div>
             <div style="font-family:var(--sans);font-size:11px;color:var(--text-muted);line-height:1.55;text-transform:none;letter-spacing:0;font-weight:400">
@@ -23839,7 +23844,7 @@ function _adjOpenDashAbom(rowKey, candPn, candWo, candWoStatus, candUo, candQty,
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     const fmtQty = v => (v == null || v === '') ? '—' : String(v);
     const woColor = ws => {
-      if (!ws) return 'var(--text-dim)';
+      if (!ws) return 'var(--text-muted)';
       return String(ws).toUpperCase() === 'CLOSED' ? 'var(--success)' : 'var(--warn)';
     };
     let extraHtml = `<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)">
@@ -23867,7 +23872,7 @@ function _adjOpenDashAbom(rowKey, candPn, candWo, candWoStatus, candUo, candQty,
       const woLabel = woInput.parentElement && woInput.parentElement.querySelector('label');
       if (woLabel && !woLabel.querySelector('.nh-wo-autolink-badge')) {
         const statusColor = (function(ws) {
-          if (!ws) return 'var(--text-dim)';
+          if (!ws) return 'var(--text-muted)';
           return String(ws).toUpperCase() === 'CLOSED' ? 'var(--success)' : 'var(--warn)';
         })(candWoStatus);
         const labelHtml = woLabel.innerHTML.replace(/<span[^>]*>\(optional\)<\/span>/i, '');
@@ -23926,7 +23931,7 @@ function _adjOpenDashAbom(rowKey, candPn, candWo, candWoStatus, candUo, candQty,
       <label style="display:flex;align-items:flex-start;gap:10px;cursor:${toggleEnabled ? 'pointer' : 'not-allowed'};opacity:${toggleEnabled ? '1' : '0.55'}">
         <input type="checkbox" id="adj-form-nh-bothlegs" ${toggleEnabled ? '' : 'disabled'} style="accent-color:var(--accent);margin-top:2px;cursor:${toggleEnabled ? 'pointer' : 'not-allowed'}">
         <div style="flex:1">
-          <div style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:${toggleEnabled ? 'var(--text)' : 'var(--text-dim)'};margin-bottom:4px">
+          <div style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:${toggleEnabled ? 'var(--text)' : 'var(--text-muted)'};margin-bottom:4px">
             Also apply this claim to EBOM-MBOM
           </div>
           <div style="font-family:var(--sans);font-size:11px;color:var(--text-muted);line-height:1.55;text-transform:none;letter-spacing:0;font-weight:400">
@@ -24160,7 +24165,7 @@ function _adjNcrCiQtyFieldHtml(idSuffix, cap, opts) {
   return `
     <div class="adj-form-row" style="margin-top:8px">
       <label>Quantity Adjudicated <span class="req">*</span>
-        <span id="adj-ncrci-qtyhint-${idSuffix}" style="color:var(--text-dim);font-weight:400;letter-spacing:0">${hint}</span>
+        <span id="adj-ncrci-qtyhint-${idSuffix}" style="color:var(--text-muted);font-weight:400;letter-spacing:0">${hint}</span>
       </label>
       <input type="number" id="adj-ncrci-qty-${idSuffix}" min="0" step="any"${disabled} placeholder="Required — enter qty this trace accounts for" autocomplete="off"
              data-cap="${capAttr}">
@@ -24183,7 +24188,7 @@ function _adjRenderNcrCiForm(ctx) {
 
   const ncrEndpointHtml = `
     <div class="adj-form-row">
-      <label>NCR Endpoint <span style="color:var(--text-dim);font-weight:400;letter-spacing:0">(read-only)</span></label>
+      <label>NCR Endpoint <span style="color:var(--text-muted);font-weight:400;letter-spacing:0">(read-only)</span></label>
       <span class="target-pill">NCR #: <strong>${esc(snap.ncrNum || '—')}</strong></span>
       <span class="target-pill">Disp #: <strong>${esc(ctx.dispNo)}</strong></span>
       <span class="target-pill">Status: <strong>${esc(snap.dispStatus || '—')}</strong></span>
@@ -24210,7 +24215,7 @@ function _adjRenderNcrCiForm(ctx) {
     // panel HTML is set (see the _adjNcrCiAddBlock call below).
     ciEndpointHtml = `
       <div class="adj-form-row">
-        <label>Trace to CI(s) <span class="req">*</span> <span style="color:var(--text-dim);font-weight:400;letter-spacing:0">(one CI per trace — up to 6)</span></label>
+        <label>Trace to CI(s) <span class="req">*</span> <span style="color:var(--text-muted);font-weight:400;letter-spacing:0">(one CI per trace — up to 6)</span></label>
         <div id="adj-ncrci-blocks"></div>
         <button type="button" id="adj-ncrci-spawn" onclick="_adjNcrCiAddBlock()"
                 style="margin-top:10px;background:var(--accent-dim);border:1px solid var(--accent);color:var(--accent);font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.04em;padding:7px 14px;border-radius:var(--radius-md);cursor:pointer">➕ Spawn additional CI trace</button>
@@ -24221,7 +24226,7 @@ function _adjRenderNcrCiForm(ctx) {
     // single capped quantity field (capped to this CI's EBOM line qty).
     ciEndpointHtml = `
       <div class="adj-form-row">
-        <label>CI Endpoint <span style="color:var(--text-dim);font-weight:400;letter-spacing:0">(prefilled from candidate)</span></label>
+        <label>CI Endpoint <span style="color:var(--text-muted);font-weight:400;letter-spacing:0">(prefilled from candidate)</span></label>
         <span class="target-pill">CI ID: <strong>${esc(ctx.ciId || '—')}</strong></span>
         <span class="target-pill">PN: <strong>${esc(ctx.ciPn || '—')}</strong></span>
         <span class="target-pill">NH: <strong>${esc(ctx.ciNh || '—')}</strong></span>
@@ -24597,12 +24602,12 @@ function _adjFilterNcrMultiPicker() {
            style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px"
            onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
         <div><strong style="color:var(--adj)">${esc(m.dispNo)}</strong>
-             <span style="color:var(--text-dim)">·</span>
+             <span style="color:var(--text-muted)">·</span>
              NCR: <span style="color:var(--text-muted)">${esc(m.ncrNum || '—')}</span>
-             ${m.dispType ? `<span style="color:var(--text-dim)"> · ${esc(m.dispType)}</span>` : ''}
-             ${m.dispCode ? `<span style="color:var(--text-dim)"> · ${esc(m.dispCode)}</span>` : ''}
+             ${m.dispType ? `<span style="color:var(--text-muted)"> · ${esc(m.dispType)}</span>` : ''}
+             ${m.dispCode ? `<span style="color:var(--text-muted)"> · ${esc(m.dispCode)}</span>` : ''}
         </div>
-        ${textSnippet ? `<div style="font-size:9px;color:var(--text-dim);margin-top:2px;white-space:normal">${esc(textSnippet)}</div>` : ''}
+        ${textSnippet ? `<div style="font-size:9px;color:var(--text-muted);margin-top:2px;white-space:normal">${esc(textSnippet)}</div>` : ''}
       </div>
     `;
   }).join('');
@@ -24890,7 +24895,7 @@ function _adjRenderEbomNcrForm(ctx) {
   // NCR endpoint pills (read-only) — show enough context to support SME's mode decision
   const ncrEndpointHtml = `
     <div class="adj-form-row">
-      <label>NCR Endpoint <span style="color:var(--text-dim);font-weight:400;letter-spacing:0">(read-only — from candidate row)</span></label>
+      <label>NCR Endpoint <span style="color:var(--text-muted);font-weight:400;letter-spacing:0">(read-only — from candidate row)</span></label>
       <span class="target-pill">NCR #: <strong>${esc(snap.ncrNum || '—')}</strong></span>
       <span class="target-pill">Disp #: <strong>${esc(snap.dispNo)}</strong></span>
       <span class="target-pill" style="background:${isClosed ? 'rgba(63,185,80,0.15)' : 'rgba(240,136,62,0.15)'};border-color:${isClosed ? 'var(--success)' : 'var(--warn)'}">
@@ -24951,7 +24956,7 @@ function _adjRenderEbomNcrForm(ctx) {
     </div>
     <div class="adj-form-row" id="adj-ebomncr-qty-row">
       <label>Quantity Adjudicated <span class="req">*</span>
-        <span style="color:var(--text-dim);font-weight:400;letter-spacing:0">(embodiment only — how much of the line this NCR disposition embodies)</span>
+        <span style="color:var(--text-muted);font-weight:400;letter-spacing:0">(embodiment only — how much of the line this NCR disposition embodies)</span>
       </label>
       <input type="number" id="adj-ebomncr-qty" min="0" step="any" placeholder="Required for Embodiment — qty this disposition accounts for" autocomplete="off">
       <div id="adj-ebomncr-qty-err" style="font-size:10px;color:var(--danger);min-height:12px;margin-top:2px"></div>
@@ -25021,7 +25026,7 @@ function _adjFilterEbomPicker() {
          onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
       <strong style="color:var(--text)">${esc(m.pn)}</strong>
       &nbsp;·&nbsp; NH: <span style="color:var(--text-muted)">${esc(m.nh || '—')}</span>
-      &nbsp;·&nbsp; Qty: <span style="color:var(--text-dim)">${esc(m.qtyText || '—')}</span>
+      &nbsp;·&nbsp; Qty: <span style="color:var(--text-muted)">${esc(m.qtyText || '—')}</span>
     </div>
   `).join('');
   resultsEl.style.display = 'block';
@@ -25553,7 +25558,7 @@ function _adjOpenManagementModal() {
         pnCell = parts0[0] || '—';
         nhCell = parts0[1] || '—';
         if (rks.length > 1) {
-          pnCell += ` <span style="color:var(--text-dim);font-size:9px">+${rks.length - 1} more</span>`;
+          pnCell += ` <span style="color:var(--text-muted);font-size:9px">+${rks.length - 1} more</span>`;
         }
       } else {
         const parts = (c.rowKey || '||').split('||');
@@ -25600,13 +25605,13 @@ function _adjOpenManagementModal() {
           (c.mode === 'embodiment' ? 'EMBOD' : 'TRACE') + '</span>';
       }
       html += `<tr>
-        <td style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">${i+1}</td>
+        <td style="font-family:var(--mono);font-size:10px;color:var(--text-muted)">${i+1}</td>
         <td style="white-space:nowrap">${statusBadge}</td>
         <td style="font-family:var(--mono);font-size:10px;color:var(--adj)">${esc(moduleSrc)}</td>
         <td style="font-family:var(--mono);font-size:11px;color:var(--text)">${pnCell}${pnHint}</td>
         <td style="font-family:var(--mono);font-size:11px">${esc(nhCell)}</td>
         <td style="font-family:var(--mono);font-size:10px;color:var(--text)">${esc(legCell)}</td>
-        <td style="font-family:var(--mono);font-size:10px;color:var(--text)">${(c.claimedQty != null && c.claimedQty !== '') ? esc(String(c.claimedQty)) : '<span style="color:var(--text-dim)">\u2014</span>'}</td>
+        <td style="font-family:var(--mono);font-size:10px;color:var(--text)">${(c.claimedQty != null && c.claimedQty !== '') ? esc(String(c.claimedQty)) : '<span style="color:var(--text-muted)">\u2014</span>'}</td>
         <td style="font-size:11px;color:var(--text)">${esc(c.sme || '—')}</td>
         <td style="font-family:var(--mono);font-size:10px;color:var(--adj)">${esc(c.smeRole || '—')}</td>
         <td style="font-family:var(--mono);font-size:10px;color:var(--text)">${esc(ts)}</td>
@@ -25652,12 +25657,12 @@ function _adjRemoveClaim(claimId) {
     <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:4px">
       <div style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-bottom:8px;letter-spacing:0.06em;text-transform:uppercase">Claim to be removed</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-family:var(--mono);font-size:11px">
-        <div><span style="color:var(--text-dim);font-size:9px">MODULE SOURCE</span><br>${esc(reasonLabel[claim.reason]||claim.reason)}</div>
-        <div><span style="color:var(--text-dim);font-size:9px">LEG</span><br>${esc((claim.leg||'').toUpperCase())}</div>
-        <div><span style="color:var(--text-dim);font-size:9px">PART NUMBER</span><br><strong>${esc(pn)}</strong></div>
-        <div><span style="color:var(--text-dim);font-size:9px">NEXT HIGHER</span><br>${esc(nh)}</div>
-        <div><span style="color:var(--text-dim);font-size:9px">SME</span><br>${esc(claim.sme||'—')}${claim.smeRole ? ` <span style="color:var(--adj);font-size:9px">(${esc(claim.smeRole)})</span>` : ''}</div>
-        <div><span style="color:var(--text-dim);font-size:9px">TIMESTAMP</span><br>${esc(ts)}</div>
+        <div><span style="color:var(--text-muted);font-size:9px">MODULE SOURCE</span><br>${esc(reasonLabel[claim.reason]||claim.reason)}</div>
+        <div><span style="color:var(--text-muted);font-size:9px">LEG</span><br>${esc((claim.leg||'').toUpperCase())}</div>
+        <div><span style="color:var(--text-muted);font-size:9px">PART NUMBER</span><br><strong>${esc(pn)}</strong></div>
+        <div><span style="color:var(--text-muted);font-size:9px">NEXT HIGHER</span><br>${esc(nh)}</div>
+        <div><span style="color:var(--text-muted);font-size:9px">SME</span><br>${esc(claim.sme||'—')}${claim.smeRole ? ` <span style="color:var(--adj);font-size:9px">(${esc(claim.smeRole)})</span>` : ''}</div>
+        <div><span style="color:var(--text-muted);font-size:9px">TIMESTAMP</span><br>${esc(ts)}</div>
       </div>
       ${claim.rationale ? `<div style="margin-top:8px;font-size:10px;color:var(--text-muted);border-top:1px solid var(--border);padding-top:8px">${esc(claim.rationale)}</div>` : ''}
     </div>
