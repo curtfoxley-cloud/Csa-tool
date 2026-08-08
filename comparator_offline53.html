@@ -349,9 +349,25 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     margin: 14px 0 5px; padding-bottom: 4px; border-bottom: 1px solid var(--border);
   }
   .pcm-row {
-    display: grid; grid-template-columns: 96px 74px 1fr auto;
-    align-items: center; gap: 10px; padding: 5px 0;
+    display: grid; grid-template-columns: 110px 74px 1fr auto;
+    align-items: start; gap: 10px; padding: 6px 0;
     border-bottom: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+  }
+  /* Column header strip — same grid so cells line up with the rows below. */
+  .pcm-head-row {
+    border-bottom: 1px solid var(--border); padding-bottom: 5px;
+    font-family: var(--mono); font-size: 8px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text-muted);
+  }
+  .pcm-head-row span:last-child { text-align: right; }
+  /* Job numbers stack one per line inside the cell. */
+  .pcm-jobs { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .pcm-job {
+    font-family: var(--mono); font-size: 10px; color: var(--text);
+    letter-spacing: 0.02em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .pcm-job-more, .pcm-job-none {
+    font-family: var(--mono); font-size: 9px; color: var(--text-muted); letter-spacing: 0.04em;
   }
   .pcm-row:last-child { border-bottom: none; }
   .pcm-code {
@@ -360,10 +376,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
   .pcm-code.blank { color: var(--text-muted); font-weight: 400; font-style: italic; }
   .pcm-count { font-family: var(--mono); font-size: 9px; color: var(--text-muted); letter-spacing: 0.04em; }
-  .pcm-desc {
-    font-family: var(--sans); font-size: 11px; color: var(--text-muted);
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
+  /* .pcm-desc removed in v153 — the panel no longer shows the ABOM description
+     column. It holds the PART name, which says nothing about what a proc code
+     means, and the removal-wording hint built on it produced false positives on
+     part names containing "REMOVABLE". Job numbers replaced it. */
   .pcm-flag {
     font-family: var(--mono); font-size: 8px; letter-spacing: 0.05em;
     color: var(--warn); border: 1px solid color-mix(in srgb, var(--warn) 34%, transparent);
@@ -4126,27 +4142,32 @@ function refreshAbomColumnMappingUI() {
 //
 // Deliberately NOT here: any attempt to guess a code's meaning. Software cannot
 // tell a removal code from an install code by looking at it; only someone on
-// the program knows. The one hint shown is derived from data the file already
-// carries (see _procRemovalish) and is advisory, never applied automatically.
+// the program knows. The panel presents EVIDENCE — row counts and a sample of
+// the job numbers each code appears under — and leaves the judgement to the
+// user. It offers no inference of its own.
 //
 // Timing: proc behavior is consumed at Run Comparison, not at parse. So tagging
 // needs a re-run, never a re-upload — unlike the column-mapping toggles.
 // ───────────────────────────────────────────────────────────────────────────
+
+// How many distinct job numbers to sample per proc code in the panel.
+const PROC_JOB_SAMPLES = 3;
 
 let _procPanelOpen   = false;   // panel expanded?
 let _procDirtySinceRun = false; // tags changed after a completed run?
 
 function _procNorm(v) { return String(v == null ? '' : v).trim().toUpperCase(); }
 
-// Is this ABOM row's description a removal instruction? Mirrors the EBOM
-// removal-scope test already in the build (substring "REMOV", overridden by
-// "INSTAL"/"INSTL"). Advisory only — surfaced as a hint next to untagged codes.
-function _procRemovalish(desc) {
-  const d = String(desc == null ? '' : desc).toUpperCase();
-  if (!d) return false;
-  if (d.indexOf('INSTAL') >= 0 || d.indexOf('INSTL') >= 0) return false;
-  return d.indexOf('REMOV') >= 0;
-}
+// NOTE — there is deliberately NO automatic hint about what a proc code means.
+// An earlier build tested the ABOM description column for "REMOV" and flagged
+// codes whose rows "look like" removals. That was wrong twice over: COL.abom.desc
+// is the PART description (it sits immediately after pn, and the CHP map names
+// the same field partName), not an instruction, so it says nothing about the
+// code; and the substring matches "REMOVABLE" / "QUICK-REMOVE", so ordinary part
+// names like "PANEL, REMOVABLE, LH" tripped it — steering the user toward
+// classifying an install code as a removal. Only someone on the program knows
+// what a code means. The panel shows evidence (row counts, job numbers) and
+// leaves the judgement to them.
 
 // ── Distinct proc codes in the loaded ABOM ─────────────────────────────────
 // DEDUPLICATED on the normalized code (trim + uppercase), so "br", "BR " and
@@ -4164,7 +4185,7 @@ function abomProcCodeInventory() {
 
   const byCode = new Map();   // normalized code -> record
   const pcCol  = COL.abom.procCode;
-  const dCol   = COL.abom.desc;
+  const jCol   = COL.abom.jobNo;
 
   bom.data.forEach(row => {
     out.totalRows++;
@@ -4173,14 +4194,17 @@ function abomProcCodeInventory() {
     if (!code) { out.blankRows++; return; }          // blank => install, not taggable
     let rec = byCode.get(code);
     if (!rec) {
-      rec = { code: code, rows: 0, removalish: 0, sample: '', variants: new Set() };
+      rec = { code: code, rows: 0, jobs: new Set(), variants: new Set() };
       byCode.set(code, rec);
     }
     rec.rows++;
     rec.variants.add(raw);
-    const desc = String(row[dCol] == null ? '' : row[dCol]).trim();
-    if (desc && !rec.sample) rec.sample = desc;
-    if (_procRemovalish(desc)) rec.removalish++;
+    // Job numbers, verbatim and DISTINCT. Job numbering schemes often encode a
+    // hint about the work being performed, so a handful of real examples is
+    // better evidence for classifying a code than anything the tool can infer.
+    // The full distinct set is kept; the panel samples from it.
+    const job = String(row[jCol] == null ? '' : row[jCol]).trim();
+    if (job) rec.jobs.add(job);
   });
 
   out.codes = [...byCode.values()].sort((a, b) =>
@@ -4368,7 +4392,9 @@ function renderProcCodePanel() {
   let h = '<div class="pcm-note">Tag the codes that mean <strong>removal</strong> or ' +
           '<strong>swap</strong>. Everything else counts as an install — the same ' +
           'default the engine already applies to any code it has not been told about. ' +
-          'Codes are read from the loaded ABOM and deduplicated.</div>';
+          'Codes are read from the loaded ABOM and deduplicated. Job numbers are a sample ' +
+          'of where each code appears \u2014 useful because job numbering often hints at the ' +
+          'work being performed.</div>';
 
   if (!state.boms.abom) {
     h += '<div class="pcm-empty">Load an ABOM to see the proc codes in your file.</div>';
@@ -4376,11 +4402,12 @@ function renderProcCodePanel() {
     h += '<div class="pcm-empty">No proc codes found in the ABOM &mdash; check the column mapping.</div>';
   } else {
     h += '<div class="pcm-subhead">Codes in this ABOM &middot; ' + inv.totalRows.toLocaleString() + ' rows</div>';
+    h += _procHeaderRow();
     inv.codes.forEach(c => { h += _procRowHtml(c); });
     if (inv.blankRows) {
       h += '<div class="pcm-row"><span class="pcm-code blank">(blank)</span>' +
            '<span class="pcm-count">' + inv.blankRows.toLocaleString() + ' rows</span>' +
-           '<span class="pcm-desc">No proc code on the row — always treated as an install.</span>' +
+           '<span class="pcm-job-none">No proc code on the row — always treated as an install.</span>' +
            '<span class="pcm-count">install</span></div>';
     }
   }
@@ -4392,6 +4419,7 @@ function renderProcCodePanel() {
   const absent = Object.keys(PROC_CODE_EXCEPTIONS).filter(k => !inFile.has(k)).sort();
   if (absent.length) {
     h += '<div class="pcm-subhead">Tagged codes not present in this file &middot; ' + absent.length + '</div>';
+    h += _procHeaderRow();
     absent.forEach(code => {
       h += _procRowHtml({ code: code, rows: 0, removalish: 0, sample: '', variants: new Set() });
     });
@@ -4410,6 +4438,12 @@ function renderProcCodePanel() {
   bodyEl.innerHTML = h;
 }
 
+function _procHeaderRow() {
+  return '<div class="pcm-row pcm-head-row">' +
+    '<span>Proc code</span><span>Rows</span>' +
+    '<span>Job Numbers (samples)</span><span>Behavior</span></div>';
+}
+
 function _procRowHtml(c) {
   const esc2 = (s) => String(s).replace(/[&<>"]/g, ch =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
@@ -4419,29 +4453,30 @@ function _procRowHtml(c) {
     (beh === val ? ' on' : '') + '" onclick="setProcCodeBehavior(' +
     JSON.stringify(c.code).replace(/"/g, '&quot;') + ',\'' + val + '\',event)">' + label + '</button>';
 
-  // Advisory hint, untagged codes only: most of this code's rows read like
-  // removal instructions. Derived from the description text already in the
-  // file; never applied automatically.
-  let flag = '';
-  if (beh === 'add' && c.rows > 0 && c.removalish > c.rows / 2) {
-    flag = '<span class="pcm-flag" title="Most rows with this code have a description mentioning removal. Advisory only — confirm before tagging.">desc says removal</span>';
-  }
   // Casing/whitespace variants collapsed into this row — a data-quality note.
   let variantNote = '';
   if (c.variants && c.variants.size > 1) {
-    variantNote = '<span class="pcm-flag" title="' + esc2([...c.variants].join(' · ')) +
+    variantNote = '<span class="pcm-flag" title="' + esc2([...c.variants].join(' \u00b7 ')) +
                   '">' + c.variants.size + ' spellings merged</span>';
   }
 
-  const desc = c.rows === 0
-    ? '<span style="color:var(--text-muted)">Not present in this ABOM.</span>'
-    : (c.sample ? esc2(c.sample.length > 90 ? c.sample.slice(0, 90) + '…' : c.sample)
-                : '<span style="color:var(--text-muted)">No description on file.</span>');
+  // Job numbers: up to PROC_JOB_SAMPLES distinct values, one per line. Sampled,
+  // not exhaustive — so the overflow count is shown rather than implying the
+  // list is complete.
+  const jobs  = c.jobs ? [...c.jobs] : [];
+  const shown = jobs.slice(0, PROC_JOB_SAMPLES);
+  const extra = jobs.length - shown.length;
+  const jobCell = shown.length
+    ? shown.map(j => '<span class="pcm-job">' + esc2(j) + '</span>').join('') +
+      (extra > 0 ? '<span class="pcm-job-more">+' + extra.toLocaleString() + ' more</span>' : '')
+    : (c.rows === 0
+        ? '<span class="pcm-job-none">Not present in this ABOM.</span>'
+        : '<span class="pcm-job-none">No job number on these rows.</span>');
 
   return '<div class="pcm-row">' +
-    '<span class="pcm-code">' + esc2(c.code) + '</span>' +
-    '<span class="pcm-count">' + (c.rows ? c.rows.toLocaleString() + ' rows' : '—') + '</span>' +
-    '<span class="pcm-desc">' + desc + flag + variantNote + '</span>' +
+    '<span class="pcm-code">' + esc2(c.code) + variantNote + '</span>' +
+    '<span class="pcm-count">' + (c.rows ? c.rows.toLocaleString() + ' rows' : '\u2014') + '</span>' +
+    '<span class="pcm-jobs">' + jobCell + '</span>' +
     '<span class="pcm-seg">' +
       seg('add',    'Install', 'ad') +
       seg('remove', 'Remove',  'rm') +
