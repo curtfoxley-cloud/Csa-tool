@@ -25412,6 +25412,21 @@ function _adjRefreshOpenReportModal() {
   if (!overlay || overlay.style.display === 'none') return;
   const titleEl = overlay.querySelector('.report-title');
   if (!titleEl) return;
+  // ═════════════════════════════════════════════════════════════════════════
+  // ⚠ DISPLAY COPY IS LOAD-BEARING HERE — DO NOT RENAME MODAL TITLES CASUALLY
+  // ═════════════════════════════════════════════════════════════════════════
+  // The 15 branches below route on the VISIBLE modal title text. Renaming a
+  // KPI label or modal heading changes control flow:
+  //   * the modal stops refreshing after an SME files a claim, so the
+  //     "✓ Claimed" badge never appears and the SME concludes, reasonably,
+  //     that their claim did not register. It fails SILENTLY.
+  //   * branches are PRECEDENCE-ORDERED (see the /Qty Mismatch/ note below).
+  //     A rename can also make a title match an EARLIER, WRONG branch and open
+  //     the wrong report — again with no error.
+  // Any title/label rename must be paired with the matching regex here, and
+  // re-tested for shadowing. The durable fix is to route on a data-report-key
+  // attribute instead of textContent; until that lands, treat every modal
+  // title string in this file as part of the control flow, not as copy.
   const title = titleEl.textContent || '';
   try {
     if (/Missing from MBOM/i.test(title))      showMissingItemsModal('mbom');
