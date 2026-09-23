@@ -1,0 +1,2431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Part Note Codes and Traceability</title>
+<style>
+:root{
+  --ink:#1E262E; --ink-2:#2C3841; --slate:#5C6D78; --mute:#8998A2;
+  --paper:#FFFFFF; --surface:#F4F6F7; --surface-2:#EDF0F1; --rule:#D6DCDF;
+  --rust:#A8481F; --rust-soft:#F2E4DD; --rust-ink:#7E340F;
+  --teal:#1F5F5B; --teal-soft:#DFEAE8;
+  --amber:#9A6508; --amber-soft:#F6ECD8;
+  --alert:#8E2F2F; --alert-soft:#F4E2E2;
+  --serif:Georgia,Cambria,"Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --rail:290px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--sans); color:var(--ink); background:var(--surface);
+  font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;font-size:inherit;cursor:pointer}
+input,textarea,select{font-family:inherit;font-size:inherit;color:inherit}
+
+/* ---------- header ---------- */
+.top{
+  position:sticky; top:0; z-index:40; background:var(--ink); color:#fff;
+  display:flex; align-items:center; gap:16px; padding:0 20px; height:60px;
+  border-bottom:1px solid #000;
+}
+.brand{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.brand b{font-family:var(--serif);font-size:16px;font-weight:700;letter-spacing:.1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand span{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#93A2AB}
+.top .spacer{flex:1}
+.who{display:flex;align-items:center;gap:8px}
+.who label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#93A2AB}
+.who input{
+  background:#2C3841;border:1px solid #3D4B55;color:#fff;border-radius:4px;
+  padding:6px 10px;font-size:13px;width:180px;
+}
+.who input:focus{outline:2px solid var(--rust);outline-offset:1px}
+.tbtn{
+  background:transparent;border:1px solid #46545F;color:#DCE3E7;border-radius:4px;
+  padding:7px 12px;font-size:12.5px;white-space:nowrap;
+}
+.tbtn:hover{background:#2C3841;border-color:#5E6D77}
+.tbtn:focus-visible{outline:2px solid var(--rust);outline-offset:2px}
+.tbtn.danger{border-color:#7A4A3A;color:#EBCDC2}
+.tbtn.danger:hover{background:#4A2E26;border-color:#A85D45}
+.tbtn.danger.armed{background:var(--rust);border-color:var(--rust);color:#fff;font-weight:600}
+.railtoggle{display:none}
+
+/* ---------- shell ---------- */
+.shell{display:flex;align-items:flex-start;max-width:1400px;margin:0 auto}
+.rail{
+  width:var(--rail); flex:0 0 var(--rail); background:var(--paper);
+  border-right:1px solid var(--rule); min-height:calc(100vh - 60px);
+  position:sticky; top:60px; max-height:calc(100vh - 60px); overflow-y:auto;
+}
+.railhead{padding:18px 20px 12px;border-bottom:1px solid var(--rule)}
+.railhead h2{margin:0 0 3px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--rust);font-weight:700}
+.railhead p{margin:0;font-size:12px;color:var(--slate)}
+.grp{padding:14px 0 6px}
+.grp h3{
+  margin:0 0 6px;padding:0 20px;font-family:var(--mono);font-size:10px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--slate);font-weight:700;
+}
+.nav{display:block;width:100%;text-align:left;background:none;border:0;border-left:3px solid transparent;
+  padding:7px 20px 7px 17px;display:flex;gap:10px;align-items:flex-start;line-height:1.35}
+.nav:hover{background:var(--surface)}
+.nav:focus-visible{outline:2px solid var(--rust);outline-offset:-2px}
+.nav[aria-current="true"]{background:var(--surface-2);border-left-color:var(--rust)}
+.nav .id{font-family:var(--mono);font-size:10.5px;color:var(--mute);flex:0 0 46px;padding-top:2px;letter-spacing:.02em}
+.nav[aria-current="true"] .id{color:var(--rust-ink)}
+.nav .nm{font-size:13px;color:var(--ink-2);flex:1}
+.nav[aria-current="true"] .nm{font-weight:600}
+.dot{flex:0 0 auto;width:9px;height:9px;border-radius:50%;margin-top:5px;border:1.5px solid var(--rule);background:transparent}
+.dot.work{border-color:var(--amber);background:var(--amber-soft)}
+.dot.done{border-color:var(--teal);background:var(--teal)}
+
+/* ---------- main ---------- */
+main{flex:1;min-width:0;padding:0 0 80px}
+.stage{max-width:820px;margin:0 auto;padding:34px 32px 0}
+.eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.recid{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--rust-ink);background:var(--rust-soft);
+  padding:3px 8px;border-radius:3px;font-weight:700}
+.status{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--slate)}
+h1.sect{font-family:var(--serif);font-size:31px;line-height:1.2;margin:0 0 6px;letter-spacing:-.2px}
+.lede{font-size:15px;color:var(--slate);margin:0 0 22px}
+.hr{height:1px;background:var(--rule);margin:0 0 26px}
+p{margin:0 0 14px}
+strong{font-weight:700}
+ul.pl{margin:0 0 16px;padding-left:0;list-style:none}
+ul.pl li{position:relative;padding-left:20px;margin-bottom:9px}
+ul.pl li::before{content:"";position:absolute;left:3px;top:10px;width:5px;height:5px;border-radius:50%;background:var(--rust)}
+
+.callout{background:var(--surface);border-radius:6px;padding:16px 18px;margin:0 0 20px;border:1px solid var(--rule)}
+.callout.teal{background:var(--teal-soft);border-color:#CBDDDA}
+.callout .lab{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--rust-ink);font-weight:700;margin-bottom:7px}
+.callout.teal .lab{color:var(--teal)}
+.callout p:last-child{margin-bottom:0}
+
+.stmt{background:var(--ink);color:#fff;border-radius:6px;padding:20px 22px;margin:0 0 20px}
+.stmt b{display:block;font-family:var(--serif);font-size:19px;line-height:1.35;font-weight:700}
+.stmt span{display:block;margin-top:9px;font-size:13.5px;color:#B4C0C7}
+
+.cards{display:grid;gap:12px;margin:0 0 20px}
+.cards.c2{grid-template-columns:1fr 1fr}
+.cards.c3{grid-template-columns:repeat(3,1fr)}
+.card{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:14px 16px}
+.card h4{margin:0 0 6px;font-size:14px;font-weight:700}
+.card p{margin:0;font-size:13.5px;color:var(--ink-2)}
+
+.steps{margin:0 0 20px;display:grid;gap:8px}
+.step{display:flex;gap:12px;background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:11px 14px}
+.step .n{flex:0 0 26px;height:26px;border-radius:50%;background:var(--rust);color:#fff;
+  font-family:var(--mono);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.step.tl .n{background:var(--teal)}
+.step .tx b{display:block;font-size:14px;margin-bottom:2px}
+.step .tx span{font-size:13.5px;color:var(--ink-2)}
+
+.tw{overflow-x:auto;margin:0 0 20px;border:1px solid var(--rule);border-radius:6px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+thead th{background:var(--ink);color:#fff;text-align:left;padding:9px 12px;font-size:12px;font-weight:700;letter-spacing:.02em}
+tbody td{padding:9px 12px;border-top:1px solid var(--rule);vertical-align:top;color:var(--ink-2)}
+tbody tr:nth-child(even) td{background:#FAFBFB}
+td.k{font-family:var(--mono);font-size:12px;color:var(--ink-2);white-space:nowrap}
+
+/* ---------- knowledge check ---------- */
+.check{background:var(--paper);border:1px solid var(--rule);border-left:3px solid var(--rust);border-radius:6px;padding:18px 20px;margin:26px 0 0}
+.check .lab{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--rust-ink);font-weight:700;margin-bottom:8px}
+.check .q{font-size:15.5px;font-weight:600;margin-bottom:12px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;border:1px solid var(--rule);border-radius:5px;margin-bottom:7px;cursor:pointer;background:var(--paper);font-size:14px}
+.opt:hover{background:var(--surface)}
+.opt input{margin:3px 0 0;accent-color:var(--rust);flex:0 0 auto}
+.opt.right{border-color:var(--teal);background:var(--teal-soft)}
+.opt.wrong{border-color:var(--alert);background:var(--alert-soft)}
+.opt.locked{cursor:default}
+.fb{margin-top:11px;padding:12px 14px;border-radius:5px;font-size:14px;display:none}
+.fb.show{display:block}
+.fb.ok{background:var(--teal-soft);border:1px solid #CBDDDA}
+.fb.no{background:var(--alert-soft);border:1px solid #E8CFCF}
+.fb b{display:block;margin-bottom:4px;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase}
+.fb.ok b{color:var(--teal)} .fb.no b{color:var(--alert)}
+
+/* ---------- exercises ---------- */
+.exwrap{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:18px 20px;margin:0 0 18px}
+.exwrap h4{margin:0 0 8px;font-family:var(--serif);font-size:18px}
+.scen{background:var(--surface);border-radius:5px;padding:13px 15px;font-size:14px;margin-bottom:16px}
+.part{margin-bottom:16px}
+.part label{display:block;font-size:14px;font-weight:600;margin-bottom:6px}
+textarea{width:100%;border:1px solid var(--rule);border-radius:5px;padding:10px 12px;font-size:14px;
+  line-height:1.55;resize:vertical;min-height:76px;background:var(--paper)}
+textarea:focus{outline:2px solid var(--rust);outline-offset:0;border-color:var(--rust)}
+.count{font-family:var(--mono);font-size:10.5px;color:var(--mute);margin-top:4px;text-align:right}
+
+/* ---------- buttons / footer nav ---------- */
+.pager{display:flex;justify-content:space-between;gap:12px;margin:32px 0 0;padding-top:22px;border-top:1px solid var(--rule)}
+.btn{border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:5px;padding:10px 18px;font-size:14px;font-weight:600}
+.btn:hover{background:var(--surface)}
+.btn:focus-visible{outline:2px solid var(--rust);outline-offset:2px}
+.btn.pri{background:var(--rust);border-color:var(--rust);color:#fff}
+.btn.pri:hover{background:var(--rust-ink)}
+.btn.gh{background:transparent}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}
+
+/* ---------- start + submit ---------- */
+.hero{background:var(--ink);color:#fff;border-radius:8px;padding:34px 34px 30px;margin-bottom:26px}
+.hero .kick{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--rust-soft);margin-bottom:12px}
+.hero h1{font-family:var(--serif);font-size:35px;line-height:1.15;margin:0 0 6px}
+  .hero .subtitle{font-family:var(--serif);font-size:19px;line-height:1.3;color:#C9D3D9;margin:0 0 10px}
+  .hero .scale{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--rust-soft);margin:0 0 14px}
+.hero p{color:#B4C0C7;margin:0;font-size:15px;max-width:60ch}
+.meta{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;margin:0 0 22px;font-size:14px}
+.meta dt{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--slate);padding-top:3px}
+.meta dd{margin:0}
+.transmit{border:1px solid var(--rule);border-radius:6px;background:var(--paper);overflow:hidden;margin-bottom:22px}
+.transmit .hd{background:var(--surface-2);padding:12px 18px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.transmit .hd b{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.transmit .hd span{font-family:var(--mono);font-size:11px;color:var(--slate)}
+.transmit .bd{padding:18px}
+.scorebox{display:flex;gap:26px;flex-wrap:wrap;align-items:baseline;margin-bottom:6px}
+.scorebox .big{font-family:var(--serif);font-size:42px;font-weight:700;line-height:1}
+.scorebox .lab{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--slate)}
+.gaps{margin-top:14px}
+.gaps li{font-size:13.5px}
+.note{font-size:13px;color:var(--slate);margin-top:10px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);background:var(--ink);color:#fff;
+  padding:11px 18px;border-radius:5px;font-size:14px;opacity:0;pointer-events:none;transition:.22s;z-index:90;max-width:90vw}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.warn{background:var(--amber-soft);border:1px solid #E4D3AE;border-radius:5px;padding:12px 14px;font-size:13.5px;margin-bottom:16px}
+.setup{font-size:13px;color:var(--slate);border-top:1px solid var(--rule);margin-top:26px;padding-top:16px}
+.setup code{font-family:var(--mono);font-size:12px;background:var(--surface-2);padding:1px 5px;border-radius:3px}
+
+.fadein{animation:fade .22s ease-out}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+@media(max-width:760px){
+  .top{padding:0 12px;gap:8px}
+  .brand{display:none}
+  .lng{display:none}
+  .who{flex:1;min-width:0}
+  .who label{display:none}
+  .who input{width:100%;min-width:0}
+}
+@media(max-width:900px){
+  .cards.c3,.cards.c2{grid-template-columns:1fr}
+  .rail{position:fixed;top:60px;left:0;bottom:0;z-index:35;transform:translateX(-100%);transition:transform .2s;box-shadow:0 0 0 100vmax rgba(0,0,0,0);max-height:none}
+  .rail.open{transform:none;box-shadow:2px 0 24px rgba(0,0,0,.25)}
+  .railtoggle{display:inline-block}
+  .stage{padding:26px 18px 0}
+  .who input{width:120px}
+  h1.sect{font-size:26px}
+  .hero{padding:26px 22px}
+  .hero h1{font-size:28px}
+}
+
+/* ---------- part note text ---------- */
+.pnote{display:flex;gap:11px;align-items:flex-start;background:var(--paper);border:1px solid var(--rule);border-left:3px solid var(--teal);
+  border-radius:5px;padding:10px 14px;margin:0 0 12px;font-family:var(--mono);font-size:12.5px;line-height:1.55;color:var(--ink-2)}
+.pnote .pc{flex:0 0 auto;min-width:44px;text-align:center;background:var(--ink);color:#fff;font-weight:700;border-radius:3px;padding:1px 7px;font-size:11.5px;letter-spacing:.04em;margin-top:1px}
+
+/* ---------- product tree ---------- */
+.tree{border:1px solid var(--rule);border-radius:6px;background:var(--paper);margin:0 0 20px;overflow:hidden}
+.trow{display:flex;gap:12px;align-items:flex-start;padding:9px 14px;border-top:1px solid var(--rule);font-size:13.5px}
+.trow:first-child{border-top:0}
+.trow .tn{flex:1;min-width:0;color:var(--ink-2)}
+.trow .tn b{color:var(--ink)}
+.trow .tn i{display:block;font-style:normal;font-size:12.5px;color:var(--slate);margin-top:2px}
+.trow .tc{flex:0 0 auto;display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;max-width:45%}
+.chip{font-family:var(--mono);font-size:11px;font-weight:700;border-radius:3px;padding:1px 6px;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--rule)}
+.chip.none{font-weight:400;color:var(--mute)}
+.tbar{font-family:var(--mono);color:var(--mute);white-space:pre}
+
+/* ---------- parts-list drill ---------- */
+.dline{background:var(--paper);border:1px solid var(--rule);border-left:3px solid var(--rust);border-radius:6px;margin:0 0 18px;overflow:hidden}
+.dline .hd{background:var(--surface-2);padding:9px 16px;border-bottom:1px solid var(--rule);display:flex;gap:8px 18px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:11.5px;color:var(--ink-2)}
+.dline .hd span b{color:var(--slate);font-weight:400;letter-spacing:.08em;text-transform:uppercase;font-size:10px;margin-right:6px}
+.dline .bd{padding:14px 16px 16px}
+.dline .nm{font-family:var(--mono);font-size:14px;font-weight:700;margin:0 0 10px;letter-spacing:.02em}
+.codes{display:flex;flex-wrap:wrap;gap:7px;margin:4px 0 0}
+.code{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--rule);border-radius:4px;padding:6px 11px;
+  font-family:var(--mono);font-size:12.5px;font-weight:700;cursor:pointer;background:var(--paper);user-select:none}
+.code:hover{background:var(--surface)}
+.code input{accent-color:var(--rust);margin:0}
+.code.none{font-weight:400}
+.code.locked{cursor:default}
+.code.locked:hover{background:inherit}
+.code.right{border-color:var(--teal);background:var(--teal-soft);color:var(--teal)}
+.code.wrong{border-color:var(--alert);background:var(--alert-soft);color:var(--alert);text-decoration:line-through}
+.code.missed{border-color:var(--amber);background:var(--amber-soft);color:var(--amber);border-style:dashed}
+.legend{font-size:12.5px;color:var(--slate);margin:10px 0 0;display:flex;gap:14px;flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:2px;border:1px solid}
+.legend .lr{background:var(--teal-soft);border-color:var(--teal)}
+.legend .lw{background:var(--alert-soft);border-color:var(--alert)}
+.legend .lm{background:var(--amber-soft);border-color:var(--amber);border-style:dashed}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <button class="tbtn railtoggle" id="railToggle" aria-label="Show section register">Sections</button>
+  <div class="brand">
+    <b>Part Note Codes and Traceability Training</b>
+    <span id="brandSub">Interactive modules</span>
+  </div>
+  <div class="spacer"></div>
+  <div class="who">
+    <label for="who">Trainee</label>
+    <input id="who" type="text" placeholder="Your name" autocomplete="name">
+  </div>
+  <button class="tbtn" id="btnSave">Save<span class="lng"> progress</span></button>
+  <button class="tbtn" id="btnLoad">Resume</button>
+  <button class="tbtn danger" id="btnClear" title="Erase every answer, check, and the trainee name">Clear<span class="lng"> all</span></button>
+  <input type="file" id="fileIn" accept=".json,application/json" hidden>
+</header>
+
+<div class="shell">
+  <nav class="rail" id="rail" aria-label="Section register"></nav>
+  <main><div class="stage" id="stage"></div></main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ==========================================================================
+   TRAINER SETUP: edit this block, save the file, then share it.
+   Nothing else in this file needs changing.
+   ========================================================================== */
+var CONFIG = {
+  companyName:   "[Company]",
+  trainerName:   "your trainer",
+  trainerEmail:  "",            // e.g. "cm.lead@company.com": enables the Email results button
+  submitEndpoint:"",            // optional: a URL that accepts a JSON POST (Power Automate, Forms webhook, etc.)
+
+  /* ---- content currency: update these two whenever you revise the content ---- */
+  contentRev:    "A",           // revision of this training file
+  alignedTo:     "Part note codes for traceable parts and product-unit records requiring configuration status accounting reconciliation. Regulatory text for 14 CFR 43.10, 45.15, and 45.16 checked against the eCFR on 2026-09-23. The special handling ESD example cites ANSI/ESD S20.20, because MIL-STD-1686C was cancelled on 12 January 2021 and superseded by ANSI/ESD S20.20. Checked 2026-09-23",
+
+  /* ---- trainer view ----
+     The source map lists every section against the rule it restates. Set this true
+     to show it, or leave it false and open the file with #trainer on the end of the
+     address to show it for one sitting. Trainees do not need it. */
+  trainerView:   false
+};
+
+/* ==========================================================================
+   SOURCE MAP
+
+   Every section restates a rule that is owned somewhere else. When an owning
+   rule changes, the sections that restate it have to be checked, and so do the
+   parts-list drill lines in the same module.
+
+   These keys name the RULE, never a document title and never a paragraph
+   number. To find what a rule change affects, look the rule up on the trainer
+   source map page, or search this file for its key.
+   ========================================================================== */
+var RULES = {
+  R_PURPOSE:         "What part traceability records are for",
+  R_ROLES:           "Who imposes the codes, who captures the records, who reconciles them",
+  R_CODES:           "The eight part note codes and what each one drives",
+  R_IDENTITY_CONDITION:"Identity codes, the linkage code, and condition codes",
+  R_SER_VS_LOT:      "Serial number versus lot/batch number",
+  R_CASCADE:         "Serialization and traceability records are maintained up the product tree to the end item",
+  R_STACKING:        "Codes stack: every source, every code",
+  R_NOTE_FORMS:      "Long and short note texts for SER, LOT, and TR",
+
+  R_SER_SOURCES:     "The sources that drive serialization",
+  R_ALI:             "Airworthiness Limitation Items and 14 CFR 45.15(c)",
+  R_ALI_QUESTIONS:   "The three questions that set the codes for an ALI",
+  R_ALI_CALENDAR:    "Calendar-limited ALIs and parts too small to mark",
+  R_ALI_LOT:         "ALS limits on a lot, and the separate shelf-life regime",
+  R_PSE:             "Safe-life Principal Structural Elements",
+  R_PSE_DT:          "Damage-tolerant PSEs and PSE constituent materials",
+  R_PREMIUM:         "Premium selected materials and elevated design values",
+
+  R_LOT_SOURCES:     "The sources that drive lot/batch recording",
+  R_CASTINGS:        "Castings and alternative material design values",
+  R_PROCESS_BATCH:   "Process and batch conditions",
+  R_COUNTERFEIT:     "Counterfeit avoidance for electronic parts",
+  R_SH:              "Special Handling Required items",
+  R_SH_NOTE:         "Writing the special handling note",
+  R_EXPLOSIVE:       "Explosive material",
+  R_RADIOACTIVE:     "Radioactive material",
+
+  R_TR:              "What the TR code directs",
+  R_PARENTS:         "Every physical parent below the end item takes SER and TR",
+  R_INSTALL_END:     "Installation drawings and the end item",
+  R_IUID_CONTRACT:   "IUID is a contract requirement",
+  R_IUID_DEFS:       "IUID definitions",
+  R_IUID_WHEN:       "When IUID applies",
+  R_IUID_MARK:       "IUID marking, serialization construct, and reporting",
+  R_IUID_APPLY:      "Applying the IUID code, and what does not flow up",
+
+  R_LL:              "The LL code and the 14 CFR 43.10 definitions",
+  R_LL_CONTROL:      "Controlling removed life-limited parts",
+  R_LL_CYCLE:        "Cycle/usage-controlled life-limited items",
+  R_LL_AGE:          "Age/shelf-life-controlled life-limited items",
+  R_CRITICAL:        "Critical items: what the term covers",
+  R_CSI:             "Critical Safety Items",
+  R_FC:              "Fracture-Critical Traceable Parts and Fracture-Critical Parts",
+  R_SCI:             "Safety-Critical Items",
+  R_MATRIX:          "The application matrix and the method for using it"
+};
+
+/* ==========================================================================
+   CONTENT
+   ========================================================================== */
+var P = function(t){return {t:"p", x:t};};
+var L = function(a){return {t:"list", x:a};};
+var C = function(lab,lines,tone){return {t:"callout", lab:lab, x:lines, tone:tone||"rust"};};
+var S = function(b,sub){return {t:"stmt", x:b, sub:sub||""};};
+var CARDS = function(items,cols){return {t:"cards", x:items, cols:cols||3};};
+var TABLE = function(head,rows){return {t:"table", head:head, x:rows};};
+var STEPS = function(items,tone){return {t:"steps", x:items, tone:tone||""};};
+var TREE = function(rows){return {t:"tree", x:rows};};
+
+/* Part note texts. These are the exact texts that go on a parts list. The
+   separator after the code is an en dash, as the notes are written. Change a
+   text here and every section that shows it changes with it. */
+var NT = {
+  SER_L: "SER – SERIALIZATION RECORDING REQUIRED. THIS ITEM IS SERIALIZED AND TRACEABILITY MUST BE MAINTAINED BETWEEN THIS ITEM AND ALL HIGHER-LEVEL PHYSICAL ITEMS UP TO THE END ITEM.",
+  SER_S: "SER – SERIALIZATION RECORDING REQUIRED.",
+  LOT_L: "LOT – LOT/BATCH RECORDING REQUIRED. THIS ITEM REQUIRES LOT/BATCH TRACEABILITY AND TRACEABILITY MUST BE MAINTAINED BETWEEN THIS ITEM AND ALL HIGHER-LEVEL PHYSICAL ITEMS UP TO THE END ITEM.",
+  LOT_S: "LOT – LOT/BATCH RECORDING REQUIRED.",
+  TR_S:  "TR – TRACEABILITY RECORDS REQUIRED.",
+  TR_INST:"TR – TRACEABILITY RECORDS REQUIRED. THIS INSTALLATION DRAWING DEPICTS TRACEABLE PARTS WHOSE SERIAL NUMBERS MUST BE TRACED TO ALL HIGHER-LEVEL PHYSICAL ITEMS UP TO THE END ITEM.",
+  TR_END:"TR – TRACEABILITY BEYOND THIS LEVEL IS NOT REQUIRED.",
+  IUID_I:"IUID – ITEM UNIQUE IDENTIFICATION REQUIRED. MARK THIS ITEM WITH A UNIQUE ITEM IDENTIFIER (UII) IN ACCORDANCE WITH MIL-STD-130 AND REPORT THE UII IN ACCORDANCE WITH DFARS 252.211-7003.",
+  IUID_P:"IUID – ITEM UNIQUE IDENTIFICATION REQUIRED. THIS ITEM IS A PARENT ITEM. MARK THIS ITEM WITH A UNIQUE ITEM IDENTIFIER (UII) IN ACCORDANCE WITH MIL-STD-130 AND REPORT THE UIIS OF ITS EMBEDDED ITEMS IN ACCORDANCE WITH DFARS 252.211-7003.",
+  LL_CYC:"LL – LIFE LIMITED PART. THIS PART IS CYCLE/USAGE-CONTROLLED AND IS LIMITED TO A SPECIFIC NUMBER OF USAGES. [NUMBER OF FLIGHTS, CYCLE LIMIT, ETC.].",
+  LL_AGE:"LL – LIFE LIMITED PART. THIS PART IS AGE/SHELF-LIFE-CONTROLLED IRRESPECTIVE OF HOW MANY TIMES IT IS USED. [SHELF LIFE, CURE DATE LIMIT, OR STORAGE AGE LIMIT].",
+  SH:    "SH – SPECIAL HANDLING REQUIRED – [ENTER THE SPECIAL HANDLING, PACKAGING, OR ENVIRONMENTAL CONTROL REQUIRED, OR REFERENCE THE SPECIFICATION THAT CONTAINS THAT INFORMATION].",
+  SH_EXP:"SH – EXPLOSIVE MATERIAL – SPECIAL HANDLING REQUIRED – [INCLUDE A DESCRIPTION OF THE METHOD FOR HANDLING EXPLOSIVE MATERIAL AND THE SAFETY PRECAUTIONS TO BE OBSERVED].",
+  SH_RAD:"SH – RADIOACTIVE MATERIAL – SPECIAL HANDLING REQUIRED – WARNING: RADIOACTIVE MATERIAL [IDENTIFY THE ISOTOPE], [NUMBER OF CURIES]. CONTACT RADIATION HEALTH PROTECTION FOR SPECIAL HANDLING.",
+  SH_EX1:"SH – SPECIAL HANDLING REQUIRED – THESE PARTS ARE EXTREMELY FRAGILE. DO NOT DROP OR JAR. PROVIDE 1/8-INCH POLYURETHANE FOAM UNDER THEIR CONTAINER ON THE BENCH OR WHEN STORING OR SHIPPING.",
+  SH_EX2:"SH – SPECIAL HANDLING REQUIRED – TEMPERATURE SHALL BE KEPT BETWEEN 33°F AND 150°F AND RELATIVE HUMIDITY SHALL BE 70 PERCENT MAXIMUM DURING SHIPMENT AND INSTALLATION.",
+  SH_EX3:"SH – SPECIAL HANDLING REQUIRED – ELECTROSTATIC DISCHARGE SENSITIVE. HANDLE, PACKAGE, AND STORE UNDER AN ELECTROSTATIC DISCHARGE CONTROL PROGRAM IN ACCORDANCE WITH ANSI/ESD S20.20.",
+  CSI:   "CSI – CRITICAL SAFETY ITEM.",
+  FC:    "FC – FRACTURE-CRITICAL ITEM."
+};
+var NOTE = function(k){ return {t:"note", x:NT[k]}; };
+
+var MODULES = [
+{
+ id:"M1", label:"Module 1", title:"The codes and the rule", sub:"Why part traceability exists, who does what, the eight part note codes, identity versus condition, and the rule that carries records to the end item",
+ sections:[
+ {id:"M1-01", gov:["R_PURPOSE"], title:"Why part traceability exists", body:[
+    P("A turbine disk cracks in service. The investigation traces the crack to an inclusion in the forging. The next question is simple. Which other disks came from that heat of material, and which aircraft are they on?"),
+    P("Part traceability records answer that question. Without them, the answer is every disk in the fleet."),
+    P("Two identifiers do the work. A **serial number** says which unit. A **lot/batch number** says which group of units shared a material, a process run, or a test. A traceability record then ties each unit to the assembly it went into."),
+    S("Traceability turns a fleet-wide problem into a list of tail numbers.",
+      "The list is only as good as the records behind it. One missing link breaks the chain at that point, and everything above the break is unknown."),
+    P("These are **product-unit records**. They describe individual units and lots as built. The design says what each item must be. The product-unit records say what each delivered unit actually contains."),
+    C("The same records serve more than recalls", [
+      "Remaining life is counted per unit, so a life-limited part without a serial number cannot be retired on time.",
+      "A test result that qualifies one part must stay with that part. A suspect lot from a supplier must be found wherever it went.",
+      "Each of these needs the same thing: an identifier on the item, and a record of where the item went."])
+  ],
+  check:{q:"A forging supplier reports that one heat of titanium had a chemistry nonconformance. What do part traceability records let the program do?",
+   o:[
+     "Identify the units made from that heat and the assemblies they went into",
+     "Show that the heat met specification, since it passed receiving inspection",
+     "Replace the material design values for that alloy across all programs",
+     "Nothing until the drawing is revised to call out a different heat"],
+   a:0, why:"Traceability records connect a heat or lot to specific units, and each unit to its parent assembly. That turns a supplier escape into a bounded list of affected hardware. Receiving inspection passed the material before the problem was known, so it proves nothing now. The design is not at fault, so a drawing change does not find a single suspect part."}},
+
+ {id:"M1-02", gov:["R_ROLES"], title:"Who does what", body:[
+    P("Three organizations share this work. Each one owns a different piece."),
+    TABLE(["Organization", "Owns", "Output"], [
+      ["Design Engineering", "Imposing the requirement", "Part note codes and note texts on the parts list"],
+      ["Manufacturing and Production (the build environment)", "Capturing the records", "Serial numbers, lot/batch numbers, marks, and parent-child traceability records"],
+      ["Configuration Management", "Reconciling the two", "Confirmation that every code on the design has matching records from the build environment"]]),
+    P("Configuration Management does the reconciliation as part of **configuration status accounting**. The design is one side of the comparison. The build records are the other."),
+    P("The part note code is the handoff between the three. If Design Engineering does not apply the code, the build environment has no instruction to capture the record. If the build environment does not capture the record, Configuration Management finds the gap at reconciliation. By then the unit may already be delivered."),
+    S("A traceability requirement that never reaches the parts list never reaches the shop floor."),
+    C("For non-engineers", [
+      "You do not need to write part notes to use this course. Buyers flow the requirement to suppliers. Planners build it into work instructions. Inspectors verify the mark and the record. Technicians record the number at installation.",
+      "Every one of those actions starts from a part note code on a parts list. Knowing what the code means tells you what your step owes."], "teal")
+  ],
+  check:{q:"An engineer knows a bracket is a Fracture-Critical Traceable Part but leaves the codes off the parts list, planning to tell Manufacturing directly. What goes wrong?",
+   o:[
+     "The build environment has no design instruction, and reconciliation has nothing to check",
+     "Nothing, provided Manufacturing records the serial numbers anyway",
+     "Only a drafting error, which the checker corrects at the next drawing revision cycle",
+     "Configuration Management adds the missing codes during reconciliation"],
+   a:0, why:"The part note code is both the instruction and the reconciliation baseline. A verbal instruction does not survive a shift change, a new supplier, or a reorder. Configuration Management reconciles the codes on the design against the records. It does not author the codes. Design Engineering does."}},
+
+ {id:"M1-03", gov:["R_CODES"], title:"The eight part note codes", body:[
+    P("Eight part note codes carry part traceability and product-unit record requirements. Learn each one by what it drives."),
+    TABLE(["Code", "Name", "What the code drives"], [
+      ["SER", "Serialization Recording Required", "Record serial numbers, or apply and record serial numbers"],
+      ["LOT", "Lot/Batch Recording Required", "Record lot/batch numbers, or apply and record lot/batch numbers"],
+      ["TR", "Traceability Records Required", "Generate the parent-child traceability records of items in the product tree"],
+      ["IUID", "Item Unique Identification Required", "Mark the item with a unique item identifier and report it to the DoD IUID Registry"],
+      ["LL", "Life Limited", "Identify the item as life-limited and state its limit"],
+      ["SH", "Special Handling Required", "State the handling, packaging, or environmental control required"],
+      ["CSI", "Critical Safety Item", "Identify the item as a Critical Safety Item"],
+      ["FC", "Fracture-Critical Item", "Identify the item as a Fracture-Critical Traceable Part or a Fracture-Critical Part"]]),
+    P("A part note code never travels alone. It goes on the parts list with its **note text**. The code is the short handle. The note text is the instruction the build environment reads."),
+    P("Here is one, as it appears on a parts list:"),
+    NOTE("SER_L"),
+    P("The rest of this course teaches which items take which codes, and why.")
+  ],
+  check:{q:"Which part note code directs the build environment to generate records linking each item to its parent in the product tree?",
+   o:[
+     "TR",
+     "SER",
+     "LOT",
+     "IUID"],
+   a:0, why:"TR, Traceability Records Required, generates the parent-child records. SER and LOT give a unit or a lot its identity. IUID adds a machine-readable unique item identifier and a registry report. None of those three links an item to its parent. TR does."}},
+
+ {id:"M1-04", gov:["R_IDENTITY_CONDITION"], title:"Identity codes and condition codes", body:[
+    P("The eight codes do three different jobs."),
+    CARDS([
+      {h:"Identity: SER, LOT, IUID", b:"These give a unit or a lot an identifier that the build environment records."},
+      {h:"Linkage: TR", b:"This links those identities into parent-child records up the product tree."},
+      {h:"Condition: LL, SH, CSI, FC", b:"These identify a condition of the item. They do not create records on their own."}]),
+    P("Take two life-limited items. A landing gear shock strut is limited by landing cycles. Each strut counts its own cycles, so each strut needs its own serial number. It takes LL and SER."),
+    P("An O-ring is limited by shelf life. The limit attaches to the manufacturing batch, so the batch is what gets recorded. It takes LL and LOT."),
+    P("Both items carry LL. LL says the item has a life limit. It does not say how the build environment will know which strut or which batch it holds. The identity code says that."),
+    S("A condition code always needs an identity code beside it.",
+      "The requirement source decides which identity code. LL never decides it.")
+  ],
+  check:{q:"A designer applies LL to a new part and nothing else. What is missing?",
+   o:[
+     "An identity code, SER or LOT, set by the requirement source",
+     "Nothing. LL creates the life-tracking records on its own",
+     "TR, because every life-limited item needs parent-child records",
+     "CSI, because every life-limited part is a Critical Safety Item"],
+   a:0, why:"LL is a condition code. It identifies the item as life-limited and states the limit. It creates no record. The requirement source decides whether the limit is tracked per unit, with SER, or per lot, with LOT. TR follows from SER or LOT on a child, not from LL. Most life-limited parts are not Critical Safety Items."}},
+
+ {id:"M1-05", gov:["R_SER_VS_LOT"], title:"Which unit, or which lot", body:[
+    P("A serial number and a lot/batch number answer different questions."),
+    CARDS([
+      {h:"Serial number", b:"Which unit. One identifier belongs to one physical item. Use it when the thing that matters is per unit: remaining life, one specimen test result, a mandatory mark."},
+      {h:"Lot/batch number", b:"Which group. One identifier covers every item made from the same material, process run, or test sample. Use it when the property that matters is shared: a heat of metal, a cure batch, a shelf-life date, a source of supply."}], 2),
+    P("Neither one substitutes for the other. A lot number cannot say where one specific item went. A serial number cannot say which heat of material an item came from unless the lot is also recorded."),
+    P("Some items need both. A premium selected material part needs a serial number to tie each test result to one part. It also needs a lot/batch record for heat traceability."),
+    C("The location gap", [
+      "A lot number alone does not establish location. Fifty O-rings from one batch may go into fifty different assemblies. The lot record says what they share. It does not say where each one went.",
+      "That is why the **parent** of a lot/batch recorded item is serialized. The parent's serial number is the location. The lot record attaches to it."])
+  ],
+  check:{q:"Why is the parent of a Lot/Batch Recording Required item serialized?",
+   o:[
+     "A lot number does not establish location, so the lot must attach to an identified unit",
+     "Lot/batch numbers expire with the shelf life of the lot, and serial numbers never do",
+     "Serial numbers are cheaper for the build environment to record than lot numbers",
+     "The parent inherits the lot number and needs a serial number to carry it"],
+   a:0, why:"One lot can be spread across many assemblies. To find where a suspect lot went, each assembly that received part of it must be individually identified. The parent's serial number is that identifier. The lot record then attaches to a known unit."}},
+
+ {id:"M1-06", gov:["R_CASCADE"], title:"The governing rule", body:[
+    P("One rule governs every item that carries SER or LOT."),
+    S("When an item holds a serialization recording requirement or a lot/batch recording requirement, serialization and traceability records must be maintained up the product tree to the end item.",
+      "This is a company directive. It applies whatever the requirement source. There is no threshold and no shorter scope."),
+    P("The rule has three consequences."),
+    L([
+      "**Every physical parent is serialized.** The item's next-higher physical parent is serialized. So is every higher physical parent below the end item.",
+      "**Every physical parent generates traceability records.** Each record links an item to its next-higher parent.",
+      "**The chain stops at the end item.** The end item is the top-level asset or system under contract. It is typically the complete aircraft, by tail number, or the missile system."]),
+    P("The end item is not a Line Replaceable Unit (LRU). An LRU is removed and replaced on the flight line. The chain does not stop there. It continues to the aircraft or system the LRU is installed in."),
+    P("Module 4 walks the climb one level at a time. For now, hold the rule.")
+  ],
+  check:{q:"A serialized valve goes into a manifold. The manifold goes into a Line Replaceable Unit, and the LRU goes into an aircraft. Where do the serialization and traceability records stop?",
+   o:[
+     "At the aircraft, the end item under contract",
+     "At the LRU, since it is the replaceable unit",
+     "At the manifold, the valve's next-higher parent",
+     "At the valve, since only the valve holds its own requirement"],
+   a:0, why:"The records climb to the end item. The end item is the top-level asset or system under contract, typically the aircraft by tail number or the missile system. An LRU is not the end item. Stopping at the manifold or the LRU leaves the question “which aircraft?” unanswered."}},
+
+ {id:"M1-07", gov:["R_STACKING"], title:"Codes stack", body:[
+    P("Requirement sources and codes do not map one to one."),
+    P("**One source can drive several codes.** A Critical Safety Item takes CSI, SER, LOT, and IUID. Each code does a different job."),
+    P("**Several sources can drive one code.** A capacitor may carry a shelf-life limit. It may also fall under a counterfeit avoidance clause in the contract. Both sources call for lot/batch recording. One LOT code satisfies both. The reasons differ. The lot records are the same records."),
+    P("**Several sources can land on one item.** A part listed in the Airworthiness Limitations Section may also be a Fracture-Critical Traceable Part and a premium selected material part. Apply every code that each source drives. Do not stop at the first source you find."),
+    STEPS([
+      {h:"Find every source", b:"Ask what regulation, contract clause, designation, or physical condition applies to the item. There may be more than one."},
+      {h:"Apply every code each source drives", b:"Do not duplicate a code. One LOT covers every source that needs lot/batch records."},
+      {h:"Apply the climb", b:"Once the item carries SER or LOT, every physical parent below the end item takes SER and TR."}])
+  ],
+  check:{q:"An electronic part has a shelf-life limit and is bought under a contract with a counterfeit avoidance clause. How many LOT codes does it take?",
+   o:[
+     "One, because both sources are satisfied by the same lot records",
+     "Two, one for each requirement source",
+     "None, because counterfeit avoidance requires serialization instead",
+     "One LOT and one SER, because two sources need two identities"],
+   a:0, why:"A code drives an action: record the lot/batch number. Both sources need that same action. One LOT code covers both, with LL beside it for the shelf life. Counterfeit avoidance traces the source and the lot. It is not a serialization requirement."}},
+
+ {id:"M1-08", gov:["R_NOTE_FORMS"], title:"Long and short note texts", body:[
+    P("SER and LOT each have a long note text and a short one. The choice depends on why the item carries the code."),
+    P("An item that holds **its own** serialization recording requirement takes the long SER text:"),
+    NOTE("SER_L"),
+    P("If that item also has children that carry SER or LOT, it also takes:"),
+    NOTE("TR_S"),
+    P("A physical parent that carries SER **only because of the climb** takes the short texts:"),
+    NOTE("SER_S"),
+    NOTE("TR_S"),
+    P("LOT follows the same logic. A raw material callout, such as bar stock, sheet, plate, or bulk sealant, takes the short text:"),
+    NOTE("LOT_S"),
+    P("A detail part or a vendor part that holds a lot/batch recording requirement takes the long text:"),
+    NOTE("LOT_L"),
+    P("The long texts carry the climb inside the note. They tell the build environment that traceability runs from this item to the end item.")
+  ],
+  check:{q:"An assembly has no traceability requirement of its own. One of its children is a serialized life-limited actuator. Which codes does the assembly take?",
+   o:[
+     "SER and TR, with the short note texts",
+     "SER with the long note text, and no TR",
+     "TR only, since the assembly holds no requirement of its own",
+     "LL and SER, inherited from the actuator"],
+   a:0, why:"The assembly is a physical parent of a serialized item. The climb requires it to be serialized and to generate traceability records, so it takes SER and TR in their short forms. The long SER text is for an item holding its own serialization requirement. Condition codes such as LL do not flow up the product tree."}}
+ ],
+ drill:[
+  {id:"M1-L1", find:"3", pn:"EX-7720-114", nm:"MANIFOLD ASSY, HYDRAULIC",
+   facts:["No requirement source applies to the manifold itself.","Its children include a relief valve that carries SER."],
+   a:["SER","TR"], why:"The manifold is a physical parent of a serialized item. The climb gives it SER and TR, in the short note texts."},
+  {id:"M1-L2", find:"12", pn:"EX-4020-PLT", nm:"PLATE, ALUMINUM ALLOY (RAW MATERIAL)",
+   facts:["A raw material callout on a detail part's parts list.","The material specification requires heat and lot traceability."],
+   a:["LOT"], why:"A raw material callout that requires lot/batch traceability takes LOT with the short note text. Raw material is not serialized."},
+  {id:"M1-L3", find:"1", pn:"EX-5512-300", nm:"STRUT, SHOCK, MAIN LANDING GEAR",
+   facts:["Life-limited by landing cycles.","Its parts list includes lot-recorded seals."],
+   a:["LL","SER","TR"], why:"Cycles are counted per unit, so the strut takes LL and SER with the long SER text. It also has children that carry LOT, so it takes TR."},
+  {id:"M1-L4", find:"6", pn:"EX-3308-020", nm:"HARNESS ASSY, WIRING",
+   facts:["No requirement source applies to the harness itself.","Its children include connectors that carry LOT."],
+   a:["SER","TR"], why:"A lot number does not establish location. The parent of a lot/batch recorded item is serialized so the lot attaches to an identified unit. The harness takes SER and TR in the short forms."},
+  {id:"M1-L5", find:"9", pn:"EX-2201-041", nm:"COVER, ACCESS PANEL",
+   facts:["No requirement source applies.","None of its children carry SER or LOT."],
+   a:[], why:"Nothing drives serialization or lot/batch recording, and it is not a parent of a traceable item. No code applies."},
+  {id:"M1-L6", find:"14", pn:"EX-8840-007", nm:"CANDLE, EMERGENCY OXYGEN",
+   facts:["Shelf-life limit attached to the manufacturing batch.","No certification or contract requirement calls for serialization."],
+   a:["LL","LOT"], why:"The limit attaches to the batch, so the batch is what gets recorded. LL states the limit with the age and shelf-life note text. LOT is the identity code."}
+ ],
+ exercises:[
+  {id:"M1-E1", title:"Exercise 1: The case for the records",
+   scen:"A program manager proposes to drop lot/batch recording on hydraulic O-rings to save cost. The argument: O-rings are cheap, and they are replaced at every overhaul anyway. The hydraulic assemblies would stay serialized.",
+   parts:[
+    {id:"a", q:"Describe a concrete failure that lot/batch records on the O-rings would let the program contain, and explain what happens to the containment if the records are gone."},
+    {id:"b", q:"The manager says the serialized assemblies are enough. What do the assembly serial numbers give you on their own, and what do they lose without the O-ring lot records?"},
+    {id:"c", q:"Explain the role of the assembly's serial number in making the O-ring lot records useful."},
+    {id:"d", q:"Who owns the decision to remove the code from the parts list? If the code were dropped without that authority, who would find the gap, and when?"}
+   ]},
+  {id:"M1-E2", title:"Exercise 2: Reading a parts list",
+   scen:"An actuator assembly parts list shows five items. A housing that is a Fracture-Critical Traceable Part. An end cap with no requirement. A set of O-rings with a shelf-life limit. A bulk sealant callout that requires lot traceability. A set of fasteners that require heat and lot traceability. The actuator goes into a flap drive unit, the flap drive unit goes into the wing, and the wing goes into the aircraft.",
+   parts:[
+    {id:"a", q:"For the housing and the O-rings, name each code and say whether it is an identity code or a condition code."},
+    {id:"b", q:"Which items take the long LOT note text and which take the short one? Say why."},
+    {id:"c", q:"Which codes does the actuator assembly itself take, and in which note form?"},
+    {id:"d", q:"How far do the records climb? Which codes do the flap drive unit and the wing take?"},
+    {id:"e", q:"The end cap has no requirement. Does it take any code? Explain your answer."}
+   ]}
+ ]
+},
+
+{
+ id:"M2", label:"Module 2", title:"Serialization sources", sub:"Where serialization requirements come from: Airworthiness Limitation Items, Principal Structural Elements, and premium selected materials, and how each one sets the codes",
+ sections:[
+ {id:"M2-01", gov:["R_SER_SOURCES"], title:"Where serialization comes from", body:[
+    P("SER drives one action: record serial numbers, or apply and record serial numbers. The requirement behind that action comes from many places."),
+    TABLE(["Source", "Why it needs a serial number", "Where this course covers it"], [
+      ["Cycle/usage-controlled life-limited items", "Remaining life is a per-unit quantity", "M5-03"],
+      ["Airworthiness Limitation Items on a discrete part", "14 CFR 45.15(c) requires the serial number", "M2-02 to M2-05"],
+      ["Safe-life Principal Structural Elements, and discrete damage-tolerant PSE parts", "An ALS entry attaches to a discrete part", "M2-06, M2-07"],
+      ["Premium selected materials", "Each test result must tie to one part instance", "M2-08"],
+      ["Critical Safety Items", "Serialization reaches them through IUID", "M5-06"],
+      ["Fracture-Critical Traceable Parts", "MIL-STD-1530 names serialization as a control", "M5-07"],
+      ["DoD serially managed items and parent items", "Every UII carries a serial number", "M4-05 to M4-09"],
+      ["Every physical parent of a serialized or lot/batch recorded item", "The climb to the end item", "M4-02"]]),
+    P("The sources differ. The result does not. Once an item carries SER, the climb to the end item applies."),
+    P("This module covers the sources that come from the airworthiness regulations for transport category airplanes, 14 CFR Part 25, and the marking rules in 14 CFR Part 45.")
+  ],
+  check:{q:"Which of these does NOT, on its own, drive serialization?",
+   o:[
+     "A Safety-Critical Item designation under MIL-STD-882E",
+     "An Airworthiness Limitations Section entry on a discrete part",
+     "A premium selection of material under 14 CFR 25.613(e)",
+     "Being the physical parent of a lot/batch recorded item"],
+   a:0, why:"A Safety-Critical Item designation drives design and process controls. It does not drive serialization on its own. Module 5 covers it. The other three are serialization sources: 14 CFR 45.15(c) for the ALS entry, the need to tie each test to one part for premium selection, and the climb for a physical parent."}},
+
+ {id:"M2-02", gov:["R_ALI"], title:"Airworthiness Limitation Items", body:[
+    P("Start with where the limit is published."),
+    P("14 CFR 25.1529 requires Instructions for Continued Airworthiness (ICA), prepared in accordance with Appendix H to Part 25. Paragraph H25.4 of Appendix H establishes the content of the Airworthiness Limitations Section (ALS). Appendix H also requires the ALS to state, in a prominent location, that it is FAA-approved and specifies maintenance required under 14 CFR 43.16 and 91.403, unless an alternative program has been FAA approved. The limits in it are mandatory."),
+    C("Definition", [
+      "An **Airworthiness Limitation Item (ALI)** is an item holding a mandatory replacement time, structural inspection interval, or related procedure approved as part of the type design and published in the Airworthiness Limitations Section (ALS) of the Instructions for Continued Airworthiness (ICA)."]),
+    P("The marking rule is in 14 CFR 45.15(c), under the heading Critical parts:"),
+    C("14 CFR 45.15(c)", [
+      "“Each person who manufactures a part for which a replacement time, inspection interval, or related procedure is specified in the Airworthiness Limitations section of a manufacturer’s maintenance manual or Instructions for Continued Airworthiness must permanently and legibly mark that part with a serial number (or equivalent) unique to that part in addition to the other applicable requirements of this section.”"], "teal"),
+    P("Read the rule for its triggers. There are three. A replacement time. An inspection interval. A related procedure. Any one of them requires the serial number."),
+    S("The trigger is the ALS entry. The form of the limit does not matter.")
+  ],
+  check:{q:"An ALS entry gives a discrete fitting a structural inspection interval. It carries no replacement time. Does 14 CFR 45.15(c) require a serial number on the fitting?",
+   o:[
+     "Yes. An inspection interval is one of the three triggers",
+     "No. Only a replacement time triggers the rule",
+     "No. Structural inspections are always tracked by airplane, not by part",
+     "Only if the fitting is also a Critical Safety Item"],
+   a:0, why:"14 CFR 45.15(c) names a replacement time, an inspection interval, or a related procedure. Any one is enough. The fitting is a discrete, separately manufactured part, so it takes SER. It does not take LL, because an inspection interval is not a replacement limit. Tracking by airplane applies to an inspection at a location with no separately manufactured part."}},
+
+ {id:"M2-03", gov:["R_ALI_QUESTIONS"], title:"Three questions set the codes", body:[
+    P("Three questions set the codes for an ALI. They are independent. Answer all three."),
+    STEPS([
+      {h:"What does the ALS entry attach to?", b:"This sets the identity code. A discrete part takes SER. An airframe location or zone with no separately manufactured part takes no code."},
+      {h:"Does the entry carry a mandatory replacement limit?", b:"This sets whether LL applies, and nothing else. A replacement limit adds LL. An inspection interval or a related procedure alone does not."},
+      {h:"How is the replacement limit expressed?", b:"This sets which LL note text to use. It does not change the identity code. Answer it only when the second answer is yes."}]),
+    TABLE(["The ALS entry attaches to", "The entry carries", "Codes", "LL note text"], [
+      ["A discrete part", "A mandatory replacement limit in cycles, landings, or flight hours", "SER, LL", "Cycle/usage"],
+      ["A discrete part", "A mandatory replacement limit in calendar time", "SER, LL", "Age and shelf-life"],
+      ["A discrete part", "An inspection interval or a related procedure only", "SER", "None"],
+      ["An airframe location or zone, with no separately manufactured part", "Any of the three triggers", "None", "None"],
+      ["A manufactured lot/batch of material, not a discrete part", "A mandatory replacement limit (uncommon)", "LOT, LL", "Per the limit expressed"]]),
+    P("A part often carries both a replacement limit and an inspection interval. Inspect every 5,000 cycles, replace at 30,000 cycles, for example. Use the row for the replacement limit. The inspection interval adds no code of its own."),
+    P("An ALI part may also be a Critical Safety Item, a Fracture-Critical Traceable Part, or a premium selected material part. The codes stack. Apply every code each source drives.")
+  ],
+  check:{q:"An ALS entry for a discrete lug reads: inspect every 5,000 flight cycles, replace at 30,000 flight cycles. Which codes apply?",
+   o:[
+     "SER and LL, with the cycle/usage LL note text",
+     "SER only, because the inspection interval comes first",
+     "SER and two LL notes, one for each limit",
+     "LOT and LL, because the limit is stated in cycles"],
+   a:0, why:"The entry attaches to a discrete part, so SER. It carries a mandatory replacement limit, so LL. The limit is in cycles, so the cycle/usage note text. The inspection interval adds no code of its own. Nothing about cycles points to lot/batch recording. Cycles are counted per unit."}},
+
+ {id:"M2-04", gov:["R_ALI_CALENDAR"], title:"Calendar limits and parts too small to mark", body:[
+    P("The third question is the one most often misread."),
+    P("An oxygen cylinder carries an ALS replacement limit of 5 years. The limit is calendar time. Calendar time sounds like shelf life, and shelf life sounds like lot/batch recording. That chain of association is wrong."),
+    S("A calendar-limited ALI on a discrete part is still serialized.",
+      "14 CFR 45.15(c) does not care how the limit is expressed. Calendar time changes the LL note text. It does not move the part to lot/batch recording."),
+    P("The oxygen cylinder takes SER and LL, with the age and shelf-life LL note text:"),
+    NOTE("LL_AGE"),
+    NOTE("SER_L"),
+    P("Some ALI parts are too small to mark. 14 CFR 45.15(d) covers them:"),
+    C("14 CFR 45.15(d)", [
+      "“If the FAA finds a part or article is too small or otherwise impractical to mark with any of the information required by this part, the manufacturer must attach that information to the part or its container.”"], "teal"),
+    P("The part still carries a unique serial number. The number moves to a tag or to the container. Lot/batch recording does not replace it.")
+  ],
+  check:{q:"A small ALI spring has a calendar replacement limit and is too small to mark. A planner proposes lot/batch recording instead of serialization. What is the correct response?",
+   o:[
+     "Keep SER. Attach the unique serial number to the part or container under 45.15(d)",
+     "Accept it. A calendar limit and a small size both point to lot/batch recording",
+     "Accept it, but add LL with the cycle/usage note text",
+     "Remove both codes. A part the FAA finds too small to mark is exempt from 45.15(c)"],
+   a:0, why:"45.15(c) requires a serial number unique to the part, whatever form the limit takes. 45.15(d) changes where the information goes, onto the part or its container. It does not remove the requirement. The calendar limit sets the age and shelf-life LL note text, not the cycle/usage one."}},
+
+ {id:"M2-05", gov:["R_ALI_LOT"], title:"Limits on a lot, and shelf life", body:[
+    P("An ALS entry normally lists a part number, a limit, and a task. It is expressed against a part."),
+    P("It can be expressed against a manufactured lot/batch of material instead. This is uncommon. Where it happens, the material takes LOT and LL rather than SER."),
+    P("Do not confuse that case with shelf life. Shelf life and cure date limits also attach to lots. They live in the maintenance manual or the material specification. They do not live in the ALS."),
+    CARDS([
+      {h:"Airworthiness limitation", b:"Published in the ALS. Approved as part of the type design. Drives 45.15(c) marking when it attaches to a discrete part."},
+      {h:"Shelf life or cure date", b:"Published in the maintenance manual or the material specification. Attaches to a manufacturing lot/batch. Drives LL and LOT."}], 2),
+    S("Airworthiness limitations and shelf life are separate regimes.",
+      "Ask where the limit is published before you ask how it is expressed.")
+  ],
+  check:{q:"A structural adhesive has a cure date limit stated in its material specification. It has no ALS entry. Which codes apply?",
+   o:[
+     "LL and LOT",
+     "SER and LL, because 45.15(c) applies to any life limit",
+     "LOT only, because a cure date is not a life limit",
+     "LL only, because the material specification controls the limit"],
+   a:0, why:"The limit lives in the material specification, not the ALS, so 45.15(c) does not apply. The limit attaches to the manufacturing batch. That makes the adhesive an age/shelf-life-controlled item: LL with the age and shelf-life note text, and LOT. LL alone creates no record."}},
+
+ {id:"M2-06", gov:["R_PSE"], title:"Safe-life Principal Structural Elements", body:[
+    P("Most transport airplane structure is damage tolerant. It is designed to carry load with a crack present until an inspection finds the crack. Some structure cannot meet that standard. For that structure, the applicant shows it will not crack during its service life, then retires it before that life ends."),
+    C("Definition", [
+      "A **Safe-Life Principal Structural Element (PSE)** is a PSE for which the applicant establishes that compliance with the damage-tolerance requirements is impractical. Under 14 CFR 25.571(c), that structure must instead be shown by analysis supported by test evidence to withstand the repeated loads of variable magnitude expected during its service life without detectable cracks."]),
+    P("The resulting safe-life limit is published as an ALS mandatory replacement time, in flight cycles or flight hours. That makes a safe-life PSE a cycle/usage-controlled life-limited item under 14 CFR 43.10."),
+    P("A safe-life PSE that is a discrete part with an ALS replacement time is serialized under 14 CFR 45.15(c). It takes LL and SER."),
+    P("Its underlying detail parts are treated differently. Lot/batch recording applies to the raw material heat and lot of those detail parts. It does not apply to the safe-life PSE part itself."),
+    C("Not a part replacement time: the Limit of Validity", [
+      "The **Limit of Validity (LOV)** bounds the engineering data that supports the airplane’s structural maintenance program. It applies to the airplane. It is not a part replacement time.",
+      "A safe-life limit retires a part. The LOV bounds the airplane. Do not apply LL to a part because of the LOV."])
+  ],
+  check:{q:"A landing gear side brace is a safe-life PSE with an ALS replacement time of 60,000 landings. It is a discrete part. Which codes apply to the brace itself?",
+   o:[
+     "LL and SER",
+     "LOT, because safe-life structure is traced by raw material heat",
+     "LL only, because the ALS already controls the brace",
+     "SER only, because the Limit of Validity sets its life"],
+   a:0, why:"A safe-life PSE with an ALS replacement time is a cycle/usage-controlled life-limited item, so LL. It is a discrete part with an ALS entry, so 45.15(c) requires SER. Heat and lot traceability applies to its detail parts, not to the brace itself. The LOV bounds the airplane, not a part."}},
+
+ {id:"M2-07", gov:["R_PSE_DT"], title:"Damage-tolerant PSEs and constituent materials", body:[
+    P("A damage-tolerant PSE is treated two ways. The difference is what the ALS entry attaches to."),
+    CARDS([
+      {h:"Inspection at a location", b:"The ALS entry is a structural inspection at an airframe location. There is no separately manufactured part. No serialization. The PSE is tracked by airplane and structural location. No code."},
+      {h:"Inspection on a discrete part", b:"The PSE is a discrete, separately manufactured part with an ALS inspection interval. 14 CFR 45.15(c) requires serialization. SER."}], 2),
+    P("Constituent materials follow a third path. Composite resins, structural adhesives, and prepregs go into PSEs. They are too small to serialize. Before installation, they are age and shelf-life limited, and they are lot/batch recorded. Once installed, they inherit the cycle and usage life of their higher-level assembly."),
+    TABLE(["PSE case", "Codes"], [
+      ["Safe-life PSE, discrete part with an ALS replacement time", "LL, SER"],
+      ["Safe-life PSE detail parts and constituent materials", "LOT"],
+      ["Damage-tolerant PSE, discrete part with an ALS inspection interval", "SER"],
+      ["Damage-tolerant PSE, location-based inspection", "None"]]),
+    P("Every row that carries SER or LOT starts a climb to the end item.")
+  ],
+  check:{q:"A composite prepreg with a storage age limit is cured into a safe-life PSE. How is the prepreg's traceability handled?",
+   o:[
+     "Lot/batch recorded before installation; once installed it inherits the PSE's cycle and usage life",
+     "Serialized, because it becomes part of a serialized PSE",
+     "Not recorded, because the PSE's serial number covers everything inside it",
+     "Given its own cycle/usage LL note and a serial number, because the PSE it goes into is cycle-limited"],
+   a:0, why:"Constituent materials are too small to serialize. Their storage limit attaches to the lot, so they are lot/batch recorded. After cure they are part of the PSE and share its cycle and usage life. The lot record is what connects a suspect batch of prepreg to the PSEs it went into."}},
+
+ {id:"M2-08", gov:["R_PREMIUM"], title:"Premium selected materials", body:[
+    P("Material design values set how much stress analysis lets a part carry. 14 CFR 25.613 governs them."),
+    P("Under 14 CFR 25.613(b), design values must be chosen to minimize the probability of structural failure due to material variability. Where applied loads eventually pass through a single member whose failure would cost the component its structural integrity, the values must assure material strength with 99 percent probability at 95 percent confidence. Engineers call this the A-basis. For redundant structure, where a failed element sheds its load safely to other members, the standard is 90 percent probability at 95 percent confidence, the B-basis."),
+    P("Premium selection is the condition on which greater values may be used. Under 14 CFR 25.613(e), greater material design values may be used:"),
+    C("14 CFR 25.613(e)", [
+      "“if a ‘premium selection’ of the material is made in which a specimen of each individual item is tested before use to determine that the actual strength properties of that particular item will equal or exceed those used in design.”"], "teal"),
+    P("The key words are “each individual item.” Each part is tested. Each result belongs to one part."),
+    S("Serialization is required in practice, although neither 14 CFR 25.613(e) nor AC 25.613-1 names it.",
+      "Each test result must tie to one part instance, from specimen through acceptance to installation. Only a distinctive product-unit identifier can hold that tie."),
+    P("Lot/batch recording does the other half. It captures heat and lot traceability, and a record that correlates each specimen to its part. If the part also carries an ALS entry, 45.15(c) marking applies as well."),
+    P("A premium selected material part takes SER and LOT.")
+  ],
+  check:{q:"A stress team raises the allowable on forged fittings by testing a prolongation coupon from each forging before use. Why must each fitting be serialized?",
+   o:[
+     "Each test result must stay tied to one fitting from specimen to installation",
+     "14 CFR 25.613(e) states a serialization requirement in its text",
+     "Forgings are always cycle-limited, so they are always serialized",
+     "Serialization of each fitting replaces the need for heat and lot records on the forgings"],
+   a:0, why:"Premium selection qualifies each individual item by its own test. The higher allowable is only valid for the fitting that passed. That link survives only if each fitting has its own identifier. The rule does not name serialization, which is why this is called a requirement in practice. Lot/batch recording is still needed for heat traceability, so the fitting takes SER and LOT."}}
+ ],
+ drill:[
+  {id:"M2-L1", find:"2", pn:"EX-6610-551", nm:"BRACE, SIDE, MAIN LANDING GEAR",
+   facts:["Safe-life PSE.","Discrete part with an ALS replacement time of 60,000 landings."],
+   a:["LL","SER"], why:"A safe-life PSE with an ALS replacement time is cycle/usage-controlled, so LL with the cycle/usage note text. It is a discrete part with an ALS entry, so 45.15(c) requires SER."},
+  {id:"M2-L2", find:"4", pn:"EX-8850-012", nm:"CYLINDER, OXYGEN, CREW",
+   facts:["Discrete part.","ALS replacement limit: 15 years from date of manufacture."],
+   a:["SER","LL"], why:"A calendar-limited ALI on a discrete part is still serialized. 45.15(c) does not care how the limit is expressed. The calendar limit sets the age and shelf-life LL note text."},
+  {id:"M2-L3", find:"7", pn:"EX-5120-230", nm:"FITTING, STABILIZER ATTACH",
+   facts:["Discrete, separately manufactured part.","ALS entry: inspect every 6,000 flight cycles. No replacement time."],
+   a:["SER"], why:"An inspection interval is one of the three 45.15(c) triggers, so SER. There is no replacement limit, so no LL."},
+  {id:"M2-L4", find:"n/a", pn:"Location 4-118", nm:"WING LOWER SKIN, STRINGER 12 RUNOUT (INSPECTION ZONE)",
+   facts:["ALS entry: inspect the zone every 12,000 flight cycles.","No separately manufactured part is identified by the entry."],
+   a:[], why:"The entry attaches to an airframe location with no separately manufactured part. It is tracked by airplane and structural location. No code."},
+  {id:"M2-L5", find:"3", pn:"EX-7730-118", nm:"FITTING, WING-TO-BODY, FORGED",
+   facts:["Uses elevated design values under a premium selection.","A coupon from each forging is tested before use."],
+   a:["SER","LOT"], why:"Each test result must tie to one part instance, so SER. Heat and lot traceability and the specimen-to-part correlation need LOT."},
+  {id:"M2-L6", find:"5", pn:"EX-6610-560", nm:"LUG, FORGED, DETAIL (INSIDE A SAFE-LIFE PSE ASSEMBLY)",
+   facts:["A detail part of a safe-life PSE assembly.","It holds no ALS entry of its own.","Its raw material heat and lot must be traceable."],
+   a:["LOT"], why:"Safe-life PSE detail parts carry lot/batch recording for raw material heat and lot. The serial number and LL belong to the PSE part that holds the ALS replacement time."},
+  {id:"M2-L7", find:"8", pn:"EX-8850-044", nm:"LUG, INSPECT AND REPLACE",
+   facts:["Discrete part.","ALS entry: inspect every 5,000 flight cycles and replace at 30,000 flight cycles."],
+   a:["SER","LL"], why:"Use the row for the replacement limit. SER for the discrete part, LL with the cycle/usage note text. The inspection interval adds no code of its own."}
+ ],
+ exercises:[
+  {id:"M2-E1", title:"Exercise 1: Reading an Airworthiness Limitations Section",
+   scen:"You are given four ALS entries. (1) Main landing gear side brace, a discrete part: replace at 60,000 landings. (2) Wing lower skin at a stringer runout: inspect every 12,000 flight cycles; no separately manufactured part is identified. (3) Crew oxygen cylinder, a discrete part: replace at 15 years. (4) Horizontal stabilizer attach fitting, a discrete part: inspect every 6,000 flight cycles and replace at 45,000 flight cycles.",
+   parts:[
+    {id:"a", q:"Give the codes for each entry, and the LL note text where LL applies. For each one, say which of the three questions decided it."},
+    {id:"b", q:"A reviewer argues that entry 3 should be lot/batch recorded because its limit is calendar time. Answer the reviewer, citing the rule."},
+    {id:"c", q:"Entry 4 carries two limits. Explain why only one of them drives LL."},
+    {id:"d", q:"Entry 2 takes no code. Explain how that location is still controlled."},
+    {id:"e", q:"Which entries start a climb to the end item, and what does the climb require of their parents?"}
+   ]},
+  {id:"M2-E2", title:"Exercise 2: A premium selection program",
+   scen:"A stress team wants to raise the design allowable on a set of forged fittings. A coupon from each forging's prolongation will be tested before the fitting is used. The forgings come from three heats. The fittings go into a wing-to-body joint assembly.",
+   parts:[
+    {id:"a", q:"Which regulation permits this, and what does it require of each item?"},
+    {id:"b", q:"The rule does not name serialization. Explain why serialization is still required."},
+    {id:"c", q:"What does lot/batch recording add that serialization does not?"},
+    {id:"d", q:"Which codes go on the fitting? Which codes does the joint assembly take, and why?"},
+    {id:"e", q:"One coupon record cannot be matched to a fitting. What does that mean for the fitting, and what would you ask for?"}
+   ]}
+ ]
+},
+
+{
+ id:"M3", label:"Module 3", title:"Lot/batch sources and special handling", sub:"Where lot/batch recording requirements come from: castings, process and batch conditions, counterfeit avoidance for electronic parts, and special handling, including explosive and radioactive material",
+ sections:[
+ {id:"M3-01", gov:["R_LOT_SOURCES"], title:"Where lot/batch recording comes from", body:[
+    P("LOT drives one action: record lot/batch numbers, or apply and record lot/batch numbers. As with SER, the requirement comes from many places."),
+    TABLE(["Source", "Why the lot matters", "Where this course covers it"], [
+      ["Age/shelf-life-controlled life-limited items", "The limit attaches to the manufacturing lot/batch", "M5-04"],
+      ["ALIs expressed against a manufactured lot/batch (uncommon)", "The ALS limit is on the lot", "M2-05"],
+      ["Safe-life PSE detail parts and constituent materials", "Raw material heat and lot", "M2-06, M2-07"],
+      ["Premium selected materials", "Heat traceability and specimen correlation", "M2-08"],
+      ["Critical Safety Items", "Traceability to an approved source, with lot and heat control", "M5-06"],
+      ["Fracture-Critical Traceable Parts and Fracture-Critical Parts", "Fracture control relies on material properties and process condition", "M5-07"],
+      ["Castings and alternative approved material design values", "Batch records support reduced inspection or approved values", "M3-02"],
+      ["Process and batch conditions", "Identity or performance is set by a batch", "M3-03"],
+      ["Counterfeit avoidance for electronic parts", "The source chain back to the original manufacturer", "M3-04, M3-05"],
+      ["Special handling, including explosive and radioactive material", "Handling conditions are recorded as a lot", "M3-06 to M3-09"]]),
+    P("Recall the two note forms. A raw material callout takes the short LOT text. A detail part or vendor part takes the long one. And recall the location gap: the parent of a lot/batch recorded item is serialized, so every LOT item starts a climb to the end item.")
+  ],
+  check:{q:"Sealant is called out in bulk on a parts list, and the specification requires lot traceability. A vendor O-ring on the same list also requires lot/batch recording. Which note texts apply?",
+   o:[
+     "Short LOT text on the sealant, long LOT text on the O-ring",
+     "Long LOT text on both, because both require traceability",
+     "Short LOT text on both, because neither is serialized",
+     "No LOT on the sealant, because bulk material cannot be traced"],
+   a:0, why:"A raw material callout, such as bar stock, sheet, plate, or bulk sealant, takes the short LOT text. A detail part or a vendor part that holds a lot/batch recording requirement takes the long text, which carries the climb to the end item inside the note."}},
+
+ {id:"M3-02", gov:["R_CASTINGS"], title:"Castings and alternative design values", body:[
+    P("A casting's strength varies more than wrought material does. Porosity and inclusions hide inside it. 14 CFR 25.619 requires special factors wherever strength is uncertain, and 14 CFR 25.621 sets the **casting factors** for castings. A casting factor is an extra factor of safety applied to the casting's design loads."),
+    P("Three conditions in Part 25 depend on production lot and batch records."),
+    L([
+      "**Non-critical castings with reduced non-visual inspection.** 14 CFR 25.621(d)(5) allows the number of castings per production batch inspected by non-visual methods to be reduced when an approved quality control procedure is established. Quality control must track and record each production batch to support the reduced sampling. See FAA AC 25.621-1.",
+      "**Castings using process monitoring to support a casting factor of 1.0.** 14 CFR 25.621(c)(1) and 14 CFR 25.621(d)(1) allow a casting factor of 1.0 or greater under stated conditions. For critical castings, those conditions include process monitoring with testing of coupons cut from the prolongations of each casting, or of each set of castings produced from a single pour into a single mold in a runner system. Records must tie each coupon to its casting or pour. See FAA AC 25.621-1.",
+      "**Alternative approved material design values.** 14 CFR 25.613(f) permits other material design values when the Administrator approves them. The rule does not itself require lot/batch records. The approval carries process and statistical conditions. Production lot and batch records show ongoing conformity to those conditions."]),
+    S("In each case, the batch record is what earns the reduced factor, the reduced sampling, or the approved value.",
+      "Lose the batch record and the relief goes with it."),
+    P("Each of these items takes LOT.")
+  ],
+  check:{q:"A non-critical casting program samples fewer castings per batch for radiographic inspection under an approved quality control procedure. Why does the casting take LOT?",
+   o:[
+     "The reduced sampling is only valid if each production batch is tracked and recorded",
+     "Every casting is serialized, and LOT is its identity code",
+     "14 CFR 25.621 requires a serial number on every casting",
+     "Castings always carry a shelf-life limit that attaches to the pour, so the pour is recorded"],
+   a:0, why:"Reduced sampling means the uninspected castings are accepted on the evidence of their batch. That argument only holds if each casting can be tied to its batch. The production batch record does that. Nothing here requires serialization, and castings carry no shelf life."}},
+
+ {id:"M3-03", gov:["R_PROCESS_BATCH"], title:"Process and batch conditions", body:[
+    P("Some items get their identity or their performance from a batch rather than from a unit. Lot/batch recording applies to:"),
+    L([
+      "Items fabricated using specific batches of bulk materials or processes.",
+      "Items whose testing or certification is conducted by lot/batch.",
+      "Items whose performance may depend on process or batch conditions, including storage conditions, temperature, solution strength, application technique, and cure time."]),
+    P("Common examples: printed wiring boards, heat-treated high-strength material, forged items, specialized metallic fasteners for heat and lot traceability, parts and materials with specific storage requirements, cured epoxy-filled honeycomb panels, electrical fuses, O-rings, simple high-volume electromechanical switches, and filters. The switches are standard toggles, general-purpose push-button switches, circuit breakers, and internal switches used inside non-critical line replaceable units."),
+    P("This is the widest lot/batch source by item count."),
+    C("Fasteners are not life-limited", [
+      "Specialized metallic fasteners have no shelf life. They carry heat and lot traceability. They take LOT under this source. They do not take LL.",
+      "The pattern to avoid is reasoning from “lot recorded” to “shelf life.” Many lot-recorded items have no life limit at all."]),
+    P("An item can carry this source and a criticality designation at the same time. The lot records are the same records.")
+  ],
+  check:{q:"Specialized high-strength fasteners require heat and lot traceability. Which codes apply?",
+   o:[
+     "LOT",
+     "LL and LOT",
+     "SER and LOT",
+     "LL only"],
+   a:0, why:"The fasteners have no shelf life, so LL does not apply. Heat and lot traceability is a lot/batch recording requirement under process and batch conditions. LOT, with the long note text for a detail or vendor part. Nothing drives serialization."}},
+
+ {id:"M3-04", gov:["R_COUNTERFEIT"], title:"Counterfeit avoidance for electronic parts", body:[
+    P("Counterfeit avoidance drives lot/batch traceability on electronic parts. It is a contract requirement, not a design requirement. It applies when the contract includes either of two clauses:"),
+    L([
+      "**DFARS 252.246-7007**, Contractor Counterfeit Electronic Part Detection and Avoidance System.",
+      "**DFARS 252.246-7008**, Sources of Electronic Parts."]),
+    C("Definition, DFARS 252.246-7007", [
+      "**Electronic part** means “an integrated circuit, a discrete electronic component (including, but not limited to, a transistor, capacitor, resistor, or diode), or a circuit assembly.”"]),
+    P("The definition is broad. It reaches ordinary passive components, not only microcircuits. A resistor is an electronic part."),
+    P("Both clauses state the traceability requirement the same way. The contractor keeps risk-based processes that let it track electronic parts from the original manufacturer to product acceptance by the Government. That holds whether the parts arrive as discrete parts or inside assemblies."),
+    P("DFARS 252.246-7008 sets the sourcing order:"),
+    STEPS([
+      {h:"The original manufacturer, or its authorized suppliers", b:"Or suppliers that obtain the parts only from the original manufacturer or its authorized suppliers."},
+      {h:"A contractor-approved supplier", b:"Only when the part is not available from the first tier. The contractor then takes responsibility for authenticity, and for inspection, testing, and authentication under the applicable industry standards."}]),
+    P("Two SAE standards are commonly invoked. SAE AS5553 covers counterfeit avoidance, detection, mitigation, and disposition for organizations that buy and integrate electronic parts. SAE AS6081 covers the same ground for distributors."),
+    S("Where traceability cannot be established, inspection, testing, and authentication replace it.",
+      "That substitution is expensive. The lot and source record is the cheaper path.")
+  ],
+  check:{q:"A contract includes DFARS 252.246-7008. A buyer wants to source a resistor from an independent distributor with no link to the original manufacturer, because it is not a microcircuit. What is wrong?",
+   o:[
+     "A resistor is an electronic part, so the sourcing order and traceability apply",
+     "Nothing. The clauses apply only to integrated circuits",
+     "Nothing, provided the resistor is serialized and inspected at receiving",
+     "The clause bans independent distributors under all conditions"],
+   a:0, why:"The DFARS definition names discrete components, including resistors. The sourcing order puts the original manufacturer and its authorized suppliers first. A contractor-approved supplier may be used only when the part is not available from those sources, and then the contractor owns authentication. Serialization does not answer a source question."}},
+
+ {id:"M3-05", gov:["R_COUNTERFEIT"], title:"Which source, and which lot", body:[
+    P("Counterfeit avoidance is commonly mistaken for a serialization requirement. It is not one."),
+    CARDS([
+      {h:"Serialization records", b:"Which unit. Where that unit is installed."},
+      {h:"Counterfeit avoidance records", b:"Which source. Which lot. The chain back to the original component manufacturer."}], 2),
+    P("The record structure is lot/batch with a source chain. The obligation is to trace a part back to the company that made it. A serial number applied at receiving says nothing about where the part came from."),
+    P("An electronic part can carry this source and a shelf-life source at the same time. Electronic components, microchips, capacitors, and diodes appear in both lists. One LOT code satisfies both. The reasons differ. The lot records are the same records."),
+    P("A counterfeit-controlled electronic part takes LOT. If it also has a shelf-life limit, it takes LL and LOT.")
+  ],
+  check:{q:"A capacitor is bought under DFARS 252.246-7007 and has a shelf-life limit on its lot. Which codes does it take?",
+   o:[
+     "LL and LOT",
+     "SER and LOT, one identity for each source",
+     "LOT only, because the shelf life is covered by counterfeit control",
+     "SER and LL, because counterfeit control needs a serial number"],
+   a:0, why:"Both sources need lot/batch recording, and one LOT covers both. The shelf-life limit adds LL with the age and shelf-life note text. Counterfeit avoidance traces source and lot. It does not call for a serial number."}},
+
+ {id:"M3-06", gov:["R_SH"], title:"Special Handling Required", body:[
+    P("Special Handling Required items are Lot/Batch Recording Required items. Manufacturing and Production must follow special handling and packaging methods when storing and working with them."),
+    P("They include sensitive electronic parts or assemblies, fragile equipment, easily lost parts of high value, perishable items, and items that must be stored under specific environmental or security conditions."),
+    P("Special handling, packaging, and environmental control may be required when critical limits exist for any of these factors:"),
+    CARDS([
+      {h:"Environment", b:"Atmospheric pressure. Fungus. Hail. Humidity. Rain. Salt spray. Sand and dust. Solar radiation. Temperature. Wind."},
+      {h:"Physical and electrical", b:"Shock. Vibration. Electrostatic discharge sensitive. Sensitive electronic devices."},
+      {h:"Material, life, and security", b:"Life limits, including expiration dates. Hazardous material. Security classification."}]),
+    P("The special handling conditions, including segregation and packaging, are recorded as a lot. That is why SH always travels with LOT."),
+    P("Parts lists containing these items must specify the handling, packaging, or environmental requirements. Parts lists that call out off-the-shelf purchased items must identify the special requirements for those items too. An off-the-shelf part does not arrive with the requirement attached.")
+  ],
+  check:{q:"A parts list calls out an off-the-shelf humidity-sensitive sensor. The engineer omits SH, reasoning that the vendor's datasheet covers storage. What is wrong?",
+   o:[
+     "Parts lists must identify special requirements for off-the-shelf items too",
+     "Nothing. The vendor datasheet satisfies the requirement",
+     "Only the LOT code is missing, because SH does not apply to purchased items",
+     "SH is needed only if the sensor is also a Critical Safety Item"],
+   a:0, why:"The parts list is the instruction the build environment reads. A datasheet in a vendor's file is not. Parts lists that call out off-the-shelf purchased items must identify the special requirements for those items. The sensor takes SH with the handling stated, and LOT, because the handling conditions are recorded as a lot."}},
+
+ {id:"M3-07", gov:["R_SH_NOTE"], title:"Writing the special handling note", body:[
+    P("For items requiring special handling, apply both notes:"),
+    NOTE("LOT_L"),
+    NOTE("SH"),
+    P("The bracketed field is where the work is. State the control, or reference the specification that states it. Write it so a technician at a bench can act on it without looking anything else up, or can find the specification that tells them."),
+    P("Three examples:"),
+    NOTE("SH_EX1"),
+    NOTE("SH_EX2"),
+    NOTE("SH_EX3"),
+    C("Watch for cancelled standards in older notes", [
+      "Older ESD notes cite MIL-STD-1686 and DOD-HDBK-263. MIL-STD-1686C was cancelled on 12 January 2021. The cancellation notice names ANSI/ESD S20.20 as its replacement.",
+      "When you revise a parts list that carries an older ESD note, bring the reference current. A note that points at a cancelled standard sends the reader to a document nobody maintains."], "teal")
+  ],
+  check:{q:"Which special handling note text does its job?",
+   o:[
+     "SPECIAL HANDLING REQUIRED – TEMPERATURE SHALL BE KEPT BETWEEN 33°F AND 150°F DURING SHIPMENT AND INSTALLATION.",
+     "SPECIAL HANDLING REQUIRED – HANDLE WITH CARE.",
+     "SPECIAL HANDLING REQUIRED – SEE VENDOR.",
+     "SPECIAL HANDLING REQUIRED."],
+   a:0, why:"The note must state the handling, packaging, or environmental control required, or reference the specification that contains it. Only the first does. “Handle with care” states no control. “See vendor” names no document. A bare heading gives the build environment nothing to follow."}},
+
+ {id:"M3-08", gov:["R_EXPLOSIVE"], title:"Explosive material", body:[
+    P("Explosive materials include, but are not limited to, ammunition, pyrotechnics, destructors, detonators, initiators, thrusters, JATO units, fuels, catapults, and explosive units. The category includes solids, liquids, and gases."),
+    P("Before releasing any data, coordinate the use of these materials with the Materials and Processes organization under existing operating procedures. Do the same for any material suspected of being explosive."),
+    P("For explosive material items, apply:"),
+    NOTE("LOT_L"),
+    NOTE("SH_EXP"),
+    P("The explosive material note text goes on the drawing picture sheet as well. If that is not practicable, the picture sheet carries a reference to it. The note, or a reference to it, is required on the drawing picture sheet and on **all higher-level drawings**."),
+    S("Explosive material is the one condition that must be visible at every level above it.",
+      "Someone working on the top assembly needs to know what is inside it."),
+    C("Beryllium is not explosive", [
+      "Beryllium and beryllium alloys are toxic hazardous materials. They are not explosive materials. Treat them as Special Handling Required items under the hazardous material factor, with SH and LOT."])
+  ],
+  check:{q:"A thruster cartridge is installed in a canopy jettison assembly, which goes into the cockpit installation. Where must the explosive material note, or a reference to it, appear?",
+   o:[
+     "On the cartridge's drawing picture sheet and on all higher-level drawings",
+     "On the cartridge's parts list line only, next to the LOT note",
+     "On the cartridge drawing and the next-higher assembly only",
+     "On the end item drawing only, where the whole system is shown"],
+   a:0, why:"The explosive material note, or a reference to it, is required on the drawing picture sheet and on all higher-level drawings. That puts the warning in front of anyone working at any level above the explosive item. The SER and TR climb is a separate rule, and it also applies here because the cartridge carries LOT."}},
+
+ {id:"M3-09", gov:["R_RADIOACTIVE"], title:"Radioactive material", body:[
+    P("Radioactive materials are items that Radiation Health Protection has identified as radioactive beyond tolerable limits."),
+    P("For radioactive material items, apply:"),
+    NOTE("LOT_L"),
+    NOTE("SH_RAD"),
+    P("The note must name the isotope and the amount of radioactivity. A warning without the isotope and the curies is not enough for Radiation Health Protection to act on."),
+    P("The note is required on the lowest-level drawing that calls for the radioactive material. It is required on higher-level drawings when Radiation Health Protection requests it."),
+    TABLE(["", "Explosive material", "Radioactive material"], [
+      ["Codes", "SH, LOT", "SH, LOT"],
+      ["Who decides it applies", "Coordinate with Materials and Processes", "Radiation Health Protection identifies it"],
+      ["Note must include", "Handling method and safety precautions", "Isotope and number of curies"],
+      ["Higher-level drawings", "Always, note or reference", "When Radiation Health Protection requests it"]])
+  ],
+  check:{q:"A radioactive source is called out on a detail drawing. Radiation Health Protection has not asked for the note on higher assemblies. Where is the note required?",
+   o:[
+     "On the lowest-level drawing that calls for the material",
+     "On every higher-level drawing up to the end item",
+     "On the end item drawing only, as the top-level record",
+     "Nowhere, until Radiation Health Protection requests it"],
+   a:0, why:"The radioactive material note is required on the lowest-level drawing that calls for the material. Higher-level drawings carry it when Radiation Health Protection requests it. That differs from explosive material, where every higher-level drawing carries the note or a reference to it."}}
+ ],
+ drill:[
+  {id:"M3-L1", find:"11", pn:"EX-3340-900", nm:"CASTING, HOUSING, NON-CRITICAL",
+   facts:["Accepted under an approved quality control procedure that reduces non-visual inspection per production batch."],
+   a:["LOT"], why:"Reduced sampling only holds if each production batch is tracked and recorded. LOT."},
+  {id:"M3-L2", find:"15", pn:"EX-BLT-HT-12", nm:"BOLT, HIGH-STRENGTH, SPECIALIZED",
+   facts:["Requires heat and lot traceability.","No shelf life."],
+   a:["LOT"], why:"Heat and lot traceability is a process and batch condition. Fasteners have no shelf life, so no LL."},
+  {id:"M3-L3", find:"22", pn:"EX-RES-0402-10K", nm:"RESISTOR, FIXED, FILM",
+   facts:["Contract includes DFARS 252.246-7007 and 252.246-7008.","No shelf-life limit."],
+   a:["LOT"], why:"A resistor is an electronic part under the DFARS definition. Counterfeit avoidance needs source and lot records, not serial numbers. LOT."},
+  {id:"M3-L4", find:"23", pn:"EX-CAP-TA-47U", nm:"CAPACITOR, TANTALUM",
+   facts:["Contract includes DFARS 252.246-7007.","Shelf-life limit on the manufacturing lot."],
+   a:["LL","LOT"], why:"One LOT covers both the counterfeit avoidance source and the shelf-life source. The shelf-life limit adds LL with the age and shelf-life note text."},
+  {id:"M3-L5", find:"4", pn:"EX-SNS-HUM-2", nm:"SENSOR, HUMIDITY-SENSITIVE (OFF THE SHELF)",
+   facts:["Relative humidity must stay at or below 70 percent during shipment and installation."],
+   a:["SH","LOT"], why:"Special Handling Required items are Lot/Batch Recording Required items. SH states the control, and LOT records the handling conditions as a lot. Off-the-shelf items are not exempt."},
+  {id:"M3-L6", find:"2", pn:"EX-CTG-JET-7", nm:"CARTRIDGE, THRUSTER, CANOPY JETTISON",
+   facts:["Explosive material."],
+   a:["SH","LOT"], why:"Explosive material takes LOT and the explosive material SH note. The note or a reference to it also goes on the picture sheet and every higher-level drawing."},
+  {id:"M3-L7", find:"19", pn:"EX-BE-CU-172", nm:"STRIP, BERYLLIUM COPPER",
+   facts:["Toxic hazardous material.","Not explosive."],
+   a:["SH","LOT"], why:"Beryllium is a hazardous material, not an explosive. It is a Special Handling Required item under the hazardous material factor: SH and LOT, with the general SH note rather than the explosive one."}
+ ],
+ exercises:[
+  {id:"M3-E1", title:"Exercise 1: The electronics buy",
+   scen:"A program's contract includes DFARS 252.246-7007 and 252.246-7008. A circuit card assembly uses microcircuits, ceramic capacitors, film resistors, and tantalum capacitors with a shelf-life limit. One microcircuit is obsolete and unavailable from the original manufacturer or its authorized distributors. The buyer finds stock at an independent distributor.",
+   parts:[
+    {id:"a", q:"Which items on the card fall under the counterfeit avoidance clauses? Explain using the definition."},
+    {id:"b", q:"Which codes do the ceramic capacitors take, and which do the tantalum capacitors take? Explain the difference."},
+    {id:"c", q:"What must happen before the obsolete microcircuit can be bought from the independent distributor, and who carries the responsibility?"},
+    {id:"d", q:"A colleague suggests serializing each microcircuit at receiving to satisfy the clause. Answer them."},
+    {id:"e", q:"Which codes does the circuit card assembly take, and why?"}
+   ]},
+  {id:"M3-E2", title:"Exercise 2: Handling notes on a parts list",
+   scen:"An avionics installation parts list includes: a fragile optical sensor bought off the shelf; an electrostatic discharge sensitive circuit card; a thruster cartridge for an emergency release; a beryllium copper spring; and a sealed source used in a smoke detector, which Radiation Health Protection has identified as radioactive beyond tolerable limits. The existing ESD note on the card cites MIL-STD-1686.",
+   parts:[
+    {id:"a", q:"Give the codes for each of the five items."},
+    {id:"b", q:"Write the SH note for the fragile optical sensor. Explain what makes it actionable."},
+    {id:"c", q:"What is wrong with the existing ESD note, and what would you change?"},
+    {id:"d", q:"Which of these items need a note or reference on higher-level drawings? Explain the rule for each."},
+    {id:"e", q:"A reviewer treats the beryllium copper spring as explosive material. Correct them, and say what changes in the notes."}
+   ]}
+ ]
+},
+
+{
+ id:"M4", label:"Module 4", title:"The climb to the end item, and IUID", sub:"How traceability records run from a traceable item up every physical parent to the end item, how installation drawings and the end item are coded, and when Item Unique Identification applies, how it is marked, and how it is reported",
+ sections:[
+ {id:"M4-01", gov:["R_TR"], title:"What the TR code directs", body:[
+    P("SER and LOT give an item an identity. TR puts that identity somewhere."),
+    P("The Traceability Records Required code, TR, directs the build environment to generate part traceability records. These records document where each Serialization Recording Required item and each Lot/Batch Recording Required item is installed."),
+    S("Each traceability record links an item to its next-higher parent.",
+      "String the records together and they answer the question the whole system exists to answer: this part, in which aircraft?"),
+    P("A link has to identify both ends. On one end, the child's part number with its serial number or lot/batch number. On the other end, the parent's part number and serial number."),
+    P("One link is not enough. A record that says “valve serial 0412 is in manifold serial 0031” is useless if nobody knows where manifold 0031 went. The next link says that. So does the one after it, all the way to the end item."),
+    C("TR belongs on the parent", [
+      "TR goes on the item whose parts list holds traceable children. It tells the build environment to record which child went into this unit.",
+      "An item with no traceable children has nothing to link below it. It does not take TR, even if it carries SER itself."])
+  ],
+  check:{q:"A serialized relief valve has no children. Does the valve itself take TR?",
+   o:[
+     "No. TR goes on the parent whose children carry SER or LOT",
+     "Yes. Every serialized item takes TR",
+     "Yes, because the long SER note requires traceability",
+     "No, because a valve with no children is not a traceable item at all"],
+   a:0, why:"TR directs the generation of records that link children to this item. The valve has no children, so there is nothing to link below it. Its own link, to its parent, is generated by the TR on the parent. The long SER note tells the build environment the chain runs to the end item, but TR still belongs on the parent."}},
+
+ {id:"M4-02", gov:["R_PARENTS","R_CASCADE"], title:"Every physical parent", body:[
+    P("Recall the governing rule. When an item holds a serialization recording requirement or a lot/batch recording requirement, serialization and traceability records must be maintained up the product tree to the end item."),
+    P("Here is what that means for the parents. A serialized item's next-higher physical parent must also be serialized. So must every higher physical parent below the end item. The parent of a lot/batch recorded item is serialized too, because a lot number alone does not establish location."),
+    P("For each physical parent below the end item, apply:"),
+    NOTE("SER_S"),
+    NOTE("TR_S"),
+    S("There is no threshold and no shorter scope.",
+      "The rule does not ask how critical the child is, how cheap the parent is, or how deep the tree runs. One traceable item at the bottom serializes every physical parent above it."),
+    P("Notice the word **physical**. The rule applies to items that are consumed into the product as parts. Two kinds of item in a product tree are not physical parts: installation drawings and the end item itself. The next section covers both.")
+  ],
+  check:{q:"A lot-recorded O-ring sits five levels below the aircraft. None of the four assemblies between them holds a requirement of its own. How many of those assemblies take SER and TR?",
+   o:[
+     "All four physical parents below the end item",
+     "Only the O-ring's next-higher assembly",
+     "None, because a lot-recorded child does not drive serialization of its parent",
+     "Only the assemblies that are Line Replaceable Units"],
+   a:0, why:"The parent of a lot/batch recorded item is serialized, because a lot number does not establish location. The rule then continues: every higher physical parent below the end item is serialized and generates traceability records. There is no threshold and no stopping at an LRU."}},
+
+ {id:"M4-03", gov:["R_INSTALL_END"], title:"Installation drawings and the end item", body:[
+    P("Two items in the product tree break the pattern."),
+    P("**Installation drawings.** An installation drawing depicts installation instructions. It is not consumed into the production system as a physical part. You cannot serialize an instruction. For each installation drawing that sits between a traceable item and the end item, apply:"),
+    NOTE("TR_INST"),
+    P("The installation drawing takes TR and no SER. The chain passes through it and reaches the next physical item or the end item."),
+    P("**The end item.** The end item is the top-level asset or system under contract. It is typically the complete aircraft, by tail number, or the missile system. For the end item, apply:"),
+    NOTE("TR_END"),
+    P("The end item does not take SER. The contract assigns its identity: a tail number or a system serial number. When the contract requires IUID for the end item, apply the IUID code as well."),
+    TABLE(["Item in the tree", "Codes", "Note text"], [
+      ["Physical parent below the end item", "SER, TR", "Short SER and short TR"],
+      ["Installation drawing between a traceable item and the end item", "TR", "Installation TR text"],
+      ["End item", "TR, and IUID if the contract requires it", "Terminator TR text"]])
+  ],
+  check:{q:"A flap installation drawing sits between a serialized flap drive unit and the aircraft. Which codes does the installation drawing take?",
+   o:[
+     "TR, with the installation note text",
+     "SER and TR, like any other parent",
+     "No code, because installation drawings are not parts",
+     "TR, with the terminator note text"],
+   a:0, why:"An installation drawing is not a physical part, so it takes no SER. The chain still passes through it, so it takes TR with the installation note text. The terminator text belongs only on the end item."}},
+
+ {id:"M4-04", gov:["R_PARENTS","R_INSTALL_END"], title:"A worked climb", body:[
+    P("Walk one tree from the bottom up. An actuator sits inside a flap drive unit. The flap drive unit is installed on the aircraft through a flap installation drawing."),
+    TREE([
+      [0, "Aircraft, tail number assigned by contract", ["TR"], "End item. Terminator TR text. No SER. IUID only if the contract requires it."],
+      [1, "Flap installation", ["TR"], "Installation drawing. Installation TR text."],
+      [2, "Flap drive unit", ["SER","TR"], "A Line Replaceable Unit. Physical parent. Short texts. The chain does not stop here."],
+      [3, "Actuator assembly", ["SER","TR"], "Physical parent of traceable children. Short texts."],
+      [4, "Housing, Fracture-Critical Traceable Part", ["FC","SER","LOT"], "Holds its own requirements. Long SER and long LOT texts."],
+      [4, "O-ring set, shelf-life limited", ["LL","LOT"], "Age and shelf-life LL text. Long LOT text."],
+      [4, "Fasteners, heat and lot traceability", ["LOT"], "Long LOT text. No LL: fasteners have no shelf life."],
+      [4, "End cap", [], "No source applies. No code."]]),
+    STEPS([
+      {h:"Code the children from their own sources", b:"The housing, the O-rings, and the fasteners each carry codes from their own requirement sources. The end cap carries none."},
+      {h:"Climb one level", b:"The actuator has traceable children. It takes SER and TR."},
+      {h:"Keep climbing through every physical parent", b:"The flap drive unit is a physical parent of a serialized actuator. SER and TR. Being an LRU changes nothing."},
+      {h:"Pass through the installation drawing", b:"TR with the installation text. No SER."},
+      {h:"Stop at the end item", b:"TR with the terminator text. The contract gives the aircraft its identity."}], "tl"),
+    P("Notice what did not climb. FC stayed on the housing. LL stayed on the O-rings. Condition codes describe the item they sit on. Only SER and TR climb.")
+  ],
+  check:{q:"In the worked tree, why does the flap drive unit take SER and TR even though it holds no requirement of its own?",
+   o:[
+     "It is a physical parent of a serialized item, below the end item",
+     "It is a Line Replaceable Unit, and every LRU is serialized",
+     "It inherits the FC code from the fracture-critical housing inside it",
+     "It is the end item for the actuator's records"],
+   a:0, why:"The climb serializes every physical parent below the end item. The flap drive unit's serialized child is the actuator. Its status as an LRU is irrelevant, and it is not the end item. FC does not flow up the product tree."}},
+
+ {id:"M4-05", gov:["R_IUID_CONTRACT"], title:"IUID is a contract requirement", body:[
+    P("The Item Unique Identification Required code, IUID, drives two actions. Mark the item with a unique item identifier (UII). Report that UII to the Department of Defense IUID Registry."),
+    P("IUID comes from the contract, not from the type design. It applies when the contract includes **DFARS 252.211-7003**, Item Unique Identification and Valuation."),
+    L([
+      "It does not apply to aircraft or subsystems delivered only under FAA certification, unless the contract requires it.",
+      "When the prime contract requires IUID for an item that a supplier provides, the contractor flows DFARS 252.211-7003 down to that subcontract. That includes subcontracts for commercial products and commercial services."]),
+    S("Every UII carries a serial number, so an IUID item is a serialized item.",
+      "The UII adds two things a serial number alone does not: a machine-readable mark, and a registry record."),
+    P("That is why the IUID code always travels with SER. And because SER is there, the climb to the end item applies.")
+  ],
+  check:{q:"A commercial transport airplane is delivered under FAA certification only. The contract has no DFARS clauses. A cycle-limited actuator on it costs $12,000. Does it take IUID?",
+   o:[
+     "No. IUID comes from DFARS 252.211-7003 in the contract, which is absent",
+     "Yes. Any item with a unit cost over $5,000 takes IUID on any contract",
+     "Yes. Every cycle-limited part takes IUID",
+     "Only if the actuator is a Line Replaceable Unit removed on the flight line"],
+   a:0, why:"IUID is a contract requirement. Without DFARS 252.211-7003, the value threshold never comes into play. The actuator still takes LL and SER from its cycle limit, and its parents still climb to the end item. It does not take IUID."}},
+
+ {id:"M4-06", gov:["R_IUID_DEFS"], title:"IUID definitions", body:[
+    P("DFARS 252.211-7003 defines the key terms. They are used as written."),
+    C("DoD item unique identification", [
+      "“a system of marking items delivered to DoD with unique item identifiers that have machine-readable data elements to distinguish an item from all other like and unlike items. For items that are serialized within the enterprise identifier, the unique item identifier shall include the data elements of the enterprise identifier and a unique serial number. For items that are serialized within the part, lot, or batch number within the enterprise identifier, the unique item identifier shall include the data elements of the enterprise identifier; the original part, lot, or batch number; and the serial number.”"]),
+    C("Unique item identifier", [
+      "“a set of data elements marked on items that is globally unique and unambiguous. The term includes a concatenated unique item identifier or a DoD recognized unique identification equivalent.”"]),
+    C("Parent item", [
+      "“the item assembly, intermediate component, or subassembly that has an embedded item with a unique item identifier or DoD recognized unique identification equivalent.”"]),
+    P("Read the first definition for its data elements. There is always an **enterprise identifier**, which says who made or assigned the identity. There is always a **serial number**. Sometimes there is an **original part, lot, or batch number** in between. Every combination ends in a serial number."),
+    P("“Like and unlike items” matters. The UII must be unique against every other item, not only against other items of the same part number. That is what “globally unique” means.")
+  ],
+  check:{q:"A UII built within a lot number contains which data elements?",
+   o:[
+     "The enterprise identifier, the original lot or batch number, and a serial number",
+     "The enterprise identifier and the lot or batch number only",
+     "The lot or batch number and the part number only",
+     "The part number, the contract number, and the delivery order number"],
+   a:0, why:"For items serialized within the part, lot, or batch number, the UII includes the enterprise identifier; the original part, lot, or batch number; and the serial number. A lot number without a serial number does not distinguish one item from another, so it cannot be a UII."}},
+
+ {id:"M4-07", gov:["R_IUID_WHEN"], title:"When IUID applies", body:[
+    P("DFARS 211.274-2(a) sets the policy. The contract identifies the items."),
+    TABLE(["Category", "When IUID is required", "Authority"], [
+      ["At or above the value threshold", "The Government’s unit acquisition cost is $5,000 or more. The contract line item sets the unit acquisition cost.", "DFARS 211.274-2(a)(1)"],
+      ["Below the value threshold", "Unit acquisition cost under $5,000, when the requiring activity determines IUID is required for mission essential or controlled inventory items. The contract identifies them.", "DFARS 211.274-2(a)(2)"],
+      ["DoD serially managed items", "Regardless of value. Includes embedded subassemblies, components, and parts. Embedded items are listed in the attachment called out by DFARS 252.211-7003(c)(1)(iii).", "DFARS 211.274-2(a)(3)(i)"],
+      ["Parent items", "Regardless of value. At delivery the contractor reports the parent’s UII with the UII of each embedded item, per DFARS 252.211-7003(e).", "DFARS 211.274-2(a)(3)(ii)"],
+      ["Warranted serialized items", "Regardless of value, for a serialized item delivered under a warranty.", "DFARS 211.274-2(a)(3)(iii)"],
+      ["Special tooling and special test equipment", "Regardless of value, for a major defense acquisition program item designated for preservation and storage under section 815 of the FY2009 NDAA (Public Law 110-417).", "DFARS 211.274-2(a)(3)(iv)"],
+      ["High risk items", "Regardless of value, when the requiring activity identifies the item as vulnerable to supply chain threat, a target of cyber threats, or susceptible to counterfeiting.", "DFARS 211.274-2(a)(3)(v)"]]),
+    P("A **DoD serially managed item** is one the primary inventory control activity identifies as serially managed under DoDI 8320.04. These include capital asset equipment, Critical Safety Items, relocatable facilities, special test equipment and special tooling that is part of a major defense acquisition program, controlled inventory items as appropriate, and depot-level repairable items as determined by the item manager or the program manager. The requirement covers reparable and nonreparable items."),
+    S("Value is only the first gate. Most of the list applies regardless of value.")
+  ],
+  check:{q:"A $900 depot-level repairable valve is identified by the item manager as serially managed. The contract includes DFARS 252.211-7003. Does it take IUID?",
+   o:[
+     "Yes. DoD serially managed items require IUID regardless of value",
+     "No. It is below the $5,000 threshold",
+     "Only if it is also a parent item",
+     "Only if the design control activity also designates it a Critical Safety Item"],
+   a:0, why:"DFARS 211.274-2(a)(3)(i) requires IUID for DoD serially managed items regardless of value. Depot-level repairable items determined by the item manager are among them. The valve takes IUID and SER."}},
+
+ {id:"M4-08", gov:["R_IUID_MARK"], title:"Marking, construct, and reporting", body:[
+    P("**Marking.** The build environment marks the UII data elements on the item. The mark is a two-dimensional data matrix symbol that complies with ISO/IEC 16022, ECC200. Marking follows MIL-STD-130, Identification Marking of U.S. Military Property, latest version."),
+    L([
+      "Each mark is verified with an automatic identification technology device programmed to the requirements of Appendix A of MIL-STD-130.",
+      "The issuing agency code is not placed on the item.",
+      "When an item is too small or otherwise impractical to mark, follow the alternative marking provisions of MIL-STD-130.",
+      "Shipments, storage containers, and packages that contain uniquely identified items are labeled in accordance with MIL-STD-129, Military Marking for Shipment and Storage, latest version."]),
+    P("**Serialization construct.** The enterprise chooses one of three methods."),
+    CARDS([
+      {h:"Within the enterprise identifier", b:"Serial numbers are unique across everything the enterprise makes. MIL-STD-130 calls this Construct 1."},
+      {h:"Within the original part, lot, or batch number", b:"Serial numbers are unique within each part, lot, or batch number. MIL-STD-130 calls this Construct 2."},
+      {h:"A DoD recognized equivalent", b:"An existing unique identification system the DoD accepts in place of a constructed UII."}]),
+    P("Each method gives every item its own identity. **Lot/batch recording alone does not satisfy IUID.**"),
+    P("**Reporting.** The contractor reports each UII at delivery, as part of the Material Inspection and Receiving Report."),
+    L([
+      "End items are reported through the receiving report capability in Wide Area WorkFlow (WAWF).",
+      "Embedded items are reported through the WAWF embedded items capability, by direct data submission to the IUID Registry, or as a WAWF deliverable attachment.",
+      "For each embedded item, the report includes the UII of the parent item that contains it."]),
+    P("Configuration Management reconciles the IUID code on the design against the UIIs reported.")
+  ],
+  check:{q:"A supplier proposes to satisfy IUID on a batch of identical brackets by marking each with the same lot number in a data matrix. What is wrong?",
+   o:[
+     "Every UII must include a serial number that gives each item its own identity",
+     "Nothing, provided the data matrix complies with ISO/IEC 16022",
+     "The mark must also include the issuing agency code in the data matrix",
+     "Brackets are too small for data matrix marking, so a tag must be used instead"],
+   a:0, why:"Every serialization construct ends in a serial number that makes each item unique. A shared lot number distinguishes no bracket from another. Lot/batch recording alone does not satisfy IUID. The issuing agency code is deliberately not placed on the item."}},
+
+ {id:"M4-09", gov:["R_IUID_APPLY"], title:"Applying the IUID code", body:[
+    P("For each item that holds an IUID requirement, apply:"),
+    NOTE("IUID_I"),
+    NOTE("SER_L"),
+    P("For each parent item that contains an embedded item carrying a UII, apply:"),
+    NOTE("IUID_P"),
+    P("Coordinate the parent item level with the contracting activity. The contract governs which assembly is the parent item."),
+    S("SER and TR flow up the product tree. IUID does not.",
+      "Apply IUID only to items that hold an IUID requirement and to the parent items the contract identifies."),
+    P("Put the two rules side by side on one assembly. A parent item contains an embedded item with a UII. The contract names it as the parent item, so it takes IUID. Its embedded item carries SER, so the climb gives it SER and TR. It takes IUID, SER, and TR."),
+    P("Its own parent, one level up, is different. That assembly is a physical parent of a serialized item, so it takes SER and TR. Unless the contract names it too, it takes no IUID.")
+  ],
+  check:{q:"An avionics unit is identified by the contract as the parent item for an embedded DoD serially managed circuit card. The unit goes into an equipment rack, which goes into the aircraft. Which codes does the rack take, assuming the contract does not name it?",
+   o:[
+     "SER and TR",
+     "IUID, SER, and TR",
+     "IUID only",
+     "No code"],
+   a:0, why:"The rack is a physical parent of a serialized item below the end item, so the climb gives it SER and TR. IUID does not flow up the product tree. The rack takes IUID only if the contract identifies it as a parent item."}}
+ ],
+ drill:[
+  {id:"M4-L1", find:"n/a", pn:"EX-TAIL-ASSIGNED", nm:"AIRPLANE, COMPLETE (END ITEM)",
+   facts:["The top-level asset under contract.","The contract carries no IUID clause.","Traceable items are installed beneath it."],
+   a:["TR"], why:"The end item takes TR with the terminator text. It does not take SER. The contract assigns its identity."},
+  {id:"M4-L2", find:"1", pn:"EX-IN-5500", nm:"INSTALLATION, FLAP",
+   facts:["An installation drawing between a serialized flap drive unit and the end item."],
+   a:["TR"], why:"An installation drawing is not a physical part, so no SER. The chain passes through it, so TR with the installation text."},
+  {id:"M4-L3", find:"2", pn:"EX-5500-100", nm:"UNIT, FLAP DRIVE (LRU)",
+   facts:["A Line Replaceable Unit.","Its children include a serialized actuator.","No requirement of its own."],
+   a:["SER","TR"], why:"A physical parent of a serialized item, below the end item. The climb gives SER and TR. Being an LRU changes nothing."},
+  {id:"M4-L4", find:"6", pn:"EX-6200-310", nm:"VALVE, DEPOT-LEVEL REPARABLE",
+   facts:["The contract includes DFARS 252.211-7003.","The item manager identifies it as serially managed.","Unit acquisition cost: $900."],
+   a:["IUID","SER"], why:"A DoD serially managed item requires IUID regardless of value. Every UII carries a serial number, so IUID travels with SER."},
+  {id:"M4-L5", find:"3", pn:"EX-AV-2210", nm:"UNIT, AVIONICS (CONTRACT-DESIGNATED PARENT ITEM)",
+   facts:["The contract includes DFARS 252.211-7003 and names this unit as the parent item.","It contains an embedded circuit card that carries a UII."],
+   a:["IUID","SER","TR"], why:"The contract names it as a parent item, so IUID with the parent item text, and SER. Its embedded card carries SER, so the climb adds TR."},
+  {id:"M4-L6", find:"4", pn:"EX-RK-0900", nm:"RACK, EQUIPMENT",
+   facts:["Contains the contract-designated avionics parent item.","The contract does not name the rack."],
+   a:["SER","TR"], why:"The rack is a physical parent of a serialized item. SER and TR climb. IUID does not."},
+  {id:"M4-L7", find:"5", pn:"EX-ACT-7710", nm:"ACTUATOR, CYCLE-LIMITED",
+   facts:["Life-limited by flight cycles.","FAA certification only. No DFARS clauses in the contract.","Unit cost: $12,000."],
+   a:["LL","SER"], why:"The cycle limit drives LL and SER. IUID comes from DFARS 252.211-7003 in the contract, and it is absent, so the value does not matter."}
+ ],
+ exercises:[
+  {id:"M4-E1", title:"Exercise 1: Climb a tree",
+   scen:"A missile system is the end item. Beneath it: a guidance section installation drawing; a guidance section assembly; an inertial measurement unit; a circuit card inside the IMU that uses tantalum capacitors with a shelf-life limit; and a thermal battery that is explosive material. The contract includes DFARS 252.211-7003. The IMU is a DoD serially managed item. The contract names the guidance section assembly as the parent item for the IMU.",
+   parts:[
+    {id:"a", q:"List every item in the tree from the bottom up, with its codes and note form."},
+    {id:"b", q:"Which items take IUID? Explain why the others do not."},
+    {id:"c", q:"The guidance section installation drawing: which codes, and why no SER?"},
+    {id:"d", q:"What does the end item take? What gives it its identity?"},
+    {id:"e", q:"Which condition codes appear in the tree, and why does none of them climb?"}
+   ]},
+  {id:"M4-E2", title:"Exercise 2: The IUID challenge",
+   scen:"A supplier builds a $3,200 hydraulic pump for a military transport. The prime contract includes DFARS 252.211-7003. The pump is not on the list of serially managed items, and the contract does not identify it as mission essential or controlled inventory. The supplier's subcontract is a commercial products subcontract. The supplier plans to mark each pump with its part number and a lot number in a data matrix, and to report nothing.",
+   parts:[
+    {id:"a", q:"Does the pump require IUID? Walk through the categories and say what fact you would need to confirm your answer."},
+    {id:"b", q:"The supplier argues that a commercial products subcontract is exempt from the IUID clause. Answer them."},
+    {id:"c", q:"If IUID did apply, what is wrong with the supplier's marking plan?"},
+    {id:"d", q:"If IUID did apply, what reporting is due, when, and through what channel?"},
+    {id:"e", q:"Whatever the IUID answer, what codes does the pump's parent assembly take if the pump carries SER?"}
+   ]}
+ ]
+},
+
+{
+ id:"M5", label:"Module 5", title:"Life limits, critical items, and the matrix", sub:"The LL code and 14 CFR 43.10, cycle and shelf-life limits, Critical Safety Items, fracture-critical parts, Safety-Critical Items, and the application matrix that pulls every rule together",
+ sections:[
+ {id:"M5-01", gov:["R_LL"], title:"The LL code and 14 CFR 43.10", body:[
+    P("The Life Limited code, LL, identifies the item as life-limited and states its limit. It does not create records on its own. Apply it with the identity code that the requirement source drives."),
+    P("14 CFR 43.10 supplies the definitions."),
+    C("14 CFR 43.10(a)", [
+      "**Life-limited part** means “any part for which a mandatory replacement limit is specified in the type design, the Instructions for Continued Airworthiness, or the maintenance manual.”",
+      "**Life status** means “the accumulated cycles, hours, or any other mandatory replacement limit of a life-limited part.”"], "teal"),
+    P("The limit may be expressed in cycles, hours, or calendar time. The form of the limit sets which LL note text you use. It does not set the identity code."),
+    P("There are two categories of life-limited item."),
+    CARDS([
+      {h:"Cycle/usage-controlled", b:"Limited by cycles or operating hours. Remaining life is a per-unit quantity. Serialized."},
+      {h:"Age/shelf-life-controlled", b:"Limited by shelf life, cure date, or storage age. The limit usually attaches to the manufacturing lot/batch. Lot/batch recorded, unless another source requires a serial number."}], 2),
+    S("LL states the limit. The requirement source sets the identity code.")
+  ],
+  check:{q:"Where can a mandatory replacement limit be specified and still make a part life-limited under 14 CFR 43.10?",
+   o:[
+     "In the type design, the Instructions for Continued Airworthiness, or the maintenance manual",
+     "Only in the Airworthiness Limitations Section",
+     "Only in the type certificate data sheet issued by the FAA for the product",
+     "Anywhere the manufacturer recommends a replacement in its service literature"],
+   a:0, why:"The definition names three places: the type design, the ICA, or the maintenance manual. The ALS is one part of the ICA. A recommendation is not a mandatory replacement limit."}},
+
+ {id:"M5-02", gov:["R_LL_CONTROL"], title:"Controlling a removed life-limited part", body:[
+    P("14 CFR 43.10(c) requires each person who removes a life-limited part from a type-certificated product to control it. The method must deter installation after the part reaches its life limit. The acceptable methods are:"),
+    TABLE(["Method", "What it takes"], [
+      ["Record keeping system", "Part number, serial number, and current life status, updated at each removal"],
+      ["Tag or record attached to the part", "Part number, serial number, and current life status"],
+      ["Non-permanent marking", "Current life status, marked legibly, updated at each removal"],
+      ["Permanent marking", "Current life status, permanently marked"],
+      ["Segregation", "Physical separation from eligible parts, with records"],
+      ["Mutilation", "Rendering the part beyond repair and incapable of appearing airworthy"],
+      ["Other method", "Any method approved or accepted by the FAA"]]),
+    P("When the part is later sold or transferred, the mark, tag, or record goes with it, unless the part is mutilated first."),
+    S("Most of these methods need a part number and a serial number.",
+      "Serialization is what makes 43.10 compliance workable. The serialization requirement itself comes from 14 CFR 45.15(c) when the limit is in the Airworthiness Limitations Section."),
+    P("The marking methods rely on 14 CFR 45.16. When a person required to comply with 43.10 asks, the holder of the type certificate or design approval for a life-limited part must provide marking instructions, or state that the part cannot be practicably marked without compromising its integrity. That is a design responsibility."),
+    C("Shelf life is a different regime", [
+      "A shelf life, cure date, or storage age limit on material held in storage is not, by itself, a 14 CFR 43.10 mandatory replacement limit.",
+      "The LL code still applies to age/shelf-life-controlled items. The code covers both categories. The regulation does not. Know which regime a limit sits in before you cite 43.10."])
+  ],
+  check:{q:"A mechanic asks how to mark a removed life-limited fitting with its life status. Under 14 CFR 45.16, who must answer?",
+   o:[
+     "The holder of the type certificate or design approval for the part",
+     "The mechanic's repair station, from its own procedures",
+     "The FAA, through an Advisory Circular",
+     "Nobody. Marking is only one of the optional methods under 43.10"],
+   a:0, why:"14 CFR 45.16 puts the answer on the design approval holder. It must provide marking instructions or state that the part cannot be practicably marked without compromising its integrity. Marking is one of several 43.10 methods, so it is not the only option, but the question must still be answered."}},
+
+ {id:"M5-03", gov:["R_LL_CYCLE"], title:"Cycle/usage-controlled items", body:[
+    P("A Cycle/Usage-Controlled Life-Limited Item is an item life-limited by cycles or operating hours. It is serialized, because remaining life is a per-unit quantity. Two identical disks on the same shelf can have very different remaining lives."),
+    P("Common examples:"),
+    CARDS([
+      {h:"Landing gear", b:"Landing gear assemblies. Main gear shock struts and oleo cylinders. Main wheel axles. Side stays and drag braces."},
+      {h:"Engines and power", b:"Turbine disks. Compressor disks. Turbine blades. Auxiliary power unit components."},
+      {h:"Systems and actuation", b:"Flap and slat actuator ball screws. Air cycle machine turbines and compressors. Ram air turbine deploy actuators. Primary bleed air valves. Pitch change actuator piston assemblies."}]),
+    P("For a Cycle/Usage-Controlled Life-Limited Item, apply:"),
+    NOTE("LL_CYC"),
+    NOTE("SER_L"),
+    P("The bracketed field states the limit. A number of flights, a cycle limit, or operating hours. Write the number, not a pointer to a document that someone must go find.")
+  ],
+  check:{q:"A compressor disk is limited to 20,000 engine cycles. Which codes apply?",
+   o:[
+     "LL with the cycle/usage note text, and SER",
+     "LL with the age and shelf-life note text, and LOT",
+     "SER only, because the disk is tracked by engine",
+     "LL only, because the engine log tracks the cycles"],
+   a:0, why:"A cycle limit makes the disk a cycle/usage-controlled item. Remaining life is counted per disk, so each disk needs its own serial number. The engine log records cycles against a serial number. Without the serial number, the log cannot say which disk it is counting."}},
+
+ {id:"M5-04", gov:["R_LL_AGE"], title:"Age/shelf-life-controlled items", body:[
+    P("An Age/Shelf-Life-Controlled Life-Limited Item is an item life-limited by shelf life, cure date, or storage age. It is lot/batch recorded, because the limit attaches to the manufacturing lot/batch rather than to the individual unit."),
+    P("Common examples:"),
+    CARDS([
+      {h:"Seals and hoses", b:"O-rings. Gaskets. Rubber-based hoses, such as hydraulic hoses and fuel hoses."},
+      {h:"Electrical", b:"Electronic components (EEE). Microchips. Capacitors. Diodes. Lithium batteries. Standard circuit breakers. Relays."},
+      {h:"Chemicals and composites", b:"Epoxy resins used in structural bonding. Prepregs. Polysulfide or polythioether gap and fuel tank sealants. Polyurethane topcoats. Chromate and non-chromate primers. Synthetic grease for actuator screws, landing gear pivots, or bearings."},
+      {h:"Emergency and survival", b:"Emergency oxygen candles. Fire extinguisher squibs. Oxygen mask rebreather bags. Medical kits. Life vests and life jackets."},
+      {h:"Filters", b:"Filters."},
+      {h:"Not on this list", b:"Specialized metallic fasteners. They have no shelf life. They carry heat and lot traceability under process and batch conditions."}]),
+    P("A calendar limit does not by itself make an item a lot/batch item. Two pairings follow."),
+    P("**A calendar limit on a discrete part with an Airworthiness Limitations Section entry.** 14 CFR 45.15(c) requires the serial number whatever form the limit takes. Apply:"),
+    NOTE("LL_AGE"),
+    NOTE("SER_L"),
+    P("**A shelf life, cure date, or storage age limit that attaches to the manufacturing lot/batch.** Use this pairing when no certification or contract requirement calls for serialization. Apply:"),
+    NOTE("LL_AGE"),
+    NOTE("LOT_L")
+  ],
+  check:{q:"Oxygen mask rebreather bags carry a shelf-life limit on the manufacturing lot. Nothing else calls for serialization. Which codes apply?",
+   o:[
+     "LL with the age and shelf-life note text, and LOT",
+     "LL with the age and shelf-life note text, and SER",
+     "LL with the cycle/usage note text, and SER",
+     "LOT only"],
+   a:0, why:"The limit attaches to the lot, and no certification or contract requirement calls for serialization. That is the second pairing: LL with the age and shelf-life text, and LOT. SER would apply only if a source such as an ALS entry on a discrete part required it."}},
+
+ {id:"M5-05", gov:["R_CRITICAL","R_CSI"], title:"Critical items and Critical Safety Items", body:[
+    P("“Critical items” is a broad term. It covers many part classifications related to safety. Some come from customer requirements or regulatory agencies. Others rest on engineering governance and analysis. Three matter for part note codes: Critical Safety Items, Fracture-Critical Traceable Parts, and Safety-Critical Items. The names are close. The rules are not."),
+    P("DFARS 209.270-2 defines an aviation critical safety item as a part, an assembly, installation equipment, launch equipment, recovery equipment, or support equipment for an aircraft or aviation weapon system if the part, assembly, or equipment contains a characteristic any failure, malfunction, or absence of which could cause any of the following:"),
+    C("DFARS 209.270-2", [
+      "“(1) A catastrophic or critical failure resulting in the loss of or serious damage to the aircraft or weapon system;”",
+      "“(2) An unacceptable risk of personal injury or loss of life; or”",
+      "“(3) An uncommanded engine shutdown that jeopardizes safety.”"], "teal"),
+    P("Section 802 of Public Law 108-136 is the statutory basis. DFARS 209.270 and DFARS PGI 209.270 set the qualification requirements, source approval, and procedures. The contract clause at DFARS 252.209-7010 carries the definitions and the heightened quality assurance surveillance requirement."),
+    P("**Who designates.** The design control activity designates Critical Safety Items. DFARS 252.209-7010 defines it, for an aviation critical safety item, as “the systems command of a military department that is specifically responsible for ensuring the airworthiness of an aviation system or equipment, in which an aviation critical safety item is to be used.” Systems Safety and engineering support provide inputs. They do not make the designation."),
+    P("**Where it does not apply.** Critical Safety Item identification does not apply to aircraft or subsystems bought, operated, and maintained under FAA certification, unless the United States Air Force Engineering Support Activity requires it. Critical Safety Item policies do not override or duplicate FAA approaches when those approaches apply and meet military Critical Safety Item objectives.")
+  ],
+  check:{q:"An engineer's hazard analysis shows a bracket failure could cause loss of the aircraft. The engineer applies the CSI code on their own authority. What is wrong?",
+   o:[
+     "The design control activity designates Critical Safety Items. Engineering provides inputs",
+     "Nothing. Any engineer may designate a CSI from a hazard analysis",
+     "CSI applies only to engines and rotating hardware, never to airframe structure",
+     "The bracket must first be shown to be single load path under MIL-STD-1530D"],
+   a:0, why:"Under DFARS 252.209-7010, the design control activity, a military systems command responsible for airworthiness, designates CSIs. Systems Safety and engineering analysis are inputs to that decision. The engineer should raise the finding for designation, not self-designate."}},
+
+ {id:"M5-06", gov:["R_CSI"], title:"Coding a Critical Safety Item", body:[
+    P("Serialization reaches a Critical Safety Item through IUID. Follow the chain:"),
+    STEPS([
+      {h:"DoDI 8320.04", b:"Directs the primary inventory control activity to identify Critical Safety Items as DoD serially managed items."},
+      {h:"DFARS 211.274-2(a)(3)(i)", b:"Requires IUID for any DoD serially managed item, regardless of value."},
+      {h:"The UII", b:"Every UII carries a serial number. The CSI is serialized."}]),
+    P("Lot/batch recording is also required, with traceability to an approved source. Lot and heat control is typical for structural and rotating hardware."),
+    P("For Critical Safety Items, apply all four:"),
+    NOTE("CSI"),
+    NOTE("SER_L"),
+    NOTE("LOT_L"),
+    NOTE("IUID_I"),
+    S("CSI does not flow up the product tree.",
+      "SER and TR climb to the end item. IUID goes to the parent items the contract identifies. CSI stays on the item that holds it.")
+  ],
+  check:{q:"A flight control bellcrank is designated a Critical Safety Item. It goes into a control linkage assembly. What does the linkage assembly take, assuming the contract does not name it as a parent item?",
+   o:[
+     "SER and TR",
+     "CSI, SER, and TR",
+     "CSI, SER, LOT, IUID, and TR",
+     "No code, because only the bellcrank is critical"],
+   a:0, why:"The bellcrank carries CSI, SER, LOT, and IUID. The linkage assembly is a physical parent of a serialized item, so it takes SER and TR. CSI does not flow up. IUID goes only to contract-identified parent items."}},
+
+ {id:"M5-07", gov:["R_FC"], title:"Fracture-Critical Traceable Parts and Fracture-Critical Parts", body:[
+    P("MIL-STD-1530D with Change 1 governs the Aircraft Structural Integrity Program (ASIP). It defines two separate categories. MIL-STD-1530C carries the same definitions."),
+    CARDS([
+      {h:"Fracture-Critical Traceable Part", b:"A safety-of-flight structural component that is either single load path or sized by durability or damage tolerance requirements."},
+      {h:"Fracture-Critical Part", b:"A safety-of-flight structural component that is not single load path and is not sized by durability or damage tolerance requirements, but that requires special emphasis due to the criticality."}], 2),
+    P("The two definitions exclude each other. The standard's Figure 1 shows them as separate branches. A Fracture-Critical Traceable Part is not a subclass of a Fracture-Critical Part."),
+    P("**Fracture-Critical Traceable Parts** require serialization and lot/batch recording as one of their controls. Lot/batch recording supports material and process traceability. They take FC, SER, and LOT."),
+    NOTE("FC"),
+    NOTE("SER_L"),
+    NOTE("LOT_L"),
+    P("**Fracture-Critical Parts** still take lot/batch recording. Fracture control relies on material properties and process condition. Raw material heat and lot traceability applies, with process control on forging, machining, and surface treatment. They take FC and LOT. They do not take SER on this basis."),
+    NOTE("FC"),
+    NOTE("LOT_L"),
+    C("Not the same as Fracture Critical Category I and II", [
+      "Fracture Critical Category I and Category II Parts are a different scheme. They go through the Critical Safety Item or Safety-Critical Item screening process, and that process decides whether part traceability applies.",
+      "Fracture-Critical Traceable Parts always require serialization and lot/batch recording. See the critical part and process selection and controls section of MIL-STD-1530D with Change 1, and the Durability and Damage Tolerance Control Plan."]),
+    P("FC does not flow up the product tree. SER and TR do.")
+  ],
+  check:{q:"A redundant, non-damage-tolerance-sized structural fitting is a safety-of-flight component that the program says needs special emphasis. Which codes apply on this basis?",
+   o:[
+     "FC and LOT",
+     "FC, SER, and LOT",
+     "FC only",
+     "SER and LOT"],
+   a:0, why:"Not single load path and not sized by durability or damage tolerance, but requiring special emphasis: that is a Fracture-Critical Part. It takes FC and LOT for material and process traceability. It does not take SER on this basis. A Fracture-Critical Traceable Part would add SER."}},
+
+ {id:"M5-08", gov:["R_SCI"], title:"Safety-Critical Items", body:[
+    C("Definition, MIL-STD-882E", [
+      "A **Safety-Critical Item (SCI)** is “a hardware or software item that has been determined through analysis to potentially contribute to a hazard with Catastrophic or Critical mishap potential, or that may be implemented to mitigate a hazard with Catastrophic or Critical mishap potential.”"]),
+    P("MIL-STD-882E defines the severity categories behind those words. **Catastrophic** could result in death, permanent total disability, irreversible significant environmental impact, or monetary loss of $10 million or more. **Critical** could result in permanent partial disability, injuries or occupational illness that may result in hospitalization of at least three personnel, reversible significant environmental impact, or monetary loss of $1 million or more but less than $10 million."),
+    P("Safety-Critical Items are often confused with Critical Safety Items. MIL-STD-882E settles the point. It states that its definition of “safety-critical item” is independent of the definition of “critical safety item” in Public Laws 108-136 and 109-364."),
+    CARDS([
+      {h:"Critical Safety Item", b:"DFARS and statute. Designated by the design control activity. Takes CSI, SER, LOT, and IUID."},
+      {h:"Safety-Critical Item", b:"MIL-STD-882E system safety analysis. Drives design and process controls. No part note code."}], 2),
+    S("No part note code identifies a Safety-Critical Item.",
+      "System Safety analysis outputs drive design and process controls for SCIs. They do not drive item marking."),
+    P("SCI designation does not drive serialization or lot/batch recording on its own. An SCI is serialized or lot/batch recorded when it is life-limited or otherwise holds a serialization or lot/batch recording requirement. Code it from those sources.")
+  ],
+  check:{q:"A hazard analysis identifies a hydraulic valve as a Safety-Critical Item. No other source applies to it. Which codes does it take?",
+   o:[
+     "No code on this basis",
+     "CSI, SER, LOT, and IUID",
+     "SER and LOT",
+     "LL and SER"],
+   a:0, why:"An SCI designation drives design and process controls, not marking. No code identifies an SCI, and the designation alone drives neither serialization nor lot/batch recording. CSI is a different designation, made by a different authority. If a real source applies later, such as a life limit, code from that source."}},
+
+ {id:"M5-09", gov:["R_MATRIX","R_STACKING"], title:"The application matrix", body:[
+    P("Start here when you know the item and need the codes. The matrix is a summary of every rule in this course. Every item carrying SER or LOT also climbs to the end item."),
+    TABLE(["Item or condition", "Codes to apply", "Covered in"], [
+      ["Cycle/usage-controlled life-limited item", "LL, SER", "M5-03"],
+      ["Age/shelf-life-controlled life-limited item, limit on the lot/batch", "LL, LOT", "M5-04"],
+      ["ALI on a discrete part, replacement limit in cycles, landings, or flight hours", "SER, LL (cycle/usage text)", "M2-03"],
+      ["ALI on a discrete part, replacement limit in calendar time", "SER, LL (age and shelf-life text)", "M2-04"],
+      ["ALI on a discrete part, inspection interval or related procedure only", "SER", "M2-03"],
+      ["ALI at an airframe location or zone, no separately manufactured part", "None", "M2-03"],
+      ["ALI expressed against a manufactured lot/batch (uncommon)", "LOT, LL", "M2-05"],
+      ["Safe-life PSE, discrete part with an ALS replacement time", "LL, SER", "M2-06"],
+      ["Safe-life PSE detail parts and constituent materials", "LOT", "M2-06, M2-07"],
+      ["Damage-tolerant PSE, discrete part with an ALS inspection interval", "SER", "M2-07"],
+      ["Damage-tolerant PSE, location-based inspection", "None", "M2-07"],
+      ["Premium selected material part", "SER, LOT", "M2-08"],
+      ["Critical Safety Item", "CSI, SER, LOT, IUID", "M5-06"],
+      ["Fracture-Critical Traceable Part", "FC, SER, LOT", "M5-07"],
+      ["Fracture-Critical Part (not traceable)", "FC, LOT", "M5-07"],
+      ["Safety-Critical Item", "None on this basis", "M5-08"],
+      ["Casting with reduced non-visual inspection", "LOT", "M3-02"],
+      ["Casting using process monitoring for a factor of 1.0", "LOT", "M3-02"],
+      ["Part using alternative approved material design values", "LOT", "M3-02"],
+      ["Item established by a process or batch condition", "LOT", "M3-03"],
+      ["Electronic part under a counterfeit avoidance clause", "LOT", "M3-04"],
+      ["Raw material callout requiring traceability", "LOT (short text)", "M1-08"],
+      ["Item requiring special handling", "SH, LOT", "M3-06"],
+      ["Explosive material", "SH, LOT", "M3-08"],
+      ["Radioactive material", "SH, LOT", "M3-09"],
+      ["DoD serially managed item", "IUID, SER", "M4-07"],
+      ["Parent item of an embedded item carrying a UII", "IUID, SER", "M4-09"],
+      ["Warranted serialized item", "IUID, SER", "M4-07"],
+      ["Special tooling or special test equipment for an MDAP", "IUID, SER", "M4-07"],
+      ["High risk item identified by the requiring activity", "IUID, SER", "M4-07"],
+      ["Physical parent of a SER or LOT item, below the end item", "SER, TR", "M4-02"],
+      ["Installation drawing between a traceable item and the end item", "TR (installation text)", "M4-03"],
+      ["End item", "TR (terminator text), IUID if the contract requires it", "M4-03"]]),
+    P("The matrix gives one row at a time. Real items often hit several rows. Use the method:"),
+    STEPS([
+      {h:"List every source that applies", b:"Regulation, contract clause, designation, physical condition. Do not stop at the first."},
+      {h:"Take the union of the codes", b:"Each code once. One LOT covers every source that needs lot records."},
+      {h:"Choose the note texts", b:"Long or short for SER and LOT. Cycle/usage or age and shelf-life for LL. State the SH control."},
+      {h:"Add TR if the item has traceable children", b:"Then climb: every physical parent below the end item takes SER and TR."}], "tl"),
+    S("Find every source. Apply every code. Then climb.")
+  ],
+  check:{q:"A turbine disk is cycle-limited, is a Critical Safety Item, and is bought under a contract with DFARS 252.211-7003. Which codes does it take?",
+   o:[
+     "CSI, LL, SER, LOT, and IUID",
+     "CSI, SER, LOT, and IUID",
+     "LL and SER",
+     "CSI, LL, SER, LOT, IUID, and TR"],
+   a:0, why:"Take the union. The cycle limit drives LL and SER. The CSI designation drives CSI, SER, LOT, and IUID. SER appears once. The disk has no traceable children, so no TR on the disk itself. TR goes on its parent."}}
+ ],
+ drill:[
+  {id:"M5-L1", find:"3", pn:"EX-HPT-1ST-DSK", nm:"DISK, TURBINE, STAGE 1",
+   facts:["Life-limited to 15,000 engine cycles.","No other source applies."],
+   a:["LL","SER"], why:"A cycle/usage-controlled item. LL with the cycle/usage text, and SER, because remaining life is counted per disk."},
+  {id:"M5-L2", find:"17", pn:"EX-RBR-BAG-4", nm:"BAG, REBREATHER, OXYGEN MASK",
+   facts:["Shelf-life limit on the manufacturing lot.","No certification or contract requirement calls for serialization."],
+   a:["LL","LOT"], why:"The second age/shelf-life pairing. LL with the age and shelf-life text, and LOT."},
+  {id:"M5-L3", find:"5", pn:"EX-BCK-FLT-22", nm:"BELLCRANK, FLIGHT CONTROL",
+   facts:["Designated a Critical Safety Item by the design control activity.","The contract includes DFARS 252.211-7003."],
+   a:["CSI","SER","LOT","IUID"], why:"CSI designation drives all four. Serialization arrives through IUID, and lot/batch recording gives traceability to an approved source."},
+  {id:"M5-L4", find:"6", pn:"EX-FTG-SLP-40", nm:"FITTING, WING ATTACH, SINGLE LOAD PATH",
+   facts:["A safety-of-flight structural component.","Single load path."],
+   a:["FC","SER","LOT"], why:"Single load path makes it a Fracture-Critical Traceable Part under MIL-STD-1530D. FC, SER, and LOT."},
+  {id:"M5-L5", find:"7", pn:"EX-FTG-RDN-41", nm:"FITTING, REDUNDANT, SPECIAL EMPHASIS",
+   facts:["A safety-of-flight structural component.","Not single load path. Not sized by durability or damage tolerance.","Requires special emphasis due to criticality."],
+   a:["FC","LOT"], why:"A Fracture-Critical Part. FC and LOT for material and process traceability. No SER on this basis."},
+  {id:"M5-L6", find:"9", pn:"EX-VLV-HYD-88", nm:"VALVE, HYDRAULIC SHUTOFF",
+   facts:["Identified as a Safety-Critical Item by MIL-STD-882E hazard analysis.","No other source applies."],
+   a:[], why:"No part note code identifies an SCI, and SCI designation alone drives neither serialization nor lot/batch recording."},
+  {id:"M5-L7", find:"10", pn:"EX-VLV-HYD-89", nm:"VALVE, HYDRAULIC SHUTOFF, LIFE-LIMITED",
+   facts:["Identified as a Safety-Critical Item by hazard analysis.","Also life-limited to 40,000 operating cycles."],
+   a:["LL","SER"], why:"The SCI designation adds nothing. The cycle limit is a real source: LL with the cycle/usage text, and SER."},
+  {id:"M5-L8", find:"2", pn:"EX-LNK-FLT-20", nm:"LINKAGE ASSY, FLIGHT CONTROL",
+   facts:["Contains the Critical Safety Item bellcrank.","The contract does not name it as a parent item.","No requirement of its own."],
+   a:["SER","TR"], why:"A physical parent of a serialized item. SER and TR climb. CSI does not flow up, and IUID goes only to contract-identified parent items."}
+ ],
+ exercises:[
+  {id:"M5-E1", title:"Exercise 1: Three critical words",
+   scen:"A new program has three items under review. A landing gear drag brace that the design control activity has designated a Critical Safety Item. A wing attach fitting that is single load path and a safety-of-flight structural component. An avionics power supply that the hazard analysis identifies as a Safety-Critical Item. The contract includes DFARS 252.211-7003. A colleague proposes to treat all three the same way, because “they are all critical.”",
+   parts:[
+    {id:"a", q:"Give the codes for each item and name the authority that drives each one."},
+    {id:"b", q:"Explain to the colleague why the three items are coded differently."},
+    {id:"c", q:"The drag brace is also cycle-limited. What changes in its codes?"},
+    {id:"d", q:"The power supply later gets a shelf-life limit on a battery pack inside it. Which item takes new codes, and which ones?"},
+    {id:"e", q:"Which of these codes climb to the end item, and which stay where they are?"}
+   ]},
+  {id:"M5-E2", title:"Exercise 2: Code a full parts list",
+   scen:"You own the parts list for a main landing gear side brace assembly on a military transport whose contract includes DFARS 252.211-7003. The items are: the side brace, a safe-life PSE with an ALS replacement time of 60,000 landings, designated a Critical Safety Item; a forged lug detail inside the brace whose raw material heat and lot must be traceable; bushings bought under a premium selection with a coupon tested from each; O-rings with a shelf-life limit; specialized fasteners with heat and lot traceability; synthetic grease with a shelf-life limit on the lot; and a data plate with no requirement. The assembly is installed on the airplane through a landing gear installation drawing.",
+   parts:[
+    {id:"a", q:"Code every item on the list. For each code, name the source."},
+    {id:"b", q:"The side brace hits several matrix rows. Show the union and explain why each code appears once."},
+    {id:"c", q:"Which items take the long LOT note text and which, if any, take the short one?"},
+    {id:"d", q:"Code the side brace assembly, the installation drawing, and the airplane."},
+    {id:"e", q:"Configuration Management finds that the build records show a lot number for the O-rings but no link to the assembly serial number. What is the gap, and what does it cost if the O-ring lot is later found suspect?"}
+   ]}
+ ]
+}
+];
+
+/* ==========================================================================
+   STATE
+   ========================================================================== */
+var STATE = { name:"", started:new Date().toISOString(), checks:{}, drills:{}, answers:{}, seen:{} };
+var VIEW = { page:"start" };          // "start" | "s:<id>" | "d:<modId>" | "x:<modId>" | "submit" | "trainer"
+var PAGES = [];                        // flat ordered page list
+var AUTOSAVE = false;
+var STORE_KEY = "pntrain_state";
+
+/* The source map is a trainer page. Turn it on in CONFIG, or add #trainer to the
+   address for one sitting. It changes nothing a trainee sees or scores. */
+var TRAINER = (CONFIG.trainerView===true) ||
+  (typeof location!=="undefined" && /trainer/i.test((location.hash||"")+(location.search||"")));
+
+(function buildPages(){
+  PAGES.push({k:"start", id:"START", nm:"Start here", grp:null});
+  for(var i=0;i<MODULES.length;i++){
+    var m=MODULES[i];
+    for(var j=0;j<m.sections.length;j++){
+      PAGES.push({k:"sect", id:m.sections[j].id, nm:m.sections[j].title, grp:m.id, mi:i, si:j});
+    }
+    if(m.drill && m.drill.length) PAGES.push({k:"drill", id:m.id+"-DR", nm:"Parts-list drill", grp:m.id, mi:i});
+    PAGES.push({k:"ex", id:m.id+"-EX", nm:"Exercises", grp:m.id, mi:i});
+  }
+  PAGES.push({k:"submit", id:"RESULTS", nm:"Review and send", grp:null});
+  if(TRAINER) PAGES.push({k:"trainer", id:"SOURCE", nm:"Source map", grp:null});
+})();
+
+/* ---- guarded browser storage: used only if the browser allows it ---- */
+function lsGet(k){ try{ return window.localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ window.localStorage.setItem(k,v); return true; }catch(e){ return false; } }
+function lsDel(k){ try{ window.localStorage.removeItem(k); return true; }catch(e){ return false; } }
+
+function freshState(){ return { name:"", started:new Date().toISOString(), checks:{}, drills:{}, answers:{}, seen:{} }; }
+function normalize(o){
+  if(!o.drills) o.drills={};
+  if(!o.seen) o.seen={};
+  return o;
+}
+
+/* ---- clear all: two-step arm so one stray click cannot wipe the record ---- */
+var CLEAR_ARMED = false, clearT;
+function clearLabel(){ return 'Clear<span class="lng"> all</span>'; }
+function disarmClear(){
+  CLEAR_ARMED = false;
+  clearTimeout(clearT);
+  var b = document.getElementById("btnClear");
+  if(b){ b.innerHTML = clearLabel(); b.classList.remove("armed"); }
+}
+function armClear(){
+  CLEAR_ARMED = true;
+  var b = document.getElementById("btnClear");
+  b.innerHTML = "Confirm clear";
+  b.classList.add("armed");
+  toast("This erases every answer, check, and drill. Click Confirm clear to go ahead. The button resets itself in ten seconds.");
+  clearTimeout(clearT);
+  clearT = setTimeout(disarmClear, 10000);
+}
+function resetAll(){
+  disarmClear();
+  STATE = freshState();
+  VIEW  = { page:"start" };
+  lsDel(STORE_KEY);
+  var w = document.getElementById("who");
+  if(w) w.value = "";
+  draw();
+  window.scrollTo({top:0,behavior:"auto"});
+  var r = document.getElementById("rail");
+  if(r) r.classList.remove("open");
+  toast("Cleared. Answers, checks, drills, and the trainee name are gone. You are back at the start.");
+}
+(function detect(){ AUTOSAVE = lsSet("pntrain_probe","1"); })();
+
+function autosave(){
+  if(!AUTOSAVE) return;
+  lsSet(STORE_KEY, JSON.stringify(STATE));
+}
+function autoload(){
+  if(!AUTOSAVE) return false;
+  var raw = lsGet(STORE_KEY);
+  if(!raw) return false;
+  try{ var o=JSON.parse(raw); if(o && o.checks){ STATE=normalize(o); return true; } }catch(e){}
+  return false;
+}
+
+/* ==========================================================================
+   RENDERING HELPERS
+   ========================================================================== */
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function fmt(s){
+  return esc(s).replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>").replace(/\*([^*]+)\*/g,"<em>$1</em>");
+}
+
+/* ---- option order ----------------------------------------------------------
+   Options are authored in a fixed order, with the correct one at check.a. They
+   are DISPLAYED in a shuffled order, so that the position of the correct answer
+   carries no information. A trainee who never reads the options and always picks
+   the second one scores what guessing is worth, which is the point.
+
+   The shuffle is deterministic, seeded from the section id. One trainee sees the
+   same order every time they reload, a saved record reopens showing the same
+   order, and two trainees discussing "the third option" are looking at the same
+   sentence. Nothing here depends on the order: radio values, STATE.checks.picks
+   and check.a are all authored indices throughout.
+
+   OPTION_SALT was chosen so the correct answer lands as evenly as possible across
+   the four display positions for the current section ids. Re-measure it if the
+   section ids change, and remember that a new salt reshuffles every section,
+   which invalidates any answer key printed from an earlier revision.
+   ---------------------------------------------------------------------------- */
+var OPTION_SALT = 437;   // Rev A: correct answer lands 10/11/11/11 across the four positions for the 43 sections, with no position repeated three times in a row.
+function optionOrder(id, n){
+  var h = 2166136261;                            // FNV-1a over the section id
+  for(var i=0;i<id.length;i++){ h = Math.imul(h ^ id.charCodeAt(i), 16777619); }
+  var a = (h ^ OPTION_SALT) >>> 0;
+  function rnd(){                                // mulberry32
+    a = (a + 0x6D2B79F5) | 0;
+    var t = Math.imul(a ^ (a>>>15), 1 | a);
+    t = (t + Math.imul(t ^ (t>>>7), 61 | t)) ^ t;
+    return ((t ^ (t>>>14)) >>> 0);
+  }
+  var idx=[]; for(var k=0;k<n;k++) idx.push(k);
+  for(var j=n-1;j>0;j--){                        // Fisher-Yates, seeded
+    var r = rnd() % (j+1);
+    var t2 = idx[j]; idx[j]=idx[r]; idx[r]=t2;
+  }
+  return idx;
+}
+function chips(codes){
+  if(!codes || !codes.length) return "<span class='chip none'>no code</span>";
+  return codes.map(function(c){ return "<span class='chip'>"+esc(c)+"</span>"; }).join("");
+}
+function block(b){
+  if(b.t==="p") return "<p>"+fmt(b.x)+"</p>";
+  if(b.t==="list") return "<ul class='pl'>"+b.x.map(function(i){return "<li>"+fmt(i)+"</li>";}).join("")+"</ul>";
+  if(b.t==="callout") return "<div class='callout "+(b.tone==="teal"?"teal":"")+"'>"+
+      (b.lab?"<div class='lab'>"+esc(b.lab)+"</div>":"")+
+      b.x.map(function(i){return "<p>"+fmt(i)+"</p>";}).join("")+"</div>";
+  if(b.t==="stmt") return "<div class='stmt'><b>"+fmt(b.x)+"</b>"+(b.sub?"<span>"+fmt(b.sub)+"</span>":"")+"</div>";
+  if(b.t==="cards") return "<div class='cards c"+b.cols+"'>"+b.x.map(function(c){
+      return "<div class='card'><h4>"+fmt(c.h)+"</h4><p>"+fmt(c.b)+"</p></div>";}).join("")+"</div>";
+  if(b.t==="steps") return "<div class='steps'>"+b.x.map(function(s,i){
+      return "<div class='step "+(b.tone||"")+"'><div class='n'>"+(i+1)+"</div><div class='tx'><b>"+fmt(s.h)+"</b><span>"+fmt(s.b)+"</span></div></div>";}).join("")+"</div>";
+  if(b.t==="note"){
+    var cut=b.x.indexOf(" – ");
+    var code=cut>0?b.x.slice(0,cut):"", rest=cut>0?b.x.slice(cut+3):b.x;
+    return "<div class='pnote'>"+(code?"<span class='pc'>"+esc(code)+"</span>":"")+"<span>"+esc(rest)+"</span></div>";
+  }
+  if(b.t==="tree") return "<div class='tree'>"+b.x.map(function(r){
+      var pad=r[0]*22;
+      return "<div class='trow'><div class='tn' style='padding-left:"+pad+"px'>"+(r[0]?"<span class='tbar'>└ </span>":"")+
+        "<b>"+fmt(r[1])+"</b>"+(r[3]?"<i>"+fmt(r[3])+"</i>":"")+"</div><div class='tc'>"+chips(r[2])+"</div></div>";
+    }).join("")+"</div>";
+  if(b.t==="table"){
+    var th="<tr>"+b.head.map(function(h){return "<th>"+esc(h)+"</th>";}).join("")+"</tr>";
+    var tb=b.x.map(function(r){
+      return "<tr>"+r.map(function(c,ci){
+        var k = (ci===0 && String(c).length<=10) ? " class='k'" : "";
+        return "<td"+k+">"+fmt(c)+"</td>";}).join("")+"</tr>";}).join("");
+    return "<div class='tw'><table><thead>"+th+"</thead><tbody>"+tb+"</tbody></table></div>";
+  }
+  return "";
+}
+function pageIndex(){
+  for(var i=0;i<PAGES.length;i++){
+    var p=PAGES[i];
+    if(VIEW.page==="start"&&p.k==="start") return i;
+    if(VIEW.page==="submit"&&p.k==="submit") return i;
+    if(VIEW.page==="trainer"&&p.k==="trainer") return i;
+    if(VIEW.page==="s:"+p.id) return i;
+    if(VIEW.page==="d:"+p.grp&&p.k==="drill") return i;
+    if(VIEW.page==="x:"+p.grp&&p.k==="ex") return i;
+  }
+  return 0;
+}
+function pageKey(p){
+  if(p.k==="start") return "start";
+  if(p.k==="submit") return "submit";
+  if(p.k==="trainer") return "trainer";
+  if(p.k==="drill") return "d:"+p.grp;
+  if(p.k==="ex") return "x:"+p.grp;
+  return "s:"+p.id;
+}
+
+/* ---- completion status ---- */
+function sectStatus(id){
+  if(STATE.checks[id]) return "done";
+  if(STATE.seen[id]) return "work";
+  return "";
+}
+function drillStatus(modId){
+  var m=mod(modId), n=0;
+  (m.drill||[]).forEach(function(d){ if(STATE.drills[d.id]) n++; });
+  if(n===0) return "";
+  return n===m.drill.length ? "done" : "work";
+}
+function exStatus(modId){
+  var m = mod(modId), total=0, filled=0;
+  m.exercises.forEach(function(x){ x.parts.forEach(function(p){
+    total++; var v=STATE.answers[x.id+"."+p.id]; if(v&&v.trim().length>0) filled++;
+  });});
+  if(filled===0) return "";
+  return filled===total ? "done" : "work";
+}
+function mod(id){ for(var i=0;i<MODULES.length;i++) if(MODULES[i].id===id) return MODULES[i]; return null; }
+
+function counts(){
+  var totalChecks=0, answered=0, right=0;
+  MODULES.forEach(function(m){ m.sections.forEach(function(s){
+    totalChecks++;
+    var c=STATE.checks[s.id];
+    if(c){ answered++; if(c.first===true) right++; }
+  });});
+  var totalDrill=0, drilled=0, drillRight=0;
+  MODULES.forEach(function(m){ (m.drill||[]).forEach(function(d){
+    totalDrill++;
+    var r=STATE.drills[d.id];
+    if(r){ drilled++; if(r.first===true) drillRight++; }
+  });});
+  var totalParts=0, filledParts=0;
+  MODULES.forEach(function(m){ m.exercises.forEach(function(x){ x.parts.forEach(function(p){
+    totalParts++; var v=STATE.answers[x.id+"."+p.id]; if(v&&v.trim().length>0) filledParts++;
+  });});});
+  return {totalChecks:totalChecks, answered:answered, right:right,
+          totalDrill:totalDrill, drilled:drilled, drillRight:drillRight,
+          totalParts:totalParts, filledParts:filledParts};
+}
+
+/* ==========================================================================
+   RAIL
+   ========================================================================== */
+function drawRail(){
+  var c=counts();
+  var h="<div class='railhead'><h2>Section register</h2><p>"+c.answered+" of "+c.totalChecks+
+        " sections released · "+c.drilled+" of "+c.totalDrill+" drill lines coded · "+
+        c.filledParts+" of "+c.totalParts+" exercise answers written</p></div>";
+  h+="<div class='grp'>"+navBtn(PAGES[0])+"</div>";
+  MODULES.forEach(function(m){
+    h+="<div class='grp'><h3>"+esc(m.label)+": "+esc(m.title)+"</h3>";
+    PAGES.forEach(function(p){ if(p.grp===m.id) h+=navBtn(p); });
+    h+="</div>";
+  });
+  h+="<div class='grp'>";
+  PAGES.forEach(function(p){ if(p.k==="submit"||p.k==="trainer") h+=navBtn(p); });
+  h+="</div>";
+  document.getElementById("rail").innerHTML=h;
+  Array.prototype.forEach.call(document.querySelectorAll("#rail .nav"), function(b){
+    b.addEventListener("click", function(){ go(b.getAttribute("data-k")); });
+  });
+}
+function navBtn(p){
+  var st = p.k==="sect" ? sectStatus(p.id) : (p.k==="ex" ? exStatus(p.grp) : (p.k==="drill" ? drillStatus(p.grp) : ""));
+  var cur = pageKey(p)===VIEW.page;
+  return "<button class='nav' data-k='"+pageKey(p)+"' aria-current='"+(cur?"true":"false")+"'>"+
+    "<span class='dot "+st+"'></span><span class='id'>"+esc(p.id)+"</span><span class='nm'>"+esc(p.nm)+"</span></button>";
+}
+
+/* ==========================================================================
+   PAGE RENDERERS
+   ========================================================================== */
+function go(key){
+  VIEW.page=key;
+  var p=PAGES[pageIndex()];
+  if(p.k==="sect") STATE.seen[p.id]=true;
+  autosave(); draw();
+  window.scrollTo({top:0,behavior:"auto"});
+  document.getElementById("rail").classList.remove("open");
+}
+function draw(){
+  drawRail();
+  var i=pageIndex(), p=PAGES[i], st=document.getElementById("stage");
+  if(p.k==="start") st.innerHTML=viewStart();
+  else if(p.k==="submit") st.innerHTML=viewSubmit();
+  else if(p.k==="trainer") st.innerHTML=viewTrainer();
+  else if(p.k==="drill") st.innerHTML=viewDrill(mod(p.grp));
+  else if(p.k==="ex") st.innerHTML=viewExercises(mod(p.grp));
+  else st.innerHTML=viewSection(MODULES[p.mi], MODULES[p.mi].sections[p.si], p);
+  st.className="stage fadein";
+  st.innerHTML += pager(i);
+  wire(i,p);
+}
+function pager(i){
+  var prev=i>0?PAGES[i-1]:null, next=i<PAGES.length-1?PAGES[i+1]:null;
+  return "<div class='pager'>"+
+   (prev?"<button class='btn gh' data-nav='"+pageKey(prev)+"'>← "+esc(prev.nm)+"</button>":"<span></span>")+
+   (next?"<button class='btn pri' data-nav='"+pageKey(next)+"'>"+esc(next.nm)+" →</button>":"<span></span>")+
+   "</div>";
+}
+
+var NUMWORDS=["Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten"];
+function viewStart(){
+  var nS=0,nE=0,nD=0; MODULES.forEach(function(m){nS+=m.sections.length; nE+=m.exercises.length; nD+=(m.drill||[]).length;});
+  var save = AUTOSAVE
+    ? "Your work is saved in this browser as you go. To move between machines, or to keep a copy, use <strong>Save progress</strong> in the header. It downloads a small file you can reopen with <strong>Resume</strong>."
+    : "This browser is not storing your work automatically. Use <strong>Save progress</strong> in the header before you close the tab. It downloads a small file, and <strong>Resume</strong> loads it back.";
+  var meta="";
+  MODULES.forEach(function(m){
+    meta+="<dt>"+esc(m.label)+"</dt><dd>"+esc(m.title)+". "+esc(m.sub)+". "+m.sections.length+" sections, "+
+      (m.drill||[]).length+" drill lines, "+m.exercises.length+" exercises.</dd>";
+  });
+  return "<div class='hero'>"+
+    "<div class='kick'>"+esc(CONFIG.companyName)+" · Configuration Management</div>"+
+    "<h1>Part Note Codes, Part Traceability, and Product-Unit Records</h1>"+
+    "<p class='subtitle'>Which items must be serialized or lot/batch recorded, why, how far the records climb, and which part note codes put those requirements on a parts list.</p>"+
+    "<p class='scale'>"+(NUMWORDS[MODULES.length]||MODULES.length)+" modules · "+nS+" sections · "+nD+" drill lines · "+nE+" exercises</p>"+
+    "<p>Work through the sections in order. Each ends with a question that checks the point it made. Each module then has a parts-list drill: read a line, pick the codes, get instant feedback. The written exercises come last. They are what "+esc(CONFIG.trainerName)+" will actually read.</p></div>"+
+    "<dl class='meta'>"+meta+
+    "<dt>Who it is for</dt><dd>Engineers who apply part note codes, and everyone who acts on them: planners, buyers, inspectors, build technicians, and configuration management staff. No drawing experience is assumed.</dd>"+
+    "<dt>Prerequisites</dt><dd>None. Work the modules in order. Each module builds on the one before it.</dd>"+
+    "<dt>Time</dt><dd>Allow about an hour for each module, plus the drill and the exercises. Few people finish in one sitting, and the course is not designed for that.</dd></dl>"+
+    "<div class='callout'><div class='lab'>How your work is kept</div><p>"+save+"</p>"+
+    "<p>When you are done, go to <strong>Review and send</strong>. It shows your scores, gathers every answer into one record, and gives you the ways to send it.</p></div>"+
+    "<div class='callout teal'><div class='lab'>What you need open</div>"+
+    "<p>Nothing. Everything this course relies on is in it. It cites the regulations, contract clauses, and standards behind each rule, so you can find the source when a question goes past the course. Your trainer will show you where the company's own procedures live.</p></div>"+
+    "<p class='note'>Enter your name in the header before you begin. It goes on the record you send.</p>";
+}
+
+function viewSection(m,s,p){
+  var idx=m.sections.indexOf(s)+1;
+  var st=sectStatus(s.id);
+  var stl = st==="done" ? "Released" : (st==="work" ? "In work" : "Not started");
+  var h="<div class='eyebrow'><span class='recid'>"+esc(s.id)+"</span>"+
+        "<span class='status'>"+esc(m.label)+" · section "+idx+" of "+m.sections.length+" · "+stl+"</span></div>"+
+        "<h1 class='sect'>"+esc(s.title)+"</h1><div class='hr'></div>";
+  s.body.forEach(function(b){ h+=block(b); });
+  h+=checkHtml(s);
+  return h;
+}
+function checkHtml(s){
+  var rec=STATE.checks[s.id];
+  var locked=!!rec;
+  var h="<div class='check' data-check='"+esc(s.id)+"'><div class='lab'>Check yourself</div><div class='q'>"+fmt(s.check.q)+"</div>";
+  optionOrder(s.id, s.check.o.length).forEach(function(i){
+    var o=s.check.o[i];
+    var cls="opt"+(locked?" locked":"");
+    if(locked){
+      if(i===s.check.a) cls+=" right";
+      else if(rec.picks && rec.picks.indexOf(i)>=0) cls+=" wrong";
+    }
+    h+="<label class='"+cls+"'><input type='radio' name='ck_"+esc(s.id)+"' value='"+i+"'"+
+       (locked?" disabled":"")+(rec&&rec.picks&&rec.picks.indexOf(i)>=0?" checked":"")+"> <span>"+fmt(o)+"</span></label>";
+  });
+  h+="<div class='btnrow' style='margin-top:12px;margin-bottom:0'>"+
+     (locked?"":"<button class='btn pri' data-ckgo='"+esc(s.id)+"'>Check answer</button>")+"</div>";
+  var fb="";
+  if(locked){
+    var ok = rec.first===true;
+    fb="<div class='fb show "+(ok?"ok":"no")+"'><b>"+(ok?"Correct":"Not quite")+"</b>"+fmt(s.check.why)+"</div>";
+  }else{
+    fb="<div class='fb' data-fb='"+esc(s.id)+"'></div>";
+  }
+  return h+fb+"</div>";
+}
+
+/* ---- parts-list drill ------------------------------------------------------
+   Each drill line is one item on a parts list. The trainee ticks the part note
+   codes the line takes, or "No code". Grading is an exact match of the set: one
+   missing code or one extra code is wrong, because on a real parts list either
+   one is a defect. The first attempt is the one that counts, as with the checks.
+   ---------------------------------------------------------------------------- */
+var CODES = ["SER","LOT","TR","IUID","LL","SH","CSI","FC"];
+function sameSet(a,b){
+  if(a.length!==b.length) return false;
+  for(var i=0;i<a.length;i++) if(b.indexOf(a[i])<0) return false;
+  return true;
+}
+function viewDrill(m){
+  var h="<div class='eyebrow'><span class='recid'>"+esc(m.id)+"-DR</span><span class='status'>"+esc(m.label)+" · parts-list drill</span></div>"+
+    "<h1 class='sect'>Parts-list drill: "+esc(m.title)+"</h1>"+
+    "<p class='lede'>Read each line. Tick every part note code it takes. Then check it.</p><div class='hr'></div>"+
+    "<div class='callout'><div class='lab'>Standing assumptions for every line</div>"+
+    "<p>Unless the line says otherwise, the item has no children that carry SER or LOT, it is not the end item, and the contract carries no IUID clause.</p>"+
+    "<p>A line is right only when the set is exact. A missing code is a defect. An extra code is also a defect. Tick <strong>No code</strong> when nothing applies.</p></div>";
+  m.drill.forEach(function(d,n){ h+=drillHtml(d,n+1); });
+  return h;
+}
+function drillHtml(d,n){
+  var rec=STATE.drills[d.id], locked=!!rec;
+  var picks=rec?rec.picks:[];
+  var h="<div class='dline' data-drill='"+esc(d.id)+"'>"+
+    "<div class='hd'><span><b>Line</b>"+esc(d.id)+"</span><span><b>Find</b>"+esc(d.find)+"</span><span><b>Part no.</b>"+esc(d.pn)+"</span></div>"+
+    "<div class='bd'><div class='nm'>"+esc(d.nm)+"</div>"+
+    "<ul class='pl'>"+d.facts.map(function(f){return "<li>"+fmt(f)+"</li>";}).join("")+"</ul>"+
+    "<div class='codes'>";
+  CODES.concat(["NONE"]).forEach(function(c){
+    var on=picks.indexOf(c)>=0, should=(c==="NONE") ? d.a.length===0 : d.a.indexOf(c)>=0;
+    var cls="code"+(c==="NONE"?" none":"")+(locked?" locked":"");
+    if(locked){
+      if(on && should) cls+=" right";
+      else if(on && !should) cls+=" wrong";
+      else if(!on && should) cls+=" missed";
+    }
+    h+="<label class='"+cls+"'><input type='checkbox' data-dcode='"+esc(d.id)+"' value='"+c+"'"+(on?" checked":"")+(locked?" disabled":"")+">"+
+       (c==="NONE"?"No code":c)+"</label>";
+  });
+  h+="</div>";
+  if(!locked){
+    h+="<div class='btnrow' style='margin-top:14px;margin-bottom:0'><button class='btn pri' data-dgo='"+esc(d.id)+"'>Check this line</button></div>";
+  }else{
+    var ok=rec.first===true;
+    h+="<div class='legend'><span><i class='lr'></i>correct pick</span><span><i class='lw'></i>should not be there</span><span><i class='lm'></i>missed</span></div>"+
+       "<div class='fb show "+(ok?"ok":"no")+"'><b>"+(ok?"Correct":"Not quite")+" · the line takes: "+(d.a.length?d.a.join(", "):"no code")+"</b>"+fmt(d.why)+"</div>";
+  }
+  return h+"</div></div>";
+}
+function gradeDrill(id){
+  var d=null;
+  MODULES.forEach(function(m){ (m.drill||[]).forEach(function(x){ if(x.id===id) d=x; }); });
+  if(!d) return;
+  var picks=[];
+  Array.prototype.forEach.call(document.querySelectorAll("input[data-dcode='"+id+"']:checked"), function(i){ picks.push(i.value); });
+  if(!picks.length){ toast("Tick at least one code, or No code."); return; }
+  if(picks.indexOf("NONE")>=0 && picks.length>1){ toast("No code cannot be ticked with other codes."); return; }
+  var ok = (picks[0]==="NONE") ? d.a.length===0 : sameSet(picks, d.a);
+  STATE.drills[id]={ first:ok, picks:picks, at:new Date().toISOString() };
+  autosave(); draw();
+  var el=document.querySelector("[data-drill='"+id+"']");
+  if(el) el.scrollIntoView({block:"center", behavior:"smooth"});
+}
+
+function viewTrainer(){
+  /* Trainer page. Lists every rule this training restates, and every section that
+     restates it. When an owning rule changes, this is the list to work through. */
+  var byRule={};
+  MODULES.forEach(function(m){ m.sections.forEach(function(s){
+    (s.gov||[]).forEach(function(k){
+      if(!byRule[k]) byRule[k]=[];
+      byRule[k].push({id:s.id, title:s.title, label:m.label});
+    });
+  });});
+  var keys=Object.keys(RULES);
+  var untagged=keys.filter(function(k){ return !byRule[k]; });
+  var unknown=Object.keys(byRule).filter(function(k){ return !RULES[k]; });
+
+  var h="<div class='eyebrow'><span class='recid'>SOURCE</span><span class='status'>Trainer page · not part of the course</span></div>"+
+    "<h1 class='sect'>Source map</h1>"+
+    "<p class='lede'>Every section restates a rule that is owned somewhere else. This lists the rules, and the sections that restate each one.</p><div class='hr'></div>"+
+    "<div class='callout'><div class='lab'>How to use it when a rule changes</div>"+
+    "<p>Find the rule that changed. Work through the sections listed against it and bring each one back into line. Check the parts-list drill lines in the same module, because their answers rest on the same rules. Then update <strong>alignedTo</strong> in the trainer setup block at the top of this file, so the next person can see what this content was last reconciled against.</p>"+
+    "<p>The rules are named, not numbered. A paragraph number or a document title drifts the moment either one is revised. A rule keeps its name.</p></div>"+
+    "<dl class='meta'><dt>Content revision</dt><dd>"+esc(CONFIG.contentRev)+"</dd>"+
+    "<dt>Last reconciled against</dt><dd>"+esc(CONFIG.alignedTo)+"</dd>"+
+    "<dt>Coverage</dt><dd>"+keys.length+" rules, "+MODULES.reduce(function(a,m){return a+m.sections.length;},0)+" sections, "+
+      MODULES.reduce(function(a,m){return a+(m.drill||[]).length;},0)+" drill lines</dd></dl>";
+
+  if(untagged.length){
+    h+="<div class='warn'>"+untagged.length+" rule"+(untagged.length===1?" is":"s are")+
+       " named in the source map and restated by no section: "+esc(untagged.join(", "))+
+       ". Either the content is missing a topic, or the rule should come out of the map.</div>";
+  }
+  if(unknown.length){
+    h+="<div class='warn'>"+unknown.length+" section tag"+(unknown.length===1?"":"s")+
+       " name a rule that is not in the source map: "+esc(unknown.join(", "))+". Add it to RULES.</div>";
+  }
+
+  keys.forEach(function(k){
+    var secs=byRule[k]||[];
+    h+="<div class='exwrap'><h4>"+esc(RULES[k])+"</h4>"+
+       "<div class='scen'><span style='font-family:var(--mono);font-size:12px'>"+esc(k)+"</span> · "+
+       secs.length+" section"+(secs.length===1?"":"s")+"</div><ul class='pl'>"+
+       secs.map(function(s){
+         return "<li><span style='font-family:var(--mono);font-size:12px'>"+esc(s.id)+"</span> &nbsp;"+esc(s.title)+"</li>";
+       }).join("")+"</ul></div>";
+  });
+  return h;
+}
+
+function viewExercises(m){
+  var h="<div class='eyebrow'><span class='recid'>"+esc(m.id)+"-EX</span><span class='status'>"+esc(m.label)+" · written exercises</span></div>"+
+    "<h1 class='sect'>Exercises: "+esc(m.title)+"</h1><div class='hr'></div>"+
+    "<p>Write your reasoning, not just your conclusion. The reasoning is what is being assessed, and several of these have more than one defensible answer. Where a question turns on a fact you have not been given, <strong>say so, and say what you would ask for and whom you would ask.</strong> Recognizing the missing fact is part of the exercise.</p>"+
+    "<p class='note'>Answers save as you type. There is no word limit and no right length.</p>";
+  m.exercises.forEach(function(x){
+    h+="<div class='exwrap'><h4>"+esc(x.title)+"</h4><div class='scen'>"+fmt(x.scen)+"</div>";
+    x.parts.forEach(function(pt){
+      var key=x.id+"."+pt.id, v=STATE.answers[key]||"";
+      h+="<div class='part'><label for='ta_"+esc(key)+"'>"+esc(pt.id)+".&nbsp; "+fmt(pt.q)+"</label>"+
+         "<textarea id='ta_"+esc(key)+"' data-ans='"+esc(key)+"' rows='4' placeholder='Your answer'>"+esc(v)+"</textarea>"+
+         "<div class='count' data-cnt='"+esc(key)+"'>"+wordCount(v)+"</div></div>";
+    });
+    h+="</div>";
+  });
+  return h;
+}
+function wordCount(v){
+  var n=(v||"").trim(); n = n? n.split(/\s+/).length : 0;
+  return n===0 ? "not started" : (n+" word"+(n===1?"":"s"));
+}
+
+function gapList(){
+  var gaps=[];
+  MODULES.forEach(function(m){
+    m.sections.forEach(function(s){
+      var r=STATE.checks[s.id];
+      if(!r) gaps.push([s.id, s.title, "not attempted"]);
+      else if(r.first!==true) gaps.push([s.id, s.title, "wrong on first attempt"]);
+    });
+    (m.drill||[]).forEach(function(d){
+      var r=STATE.drills[d.id];
+      if(!r) gaps.push([d.id, "Drill: "+d.nm, "not attempted"]);
+      else if(r.first!==true) gaps.push([d.id, "Drill: "+d.nm, "coded "+pickText(r.picks)+", should be "+(d.a.length?d.a.join(", "):"no code")]);
+    });
+  });
+  return gaps;
+}
+function pickText(p){ return (!p||!p.length||p[0]==="NONE") ? "no code" : p.join(", "); }
+
+function viewSubmit(){
+  var c=counts();
+  var pct = c.totalChecks ? Math.round(100*c.right/c.totalChecks) : 0;
+  var gaps=gapList();
+  var missing=[];
+  MODULES.forEach(function(m){ m.exercises.forEach(function(x){ x.parts.forEach(function(pt){
+    var v=STATE.answers[x.id+"."+pt.id];
+    if(!v||!v.trim()) missing.push(x.id+"."+pt.id);
+  });});});
+
+  var h="<div class='eyebrow'><span class='recid'>RESULTS</span><span class='status'>Training record · review and send</span></div>"+
+    "<h1 class='sect'>Review and send</h1>"+
+    "<p class='lede'>Check the record below, then send it to "+esc(CONFIG.trainerName)+". Nothing leaves this page until you choose one of the options.</p><div class='hr'></div>";
+
+  if(!STATE.name || !STATE.name.trim()){
+    h+="<div class='warn'>Add your name in the header before sending. The record needs to say whose it is.</div>";
+  }
+  if(missing.length){
+    h+="<div class='warn'>"+missing.length+" exercise answer"+(missing.length===1?" is":"s are")+" still blank. You can send anyway, but "+esc(CONFIG.trainerName)+" will only see what you wrote.</div>";
+  }
+
+  h+="<div class='transmit'><div class='hd'><b>Training record</b><span>"+esc(recordNo())+"</span></div><div class='bd'>"+
+     "<div class='scorebox'>"+
+     "<div><div class='big'>"+c.right+" / "+c.totalChecks+"</div><div class='lab'>Section checks correct first time</div></div>"+
+     "<div><div class='big'>"+pct+"%</div><div class='lab'>First-attempt score</div></div>"+
+     "<div><div class='big'>"+c.drillRight+" / "+c.totalDrill+"</div><div class='lab'>Drill lines coded right first time</div></div>"+
+     "<div><div class='big'>"+c.filledParts+" / "+c.totalParts+"</div><div class='lab'>Exercise answers written</div></div>"+
+     "</div>";
+  if(gaps.length){
+    h+="<div class='gaps'><p style='margin:14px 0 6px'><strong>Items to revisit.</strong> These are what your trainer will focus the review session on:</p><ul class='pl'>"+
+       gaps.map(function(g){return "<li><span style='font-family:var(--mono);font-size:12px'>"+esc(g[0])+"</span> &nbsp;"+esc(g[1])+": "+esc(g[2])+"</li>";}).join("")+"</ul></div>";
+  }else{
+    h+="<p style='margin-top:14px'><strong>Every section check and every drill line answered correctly on the first attempt.</strong></p>";
+  }
+  h+="</div></div>";
+
+  h+="<h2 style='font-family:var(--serif);font-size:22px;margin:26px 0 10px'>Send it</h2>";
+  h+="<div class='btnrow'>"+
+     "<button class='btn pri' id='btnDownload'>Download the record</button>"+
+     "<button class='btn' id='btnCopy'>Copy as text</button>"+
+     (CONFIG.trainerEmail?"<button class='btn' id='btnMail'>Open an email to "+esc(CONFIG.trainerEmail)+"</button>":"")+
+     (CONFIG.submitEndpoint?"<button class='btn' id='btnPost'>Send to trainer</button>":"")+
+     "</div>";
+  h+="<p class='note'><strong>Download the record</strong> gives you a single file to attach to an email. It opens in any browser and prints cleanly. "+
+     "<strong>Copy as text</strong> puts everything on the clipboard for pasting into email or chat."+
+     (CONFIG.trainerEmail?" <strong>Open an email</strong> starts a message with your answers in the body. Long answers may be cut short by your mail program, so attach the downloaded file as well.":"")+"</p>";
+
+  if(!CONFIG.trainerEmail && !CONFIG.submitEndpoint){
+    h+="<div class='setup'><strong>Trainer setup not finished.</strong> No delivery address has been set, so the email option is hidden. "+
+       "Open this file in a text editor, find <code>var CONFIG</code> near the top of the script, set <code>trainerEmail</code>, and save. "+
+       "Everything else keeps working without it.</div>";
+  }
+  return h;
+}
+function recordNo(){
+  var d=new Date();
+  var pad=function(n){return n<10?"0"+n:""+n;};
+  var initials=(STATE.name||"").trim().split(/\s+/).map(function(w){return w.charAt(0).toUpperCase();}).join("").slice(0,3)||"XXX";
+  return "PNT-"+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+"-"+initials;
+}
+
+/* ==========================================================================
+   WIRING
+   ========================================================================== */
+function wire(i,p){
+  Array.prototype.forEach.call(document.querySelectorAll("[data-nav]"), function(b){
+    b.addEventListener("click", function(){ go(b.getAttribute("data-nav")); });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-ckgo]"), function(b){
+    b.addEventListener("click", function(){ grade(b.getAttribute("data-ckgo")); });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-dgo]"), function(b){
+    b.addEventListener("click", function(){ gradeDrill(b.getAttribute("data-dgo")); });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("input[data-dcode]"), function(inp){
+    inp.addEventListener("change", function(){
+      /* "No code" and a real code exclude each other */
+      if(!inp.checked) return;
+      var id=inp.getAttribute("data-dcode");
+      Array.prototype.forEach.call(document.querySelectorAll("input[data-dcode='"+id+"']"), function(o){
+        if(o===inp) return;
+        if(inp.value==="NONE" || o.value==="NONE") o.checked=false;
+      });
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-ans]"), function(t){
+    t.addEventListener("input", function(){
+      var k=t.getAttribute("data-ans");
+      STATE.answers[k]=t.value;
+      var c=document.querySelector("[data-cnt='"+k+"']");
+      if(c) c.textContent=wordCount(t.value);
+      clearTimeout(window.__sv); window.__sv=setTimeout(function(){ autosave(); drawRail(); },400);
+    });
+  });
+  var bd=document.getElementById("btnDownload"); if(bd) bd.addEventListener("click", downloadRecord);
+  var bc=document.getElementById("btnCopy");     if(bc) bc.addEventListener("click", copyRecord);
+  var bm=document.getElementById("btnMail");     if(bm) bm.addEventListener("click", mailRecord);
+  var bp=document.getElementById("btnPost");     if(bp) bp.addEventListener("click", postRecord);
+}
+
+function grade(id){
+  var sec=null;
+  MODULES.forEach(function(m){ m.sections.forEach(function(s){ if(s.id===id) sec=s; }); });
+  if(!sec) return;
+  var picked=document.querySelector("input[name='ck_"+id+"']:checked");
+  if(!picked){ toast("Choose an answer first."); return; }
+  var v=parseInt(picked.value,10);
+  STATE.checks[id]={ first:(v===sec.check.a), picks:[v], at:new Date().toISOString() };
+  autosave(); draw();
+  var el=document.querySelector("[data-check='"+id+"']");
+  if(el) el.scrollIntoView({block:"center", behavior:"smooth"});
+}
+
+/* ==========================================================================
+   SAVE / RESUME / SEND
+   ========================================================================== */
+function download(name, text, type){
+  try{
+    var b=new Blob([text],{type:type||"text/plain;charset=utf-8"});
+    var u=URL.createObjectURL(b);
+    var a=document.createElement("a");
+    a.href=u; a.download=name; document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(u); },600);
+    return true;
+  }catch(e){ return false; }
+}
+function slug(){ return (STATE.name||"unnamed").trim().replace(/[^A-Za-z0-9]+/g,"-").replace(/^-|-$/g,"") || "unnamed"; }
+
+function saveProgress(){
+  STATE.saved=new Date().toISOString();
+  var ok=download("Part-note-code-training-progress-"+slug()+".json", JSON.stringify(STATE,null,2), "application/json");
+  toast(ok ? "Progress file downloaded. Reopen it with Resume." : "This browser blocked the download. Use Copy as text on the Review and send page instead.");
+}
+function loadProgress(file){
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var o=JSON.parse(r.result);
+      if(!o || !o.checks || !o.answers) throw new Error("shape");
+      STATE=normalize(o); document.getElementById("who").value=STATE.name||"";
+      autosave(); go("start");
+      toast("Progress restored.");
+    }catch(e){ toast("That file is not a training progress file. Look for Part-note-code-training-progress-….json"); }
+  };
+  r.onerror=function(){ toast("The file could not be read. Try selecting it again."); };
+  r.readAsText(file);
+}
+
+function recordLines(){
+  var c=counts(), out=[];
+  out.push("PART NOTE CODES, PART TRACEABILITY, AND PRODUCT-UNIT RECORDS: TRAINING RECORD");
+  out.push("Record: "+recordNo());
+  out.push("Trainee: "+(STATE.name||"(name not entered)"));
+  out.push("Company: "+CONFIG.companyName);
+  out.push("Completed: "+new Date().toLocaleString());
+  out.push("");
+  out.push("SCORE");
+  out.push("  Section checks correct first time: "+c.right+" of "+c.totalChecks+"  ("+(c.totalChecks?Math.round(100*c.right/c.totalChecks):0)+"%)");
+  out.push("  Drill lines coded right first time: "+c.drillRight+" of "+c.totalDrill);
+  out.push("  Exercise answers written: "+c.filledParts+" of "+c.totalParts);
+  out.push("");
+  out.push("ITEMS TO REVISIT");
+  var gaps=gapList();
+  if(!gaps.length) out.push("  None: every check and drill line correct on the first attempt.");
+  gaps.forEach(function(g){ out.push("  "+g[0]+"  "+g[1]+": "+g[2]); });
+  MODULES.forEach(function(m){
+    out.push(""); out.push("=".repeat(60));
+    out.push(m.label.toUpperCase()+": "+m.title.toUpperCase()+": EXERCISE ANSWERS");
+    out.push("=".repeat(60));
+    m.exercises.forEach(function(x){
+      out.push(""); out.push(x.title);
+      out.push("Scenario: "+x.scen.replace(/\*\*/g,""));
+      x.parts.forEach(function(pt){
+        var v=(STATE.answers[x.id+"."+pt.id]||"").trim();
+        out.push("");
+        out.push("  "+pt.id+") "+pt.q.replace(/\*\*/g,""));
+        out.push("     "+(v? v.split("\n").join("\n     ") : "(no answer written)"));
+      });
+    });
+  });
+  return out.join("\n");
+}
+function recordHtml(){
+  var c=counts();
+  var rows="";
+  MODULES.forEach(function(m){ m.sections.forEach(function(s){
+    var r=STATE.checks[s.id];
+    var st = !r ? "Not attempted" : (r.first===true ? "Correct first time" : "Wrong first attempt");
+    var cls = !r ? "na" : (r.first===true ? "ok" : "no");
+    rows+="<tr class='"+cls+"'><td class='k'>"+esc(s.id)+"</td><td>"+esc(s.title)+"</td><td>"+st+"</td></tr>";
+  });});
+  var drows="";
+  MODULES.forEach(function(m){ (m.drill||[]).forEach(function(d){
+    var r=STATE.drills[d.id];
+    var st = !r ? "Not attempted" : (r.first===true ? "Correct first time" : "Wrong first attempt");
+    var cls = !r ? "na" : (r.first===true ? "ok" : "no");
+    drows+="<tr class='"+cls+"'><td class='k'>"+esc(d.id)+"</td><td>"+esc(d.nm)+"</td><td>"+(r?esc(pickText(r.picks)):"")+"</td><td>"+esc(d.a.length?d.a.join(", "):"no code")+"</td><td>"+st+"</td></tr>";
+  });});
+  var ex="";
+  MODULES.forEach(function(m){
+    ex+="<h2>"+esc(m.label)+": "+esc(m.title)+"</h2>";
+    m.exercises.forEach(function(x){
+      ex+="<div class='ex'><h3>"+esc(x.title)+"</h3><p class='sc'>"+esc(x.scen.replace(/\*\*/g,""))+"</p>";
+      x.parts.forEach(function(pt){
+        var v=(STATE.answers[x.id+"."+pt.id]||"").trim();
+        ex+="<p class='q'>"+esc(pt.id)+") "+esc(pt.q.replace(/\*\*/g,""))+"</p><div class='a"+(v?"":" empty")+"'>"+
+            (v?esc(v).split("\n").join("<br>"):"No answer written")+"</div>";
+      });
+      ex+="</div>";
+    });
+  });
+  return "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Part note code training record: "+esc(STATE.name||"unnamed")+"</title>"+
+   "<style>body{font-family:Georgia,serif;max-width:860px;margin:36px auto;padding:0 24px;color:#1E262E;line-height:1.55}"+
+   "h1{font-size:26px;margin:0 0 4px}.sub{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:#5C6D78;letter-spacing:.06em}"+
+   "table.meta{width:auto;margin:18px 0 26px;font-size:14px}table.meta th{background:none;color:#5C6D78;font-family:ui-monospace,Consolas,monospace;font-size:11px;text-transform:uppercase;text-align:left;padding:3px 18px 3px 0;white-space:nowrap;font-weight:normal;vertical-align:top}table.meta td{border:0;padding:3px 0}"+
+   "table{border-collapse:collapse;width:100%;font-size:13.5px;margin-bottom:26px}"+
+   "th{background:#1E262E;color:#fff;text-align:left;padding:7px 10px;font-size:12px}"+
+   "td{padding:6px 10px;border-top:1px solid #D6DCDF;vertical-align:top}td.k{font-family:ui-monospace,Consolas,monospace;font-size:12px;white-space:nowrap;width:88px}th.r{width:150px}"+
+   "tr.no td{background:#F4E2E2}tr.na td{background:#F6ECD8}"+
+   "h2{font-size:19px;border-bottom:2px solid #1E262E;padding-bottom:5px;margin:32px 0 14px}"+
+   ".ex{margin-bottom:26px}.ex h3{font-size:16px;margin:0 0 6px}"+
+   ".sc{background:#F4F6F7;padding:10px 13px;border-radius:4px;font-size:13.5px;margin:0 0 12px}"+
+   ".q{font-weight:bold;font-size:14px;margin:12px 0 5px}"+
+   ".a{font-family:-apple-system,Segoe UI,Arial,sans-serif;font-size:14px;background:#fff;border-left:3px solid #A8481F;padding:8px 13px;white-space:normal}"+
+   ".a.empty{color:#8998A2;border-left-color:#D6DCDF;font-style:italic}"+
+   "@media print{body{margin:0}.ex{page-break-inside:avoid}}</style></head><body>"+
+   "<h1>Part note codes, part traceability, and product-unit records: training record</h1>"+
+   "<div class='sub'>"+esc(recordNo())+"</div>"+
+   "<table class='meta'><tr><th>Trainee</th><td>"+esc(STATE.name||"(name not entered)")+"</td></tr>"+
+   "<tr><th>Company</th><td>"+esc(CONFIG.companyName)+"</td></tr>"+
+   "<tr><th>Completed</th><td>"+esc(new Date().toLocaleString())+"</td></tr>"+
+   "<tr><th>Checks</th><td>"+c.right+" of "+c.totalChecks+" correct on the first attempt ("+(c.totalChecks?Math.round(100*c.right/c.totalChecks):0)+"%)</td></tr>"+
+   "<tr><th>Drill</th><td>"+c.drillRight+" of "+c.totalDrill+" lines coded right on the first attempt</td></tr>"+
+   "<tr><th>Exercises</th><td>"+c.filledParts+" of "+c.totalParts+" answers written</td></tr></table>"+
+   "<h2>Section checks</h2><table><colgroup><col style='width:88px'><col><col style='width:150px'></colgroup><thead><tr><th>Section</th><th>Title</th><th class='r'>Result</th></tr></thead><tbody>"+rows+"</tbody></table>"+
+   "<h2>Parts-list drill</h2><table><thead><tr><th>Line</th><th>Item</th><th>Coded</th><th>Takes</th><th class='r'>Result</th></tr></thead><tbody>"+drows+"</tbody></table>"+
+   ex+"</body></html>";
+}
+function downloadRecord(){
+  var ok=download("Part-note-code-training-record-"+slug()+".html", recordHtml(), "text/html;charset=utf-8");
+  toast(ok ? "Record downloaded. Attach it to an email to "+CONFIG.trainerName+"." : "This browser blocked the download. Use Copy as text instead.");
+}
+function copyRecord(){
+  var txt=recordLines();
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(function(){ toast("Record copied. Paste it into an email or chat."); },
+      function(){ fallbackCopy(txt); });
+  } else fallbackCopy(txt);
+}
+function fallbackCopy(txt){
+  var t=document.createElement("textarea");
+  t.value=txt; t.style.position="fixed"; t.style.opacity="0";
+  document.body.appendChild(t); t.select();
+  var ok=false; try{ ok=document.execCommand("copy"); }catch(e){}
+  document.body.removeChild(t);
+  toast(ok ? "Record copied. Paste it into an email or chat." : "Copying is blocked here. Use Download the record instead.");
+}
+function mailRecord(){
+  var subj="Part note code training record: "+(STATE.name||"unnamed")+": "+recordNo();
+  var body=recordLines();
+  var url="mailto:"+encodeURIComponent(CONFIG.trainerEmail)+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(body);
+  if(url.length>1900){
+    var c=counts();
+    var shortBody="Part note codes, part traceability, and product-unit records: training record\n"+recordNo()+
+      "\nTrainee: "+(STATE.name||"(name not entered)")+
+      "\nChecks: "+c.right+" of "+c.totalChecks+" correct first time"+
+      "\nDrill: "+c.drillRight+" of "+c.totalDrill+" lines coded right first time"+
+      "\nExercises: "+c.filledParts+" of "+c.totalParts+" answers written"+
+      "\n\nThe full record, including all written answers, is attached.\n(If it is not attached yet: go back to the training, choose Download the record, and attach the file.)";
+    url="mailto:"+encodeURIComponent(CONFIG.trainerEmail)+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(shortBody);
+    downloadRecord();
+    toast("Answers are too long for an email body, so the record was downloaded. Attach it to the message.");
+  }
+  window.location.href=url;
+}
+function postRecord(){
+  var b=document.getElementById("btnPost");
+  b.disabled=true; b.textContent="Sending…";
+  var payload={ record:recordNo(), name:STATE.name||"", company:CONFIG.companyName,
+    completed:new Date().toISOString(), score:counts(), checks:STATE.checks, drills:STATE.drills, answers:STATE.answers };
+  fetch(CONFIG.submitEndpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
+   .then(function(r){
+      if(r.ok){ b.textContent="Sent"; toast("Sent to "+CONFIG.trainerName+"."); }
+      else{ b.disabled=false; b.textContent="Send to trainer"; toast("The server refused it ("+r.status+"). Download the record and email it instead."); }
+   })
+   .catch(function(){
+      b.disabled=false; b.textContent="Send to trainer";
+      toast("Could not reach the server. Download the record and email it instead.");
+   });
+}
+
+/* ==========================================================================
+   MISC
+   ========================================================================== */
+var toastT;
+function toast(m){
+  var t=document.getElementById("toast");
+  t.textContent=m; t.classList.add("show");
+  clearTimeout(toastT); toastT=setTimeout(function(){ t.classList.remove("show"); },4200);
+}
+
+document.getElementById("who").addEventListener("input", function(e){
+  STATE.name=e.target.value; autosave();
+});
+document.getElementById("btnSave").addEventListener("click", saveProgress);
+document.getElementById("btnLoad").addEventListener("click", function(){ document.getElementById("fileIn").click(); });
+document.getElementById("btnClear").addEventListener("click", function(){
+  if(CLEAR_ARMED) resetAll(); else armClear();
+});
+document.getElementById("btnClear").addEventListener("blur", function(){ setTimeout(disarmClear, 200); });
+document.getElementById("fileIn").addEventListener("change", function(e){
+  if(e.target.files && e.target.files[0]) loadProgress(e.target.files[0]);
+  e.target.value="";
+});
+document.getElementById("railToggle").addEventListener("click", function(e){
+  e.stopPropagation();
+  document.getElementById("rail").classList.toggle("open");
+});
+document.querySelector("main").addEventListener("click", function(){
+  document.getElementById("rail").classList.remove("open");
+});
+document.addEventListener("keydown", function(e){
+  if(e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+  var i=pageIndex();
+  if(e.key==="ArrowRight" && i<PAGES.length-1) go(pageKey(PAGES[i+1]));
+  if(e.key==="ArrowLeft"  && i>0)              go(pageKey(PAGES[i-1]));
+});
+
+document.getElementById("brandSub").textContent = CONFIG.companyName + " · interactive modules";
+if(autoload()){ document.getElementById("who").value = STATE.name||""; }
+draw();
+</script>
+</body>
+</html>
